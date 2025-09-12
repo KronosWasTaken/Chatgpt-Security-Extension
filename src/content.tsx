@@ -1,48 +1,111 @@
-import cssText from "data-text:~style.css"
 import type { PlasmoCSConfig } from "plasmo"
-
-import { CountButton } from "~features/count-button"
+import { SecurityManager } from './SecurityManager'
 
 export const config: PlasmoCSConfig = {
-  matches: ["<all_urls>"]
+  matches: [
+    "https://chatgpt.com/*", 
+    "https://chat.openai.com/*", 
+    "http://127.0.0.1:*/*", 
+    "http://localhost:*/*", 
+    "file://*/*"
+  ],
+  all_frames: true,
+  run_at: "document_start"
 }
 
-/**
- * Generates a style element with adjusted CSS to work correctly within a Shadow DOM.
- *
- * Tailwind CSS relies on `rem` units, which are based on the root font size (typically defined on the <html>
- * or <body> element). However, in a Shadow DOM (as used by Plasmo), there is no native root element, so the
- * rem values would reference the actual page's root font size—often leading to sizing inconsistencies.
- *
- * To address this, we:
- * 1. Replace the `:root` selector with `:host(plasmo-csui)` to properly scope the styles within the Shadow DOM.
- * 2. Convert all `rem` units to pixel values using a fixed base font size, ensuring consistent styling
- *    regardless of the host page's font size.
- */
-export const getStyle = (): HTMLStyleElement => {
-  const baseFontSize = 16
+export default null
 
-  let updatedCssText = cssText.replaceAll(":root", ":host(plasmo-csui)")
-  const remRegex = /([\d.]+)rem/g
-  updatedCssText = updatedCssText.replace(remRegex, (match, remValue) => {
-    const pixelsValue = parseFloat(remValue) * baseFontSize
+class ContentScript {
+  private securityManager: SecurityManager
+  private isInitialized = false
 
-    return `${pixelsValue}px`
-  })
+  constructor() {
+    try {
+      console.log('🚀 ContentScript: Starting initialization...')
+      this.securityManager = new SecurityManager()
+      this.initialize()
+    } catch (error) {
+      console.error('🚨 ContentScript constructor failed:', error)
+      this.logError('ContentScript constructor failed', error)
+    }
+  }
 
-  const styleElement = document.createElement("style")
+  private async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      console.log('⚠️ ContentScript already initialized, skipping...')
+      return
+    }
 
-  styleElement.textContent = updatedCssText
+    try {
+      console.log('🔄 ContentScript: Initializing...')
+      
+      if (document.readyState === 'loading') {
+        console.log('🕇 DOM loading, waiting for DOMContentLoaded...')
+        document.addEventListener('DOMContentLoaded', () => this.startSecurity())
+      } else {
+        console.log('✅ DOM ready, starting security immediately...')
+        this.startSecurity()
+      }
 
-  return styleElement
+      this.isInitialized = true
+      console.log('✅ ContentScript initialization complete')
+    } catch (error) {
+      console.error('🚨 ContentScript initialization failed:', error)
+      this.logError('ContentScript initialization failed', error)
+    }
+  }
+
+  private async startSecurity(): Promise<void> {
+    try {
+      console.log('🛡️ Starting SecurityManager...')
+      await this.securityManager.initialize()
+      console.log('✅ Security Manager initialized successfully')
+      
+      await this.logSuccess('Security Manager initialized on: ' + window.location.href)
+    } catch (error) {
+      console.error('🚨 SecurityManager initialization failed:', error)
+      this.logError('SecurityManager initialization failed', error)
+    }
+  }
+
+  private async logSuccess(message: string): Promise<void> {
+    try {
+      await chrome.runtime.sendMessage({
+        type: 'ADD_LOG',
+        message,
+        logType: 'info'
+      })
+    } catch (error) {
+      console.warn('Could not log to extension:', error)
+    }
+  }
+
+  private async logError(message: string, error: any): Promise<void> {
+    try {
+      await chrome.runtime.sendMessage({
+        type: 'ADD_LOG',
+        message: `${message}: ${error?.message || error}`,
+        logType: 'error'
+      })
+    } catch (logError) {
+      console.warn('Could not log error to extension:', logError)
+    }
+  }
+
+  cleanup(): void {
+    try {
+      if (this.securityManager) {
+        this.securityManager.cleanup()
+      }
+      this.isInitialized = false
+      console.log('🧹 ContentScript cleanup complete')
+    } catch (error) {
+      console.error('ContentScript cleanup failed:', error)
+    }
+  }
 }
 
-const PlasmoOverlay = () => {
-  return (
-    <div className="plasmo-z-50 plasmo-flex plasmo-fixed plasmo-top-32 plasmo-right-8">
-      <CountButton />
-    </div>
-  )
-}
+new ContentScript()
 
-export default PlasmoOverlay
+window.addEventListener('beforeunload', () => {
+})

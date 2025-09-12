@@ -1,33 +1,41 @@
-This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
+# ChatGPT Security Extension
 
-## Getting Started
+Protects ChatGPT from malicious files and prompt injection attacks.
 
-First, run the development server:
+## What It Does
+
+- **Blocks malicious files** using VirusTotal (70+ antivirus engines)
+- **Prevents prompt injection** attacks with AI detection
+- **Protects sensitive files** (blocks .env, keys, credentials)
+- **Real-time monitoring** of uploads and prompts
+
+## Quick Install
+
+1. **Build extension:**
+   ```bash
+   pnpm install && pnpm dev
+   ```
+
+2. **Load in Chrome:**
+   - Go to `chrome://extensions/`
+   - Enable "Developer mode"
+   - Click "Load unpacked" → select `build/chrome-mv3-dev`
+
+## Setup API Keys
+
+1. **Get VirusTotal API key** (free): [virustotal.com/gui/my-apikey](https://www.virustotal.com/gui/my-apikey)
+2. **Get Gemini API key** (free): [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+3. **Add keys:** Click extension icon → paste keys → Save
+
+## Works On
+
+- chatgpt.com
+- chat.openai.com
+
+## Commands
 
 ```bash
-pnpm dev
-# or
-npm run dev
+pnpm dev      # Development
+pnpm build    # Production
+pnpm package  # Create ZIP
 ```
-
-Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
-
-You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
-
-For further guidance, [visit our Documentation](https://docs.plasmo.com/)
-
-## Making production build
-
-Run the following:
-
-```bash
-pnpm build
-# or
-npm run build
-```
-
-This should create a production bundle for your extension, ready to be zipped and published to the stores.
-
-## Submit to the webstores
-
-The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
