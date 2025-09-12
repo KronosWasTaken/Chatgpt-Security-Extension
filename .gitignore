@@ -29,6 +29,9 @@ out/
 build/
 dist/
 
+# version folders
+*.*.*/
+
 # plasmo - https://www.plasmo.com
 .plasmo
 
