@@ -30,9 +30,10 @@ export class FileGuard {
     }
 
     const config = await this.getConfig()
+    const scanResults: EnhancedScanResult[] = []
     
     for (const file of Array.from(files)) {
-      const result = await this.processFile(file, config)
+      const result = await this.processFile(file, config, scanResults)
       if (!result) {
         return false
       }
@@ -40,17 +41,19 @@ export class FileGuard {
 
     if (files.length > 0) {
       this.showNotification(`✅ ${files.length} file(s) passed security scan and cleared for upload`, 'success')
+      await this.logFileUploadSuccess(files, scanResults)
     }
 
     return true
   }
 
-  private async processFile(file: File, config: any): Promise<boolean> {
+  private async processFile(file: File, config: any, scanResults: EnhancedScanResult[]): Promise<boolean> {
     if (PatternMatcher.isSensitiveFile(file.name)) {
       this.showNotification(
         `🚫 Upload blocked: ${file.name} contains sensitive data that could leak secrets`,
         'error'
       )
+      await this.logFileBlocked(file.name, 'Sensitive file detected')
       return false
     }
 
@@ -60,6 +63,7 @@ export class FileGuard {
           `🚫 Upload blocked: ${file.name} is a potentially dangerous executable file`,
           'error'
         )
+        await this.logFileBlocked(file.name, 'Executable file blocked')
         return false
       }
     }
@@ -69,16 +73,19 @@ export class FileGuard {
         `🚫 Upload blocked: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB) - File too large for security scanning`,
         'error'
       )
+      await this.logFileBlocked(file.name, 'File too large for scanning')
       return false
     }
 
     const scanResult = await this.scanFile(file)
+    scanResults.push(scanResult)
     
     if (!scanResult.success) {
       this.showNotification(
         `🚫 Upload blocked: ${file.name} - Security scan failed: ${scanResult.error}`,
         'error'
       )
+      await this.logFileBlocked(file.name, `Scan failed: ${scanResult.error}`, scanResult)
       return false
     }
 
@@ -88,6 +95,7 @@ export class FileGuard {
         `🦠 Upload blocked: ${file.name} - ${threatDetails}`,
         'error'
       )
+      await this.logFileBlocked(file.name, `Malware detected: ${threatDetails}`, scanResult)
       return false
     }
 
@@ -178,5 +186,52 @@ export class FileGuard {
 
   setEnabled(enabled: boolean): void {
     this.isEnabled = enabled
+  }
+
+  private async logFileBlocked(fileName: string, reason: string, scanResult?: EnhancedScanResult): Promise<void> {
+    try {
+      const message = `🚫 BLOCKED FILE - ${reason}`
+      let logMessage = `${message}\n\n📁 FILE NAME: ${fileName}`
+      
+      if (scanResult && scanResult.virusTotalResult?.success) {
+        logMessage += `\n\n🛡️ VirusTotal: ${scanResult.virusTotalResult.isMalicious ? 'THREAT DETECTED' : 'CLEAN'} (${scanResult.virusTotalResult.detectionCount}/${scanResult.virusTotalResult.totalEngines} engines)`
+      }
+        
+      await chrome.runtime.sendMessage({
+        type: 'ADD_LOG',
+        message: logMessage,
+        logType: 'error',
+        category: 'file_scan'
+      })
+    } catch (error) {
+      console.warn('Could not log file block to extension:', error)
+    }
+  }
+
+  private async logFileUploadSuccess(files: FileList, scanResults?: EnhancedScanResult[]): Promise<void> {
+    try {
+      const fileNames = Array.from(files).map(f => f.name).join(', ')
+      const message = `✅ ALLOWED FILE UPLOAD - Security scan passed`
+      let logMessage = `${message}\n\n📁 FILES: ${fileNames}`
+      
+      if (scanResults && scanResults.length > 0) {
+        logMessage += `\n\n🔍 SCAN RESULTS:`
+        scanResults.forEach((result, index) => {
+          if (result.virusTotalResult?.success) {
+            const fileName = fileNames.split(', ')[index] || `File ${index + 1}`
+            logMessage += `\n📄 ${fileName}: VirusTotal - ${result.virusTotalResult.isMalicious ? 'THREAT' : 'CLEAN'} (${result.virusTotalResult.detectionCount}/${result.virusTotalResult.totalEngines} engines)`
+          }
+        })
+      }
+        
+      await chrome.runtime.sendMessage({
+        type: 'ADD_LOG',
+        message: logMessage,
+        logType: 'success',
+        category: 'file_scan'
+      })
+    } catch (error) {
+      console.warn('Could not log file upload success to extension:', error)
+    }
   }
 }

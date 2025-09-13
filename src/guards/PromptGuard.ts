@@ -14,9 +14,17 @@ export class PromptGuard {
     this.initializeProtection()
   }
 
-  async checkPromptSafety(text: string): Promise<{ isSafe: boolean; pattern?: string; response?: any }> {
+  async checkPromptSafety(text: string): Promise<{ isSafe: boolean; pattern?: string; response?: any; piiResult?: any }> {
     if (!text || text.length < 5) {
       return { isSafe: true }
+    }
+
+    const piiResult = this.detectPII(text)
+    if (piiResult.hasPII) {
+      return { 
+        isSafe: false, 
+        piiResult 
+      }
     }
 
     try {
@@ -99,7 +107,7 @@ export class PromptGuard {
     const safetyCheck = await this.checkPromptSafety(textData.text)
     
     if (!safetyCheck.isSafe) {
-      await this.handleThreatDetected(safetyCheck.pattern, safetyCheck.response, textData.text)
+      await this.handleThreatDetected(safetyCheck.pattern, safetyCheck.response, textData.text, safetyCheck.piiResult)
       return false
     }
 
@@ -158,7 +166,7 @@ export class PromptGuard {
     const safetyCheck = await this.checkPromptSafety(pastedText)
     
     if (!safetyCheck.isSafe) {
-      await this.handleThreatDetected(safetyCheck.pattern, safetyCheck.response, pastedText)
+      await this.handleThreatDetected(safetyCheck.pattern, safetyCheck.response, pastedText, safetyCheck.piiResult)
       return false
     }
 
@@ -222,7 +230,7 @@ export class PromptGuard {
     const safetyCheck = await this.checkPromptSafety(textData.text)
     
     if (!safetyCheck.isSafe) {
-      await this.handleThreatDetected(safetyCheck.pattern, safetyCheck.response, textData.text)
+      await this.handleThreatDetected(safetyCheck.pattern, safetyCheck.response, textData.text, safetyCheck.piiResult)
       return false
     }
 
@@ -242,12 +250,29 @@ export class PromptGuard {
     }
   }
 
-  private async handleThreatDetected(pattern?: string, response?: any, blockedText?: string): Promise<void> {
-    if (pattern) {
+  private async handleThreatDetected(pattern?: string, response?: any, blockedText?: string, piiResult?: any): Promise<void> {
+    console.log('🔍 handleThreatDetected called with:', { pattern, response, blockedText, piiResult })
+    
+    if (piiResult) {
+      console.log('🚨 PII detected, logging to extension...')
+      const riskEmoji = piiResult.riskLevel === 'high' ? '🚨' : piiResult.riskLevel === 'medium' ? '⚠️' : 'ℹ️'
+      const message = `${riskEmoji} PII detected! Risk: ${piiResult.riskLevel.toUpperCase()} - ${piiResult.piiTypes.join(', ')}`
+      
+      this.showNotification(message, 'error')
+      this.clearTextInputs()
+      
+      await this.logPIIToExtension(
+        `🚨 BLOCKED PII - ${piiResult.riskLevel.toUpperCase()} risk: ${piiResult.piiTypes.join(', ')}`,
+        blockedText,
+        piiResult
+      )
+    } else if (pattern) {
+      console.log('🚨 Pattern detected, logging to extension...')
       const message = `🚨 BLOCKED PROMPT - Fallback Pattern Detection: "${pattern}"`
       this.showNotification(`🚨 Blocked! Dangerous pattern: "${pattern}" (API unavailable)`, 'error')
       await this.logThreatToExtension(message, blockedText, { pattern, type: 'fallback_pattern' })
     } else if (response) {
+      console.log('🚨 AI response detected, logging to extension...')
       const riskLevel = response.riskLevel?.toUpperCase() || 'UNKNOWN'
       const message = `🚨 BLOCKED PROMPT - AI Detection: ${riskLevel} risk`
       this.showNotification(`🚨 Prompt injection blocked! Risk: ${riskLevel}`, 'error')
@@ -264,11 +289,215 @@ export class PromptGuard {
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
         message: logMessage,
-        logType: 'error'
+        logType: 'error',
+        category: 'prompt_injection'
       })
     } catch (error) {
       console.warn('Could not log threat to extension:', error)
     }
+  }
+
+
+  private async logPIIToExtension(message: string, blockedText?: string, piiResult?: any): Promise<void> {
+    try {
+      const logMessage = blockedText 
+        ? `${message}\n\n📋 BLOCKED TEXT:\n"${this.truncateText(blockedText, 500)}"\n\n🔍 PII Details: ${JSON.stringify(piiResult, null, 2)}`
+        : `${message}\n\n🔍 PII Details: ${JSON.stringify(piiResult, null, 2)}`
+        
+      await chrome.runtime.sendMessage({
+        type: 'ADD_LOG',
+        message: logMessage,
+        logType: 'error',
+        category: 'pii'
+      })
+    } catch (error) {
+      console.warn('Could not log PII to extension:', error)
+    }
+  }
+
+  private detectPII(text: string): any {
+    const PII_PATTERNS = {
+      names: {
+        pattern: /\b(?:Mr\.?|Mrs\.?|Ms\.?|Dr\.?|Prof\.?)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g,
+        name: 'Full Name with Title',
+        risk: 'medium'
+      },
+      
+      addresses: {
+        pattern: /\b\d+\s+[A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Lane|Ln|Boulevard|Blvd|Way|Circle|Cir|Court|Ct)\b/g,
+        name: 'Street Address',
+        risk: 'high'
+      },
+      
+      zipCodes: {
+        pattern: /\b\d{5}(?:-\d{4})?\b/g,
+        name: 'ZIP Code',
+        risk: 'medium'
+      },
+      
+      birthDates: {
+        pattern: /\b(?:born|birth|birthday|DOB|date of birth)[\s:]*\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/gi,
+        name: 'Birth Date',
+        risk: 'high'
+      },
+      
+      medicalDates: {
+        pattern: /\b(?:admission|discharge|death|deceased)[\s:]*\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/gi,
+        name: 'Medical Date',
+        risk: 'high'
+      },
+      
+      ages: {
+        pattern: /\b(?:age|aged)[\s:]*\d{2,3}\s*(?:years?|yrs?|old)\b/gi,
+        name: 'Age Information',
+        risk: 'medium'
+      },
+      
+      phone: {
+        pattern: /\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/g,
+        name: 'Phone Number',
+        risk: 'high'
+      },
+      
+      fax: {
+        pattern: /\b(?:fax|FAX)[\s:]*\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b/gi,
+        name: 'Fax Number',
+        risk: 'high'
+      },
+      
+      email: {
+        pattern: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+        name: 'Email Address',
+        risk: 'high'
+      },
+      
+      ssn: {
+        pattern: /\b\d{3}-?\d{2}-?\d{4}\b/g,
+        name: 'Social Security Number',
+        risk: 'high'
+      },
+      
+      medicalRecord: {
+        pattern: /\b(?:MRN|medical record|patient ID|patient number)[\s:]*[A-Z0-9]{6,12}\b/gi,
+        name: 'Medical Record Number',
+        risk: 'high'
+      },
+      
+      healthPlan: {
+        pattern: /\b(?:health plan|beneficiary|insurance|policy)[\s:]*[A-Z0-9]{8,15}\b/gi,
+        name: 'Health Plan Beneficiary Number',
+        risk: 'high'
+      },
+      
+      accountNumbers: {
+        pattern: /\b(?:account|acct)[\s:]*[A-Z0-9]{8,20}\b/gi,
+        name: 'Account Number',
+        risk: 'high'
+      },
+      
+      certificates: {
+        pattern: /\b(?:license|certificate|cert|permit)[\s:]*[A-Z0-9]{6,15}\b/gi,
+        name: 'Certificate/License Number',
+        risk: 'high'
+      },
+      
+      vehicleIdentifiers: {
+        pattern: /\b(?:VIN|vehicle ID|license plate|plate number)[\s:]*[A-Z0-9]{6,17}\b/gi,
+        name: 'Vehicle Identifier',
+        risk: 'medium'
+      },
+      
+      licensePlates: {
+        pattern: /\b[A-Z]{1,3}[\s\-]?\d{1,4}[\s\-]?[A-Z]{0,3}\b/g,
+        name: 'License Plate',
+        risk: 'medium'
+      },
+      
+      deviceIdentifiers: {
+        pattern: /\b(?:device ID|serial number|IMEI|MAC address)[\s:]*[A-Z0-9]{8,20}\b/gi,
+        name: 'Device Identifier',
+        risk: 'medium'
+      },
+      
+      urls: {
+        pattern: /\bhttps?:\/\/[^\s]+\b/g,
+        name: 'URL',
+        risk: 'low'
+      },
+      
+      ipAddress: {
+        pattern: /\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/g,
+        name: 'IP Address',
+        risk: 'medium'
+      },
+      
+      biometrics: {
+        pattern: /\b(?:fingerprint|voice print|biometric|retina scan|iris scan)[\s:]*[A-Z0-9]{10,50}\b/gi,
+        name: 'Biometric Identifier',
+        risk: 'high'
+      },
+      
+      photos: {
+        pattern: /\b(?:photo|picture|image|selfie|portrait)[\s:]*\w*\.(?:jpg|jpeg|png|gif|bmp|tiff)\b/gi,
+        name: 'Photographic Image',
+        risk: 'high'
+      },
+      
+      uniqueCodes: {
+        pattern: /\b(?:ID|identifier|code|number)[\s:]*[A-Z0-9]{6,20}\b/gi,
+        name: 'Unique Identifying Code',
+        risk: 'medium'
+      },
+      
+      creditCard: {
+        pattern: /\b(?:\d{4}[-\s]?){3}\d{4}\b/g,
+        name: 'Credit Card Number',
+        risk: 'high'
+      },
+      
+      passport: {
+        pattern: /\b(?:passport|passport number)[\s:]*[A-Z0-9]{6,12}\b/gi,
+        name: 'Passport Number',
+        risk: 'high'
+      },
+      
+      driversLicense: {
+        pattern: /\b(?:driver['\s]?license|DL)[\s:]*[A-Z0-9]{6,12}\b/gi,
+        name: 'Driver\'s License',
+        risk: 'high'
+      }
+    };
+
+    const detectedPII = [];
+    const piiTypes = [];
+    let maxRisk = 'low';
+
+    console.log('🔍 Starting PII pattern matching on text:', text.substring(0, 100) + '...')
+
+    for (const [key, config] of Object.entries(PII_PATTERNS)) {
+      const matches = text.match(config.pattern);
+      if (matches) {
+        console.log(`✅ PII pattern matched: ${key} (${config.name}) - matches:`, matches)
+        piiTypes.push(config.name);
+        detectedPII.push(...matches);
+        
+        if (config.risk === 'high') {
+          maxRisk = 'high';
+        } else if (config.risk === 'medium' && maxRisk !== 'high') {
+          maxRisk = 'medium';
+        }
+      }
+    }
+
+    const result = {
+      hasPII: piiTypes.length > 0,
+      piiTypes,
+      detectedPII,
+      riskLevel: maxRisk
+    };
+
+    console.log('🔍 PII detection final result:', result)
+    return result;
   }
 
   private truncateText(text: string, maxLength: number): string {

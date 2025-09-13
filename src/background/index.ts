@@ -235,10 +235,11 @@ async function scanFileWithVirusTotal(fileData: ArrayBuffer, fileName: string, a
   }
 }
 
+
 async function broadcastStatusChange(isEnabled: boolean) {
   try {
     const tabs = await chrome.tabs.query({
-      url: ['https://chatgpt.com/*', 'https://chat.openai.com/*']
+      url: ['https://chatgpt.com/*', 'https://chat.openai.com/*', 'http://127.0.0.1:*/*', 'http://localhost:*/*']
     });
     
     for (const tab of tabs) {
@@ -329,6 +330,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             )
           }
           
+          // Gemini is reserved for prompt injection protection only
           console.log('🚫 Local LLM: Skipping file analysis - LLM is reserved for prompt injection protection only')
           
           if (!virusTotalResult?.success) {
@@ -341,9 +343,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           
           let scanDetails = []
           if (virusTotalResult?.success) {
-            scanDetails.push(`VirusTotal (PRIMARY): ${virusTotalResult.isMalicious ? 'THREAT' : 'CLEAN'} (${virusTotalResult.detectionCount}/${virusTotalResult.totalEngines})`)
+            scanDetails.push(`VirusTotal: ${virusTotalResult.isMalicious ? 'THREAT' : 'CLEAN'} (${virusTotalResult.detectionCount}/${virusTotalResult.totalEngines})`)
           } else if (virusTotalResult) {
-            scanDetails.push(`VirusTotal (PRIMARY): FAILED - ${virusTotalResult.error}`)
+            scanDetails.push(`VirusTotal: FAILED - ${virusTotalResult.error}`)
           }
           
           if (config.geminiApiKey) {
@@ -449,7 +451,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           chrome.runtime.sendMessage({
             type: 'ADD_LOG',
             message: `🔍 ANALYZING PROMPT: "${prompt.substring(0, 100)}${prompt.length > 100 ? '...' : ''}"`,
-            logType: 'info'
+            logType: 'info',
+            category: 'prompt_injection'
           })
           
           const result = await FastThreatDetector.analyzeContent(prompt, geminiApiKey)
@@ -459,27 +462,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             chrome.runtime.sendMessage({
               type: 'ADD_LOG',
               message: `🚨 INJECTION DETECTED: ${result.riskLevel.toUpperCase()} risk - ${result.summary}`,
-              logType: 'error'
+              logType: 'error',
+              category: 'prompt_injection'
             })
             
             for (const threat of result.threats) {
               chrome.runtime.sendMessage({
                 type: 'ADD_LOG',
                 message: `⚠️ THREAT TYPE: ${threat}`,
-                logType: 'warning'
+                logType: 'warning',
+                category: 'prompt_injection'
               })
             }
             
             chrome.runtime.sendMessage({
               type: 'ADD_LOG',
               message: `🚫 BLOCKED: "${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}"`,
-              logType: 'error'
+              logType: 'error',
+              category: 'prompt_injection'
             })
           } else {
             chrome.runtime.sendMessage({
               type: 'ADD_LOG',
               message: `✅ SAFE PROMPT: ${result.summary}`,
-              logType: 'success'
+              logType: 'success',
+              category: 'normal_prompt'
             })
           }
           
@@ -512,16 +519,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           id: Date.now().toString(),
           timestamp: new Date().toISOString(),
           message: request.message,
-          type: request.logType || 'info'
+          type: request.logType || 'info',
+          category: request.category || 'system'
         };
         logs.unshift(newLog);
         const trimmedLogs = logs.slice(0, 100);
         
-        console.log('Background: Adding log:', newLog);
-        console.log('Background: Total logs:', trimmedLogs.length);
-        
         chrome.storage.sync.set({ logs: trimmedLogs }, () => {
-          console.log('Background: Log saved to storage');
           sendResponse({ success: true });
         });
       });

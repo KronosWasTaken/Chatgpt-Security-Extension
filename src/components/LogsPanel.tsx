@@ -9,10 +9,12 @@ interface LogsPanelProps {
 
 export default function LogsPanel({ logs, onClearLogs, onRefreshLogs }: LogsPanelProps) {
   const [filter, setFilter] = useState<string>('all')
+  const [categoryFilter, setCategoryFilter] = useState<string>('all')
 
   const filteredLogs = logs.filter(log => {
-    if (filter === 'all') return true
-    return log.type === filter
+    const typeMatch = filter === 'all' || log.type === filter
+    const categoryMatch = categoryFilter === 'all' || log.category === categoryFilter
+    return typeMatch && categoryMatch
   })
 
   const handleClearLogs = async () => {
@@ -79,11 +81,21 @@ export default function LogsPanel({ logs, onClearLogs, onRefreshLogs }: LogsPane
             onChange={(e) => setFilter(e.target.value)}
             className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value="all">All</option>
+            <option value="all">All Types</option>
             <option value="success">Success</option>
             <option value="error">Error</option>
             <option value="warning">Warning</option>
             <option value="info">Info</option>
+          </select>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+            <option value="all">All</option>
+            <option value="prompt_injection">Blocked Prompts</option>
+            <option value="pii">Blocked PII</option>
+            <option value="file_scan">Files</option>
           </select>
           <button
             onClick={handleClearLogs}
@@ -108,7 +120,7 @@ export default function LogsPanel({ logs, onClearLogs, onRefreshLogs }: LogsPane
 
       <div className="flex-1 overflow-hidden">
         <div className="mb-2 text-xs text-slate-500">
-          Debug: {logs.length} logs loaded, filter: {filter}
+          Debug: {logs.length} logs loaded, type: {filter}, category: {categoryFilter}
         </div>
         
         <div className="h-full overflow-y-auto custom-scrollbar space-y-3">

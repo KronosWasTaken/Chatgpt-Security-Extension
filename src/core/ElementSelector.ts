@@ -23,7 +23,18 @@ export class ElementSelector {
       'button[data-testid*="submit"]',
       'button[data-testid*="send"]',
       'button[aria-label*="Submit"]',
-      'button[aria-label*="submit"]'
+      'button[aria-label*="submit"]',
+      'button[data-testid*="composer-send"]',
+      'button[aria-label*="Send message"]',
+      'button[aria-label*="Send message to ChatGPT"]',
+      'button[title*="Send"]',
+      'button[title*="send"]',
+      'button:has(svg[data-testid*="send"])',
+      'button:has(svg[data-testid*="arrow"])',
+      'button:has(svg[data-testid*="paper-plane"])',
+      'button:has(svg[data-testid*="send-icon"])',
+      '[data-testid*="send-button"]',
+      '[data-testid*="composer-send"]'
     ],
     
     TEXT_INPUT: [
@@ -66,15 +77,30 @@ export class ElementSelector {
   }
 
   static isSendButton(element: HTMLElement): boolean {
-    return (
-      element.getAttribute('data-testid') === 'send-button' ||
-      element.getAttribute('aria-label')?.toLowerCase().includes('send') ||
-      element.textContent?.toLowerCase().includes('send') ||
-      !!element.closest('button[data-testid="send-button"]') ||
-      !!element.closest('button[aria-label*="Send"]') ||
-      !!element.closest('button[aria-label*="send"]') ||
-      !!element.closest('.prompt-guard-disabled')
-    )
+    if (element.getAttribute('data-testid')?.includes('send') ||
+        element.getAttribute('aria-label')?.toLowerCase().includes('send') ||
+        element.getAttribute('title')?.toLowerCase().includes('send') ||
+        element.textContent?.toLowerCase().includes('send')) {
+      return true
+    }
+    
+    const sendButton = element.closest('button[data-testid*="send"], button[aria-label*="send"], button[title*="send"], button[data-testid*="composer-send"]')
+    if (sendButton) {
+      return true
+    }
+    
+    if (element.tagName === 'SVG' || element.tagName === 'svg') {
+      const parentButton = element.closest('button')
+      if (parentButton && (
+        parentButton.getAttribute('data-testid')?.includes('send') ||
+        parentButton.getAttribute('aria-label')?.toLowerCase().includes('send') ||
+        parentButton.getAttribute('title')?.toLowerCase().includes('send')
+      )) {
+        return true
+      }
+    }
+    
+    return false
   }
 
   static isTextInput(element: HTMLElement): boolean {

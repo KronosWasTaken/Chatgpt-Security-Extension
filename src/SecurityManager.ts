@@ -80,9 +80,9 @@ export class SecurityManager {
   }
 
   private setupPromptProtection(): void {
-    if (this.isChatGPTDomain()) {
+    if (this.isChatGPTDomain() || this.isTestPage()) {
       this.notificationManager.show(
-        '🛡️ ChatGPT detected - activating prompt injection protection',
+        '🛡️ ChatGPT/Test page detected - activating prompt injection and PII protection',
         'info'
       )
     }
@@ -109,7 +109,8 @@ export class SecurityManager {
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
         message: `Security Manager initialized on: ${window.location.href}`,
-        logType: 'info'
+        logType: 'info',
+        category: 'system'
       })
     } catch (error) {
       console.warn('Could not log initialization:', error)
@@ -118,6 +119,12 @@ export class SecurityManager {
 
   private isChatGPTDomain(): boolean {
     return ['chatgpt.com', 'chat.openai.com'].includes(window.location.hostname)
+  }
+
+  private isTestPage(): boolean {
+    return window.location.hostname === 'localhost' || 
+           window.location.hostname === '127.0.0.1' ||
+           window.location.pathname.includes('test-page.html')
   }
 
   getStatus(): {

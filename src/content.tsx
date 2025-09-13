@@ -62,6 +62,7 @@ class ContentScript {
       console.log('✅ Security Manager initialized successfully')
       
       await this.logSuccess('Security Manager initialized on: ' + window.location.href)
+      await this.testLogging()
     } catch (error) {
       console.error('🚨 SecurityManager initialization failed:', error)
       this.logError('SecurityManager initialization failed', error)
@@ -73,10 +74,24 @@ class ContentScript {
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
         message,
-        logType: 'info'
+        logType: 'info',
+        category: 'system'
       })
     } catch (error) {
       console.warn('Could not log to extension:', error)
+    }
+  }
+
+  private async testLogging(): Promise<void> {
+    try {
+      await chrome.runtime.sendMessage({
+        type: 'ADD_LOG',
+        message: '🧪 TEST LOG from localhost - File scan logging test',
+        logType: 'info',
+        category: 'file_scan'
+      })
+    } catch (error) {
+      console.warn('Could not send test log:', error)
     }
   }
 
@@ -85,7 +100,8 @@ class ContentScript {
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
         message: `${message}: ${error?.message || error}`,
-        logType: 'error'
+        logType: 'error',
+        category: 'system'
       })
     } catch (logError) {
       console.warn('Could not log error to extension:', logError)
