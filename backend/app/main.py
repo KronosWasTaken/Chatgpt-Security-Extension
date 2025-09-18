@@ -10,6 +10,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import make_asgi_app
 
+
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import init_db
@@ -91,10 +92,11 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix="/api/v1")
     
-
+    # Prometheus metrics endpoint
     if settings.PROMETHEUS_ENABLED:
         metrics_app = make_asgi_app()
         app.mount("/metrics", metrics_app)
+
     
 
     @app.get("/health")

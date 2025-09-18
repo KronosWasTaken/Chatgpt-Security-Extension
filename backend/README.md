@@ -48,6 +48,7 @@ FastAPI-based backend for the AI Compliance Platform with multi-tenant architect
 - **Health Check**: http://localhost:8000/health
 - **API Documentation**: http://localhost:8000/docs
 - **Alternative Docs**: http://localhost:8000/redoc
+- **Metrics**: http://localhost:8000/metrics
 
 ## 🏗️ Architecture
 
@@ -57,6 +58,7 @@ FastAPI-based backend for the AI Compliance Platform with multi-tenant architect
 - **PHI/PII Detection** using regex patterns and ML models
 - **Audit Logging** for SOC2 compliance
 - **Real-time Prompt Analysis** with policy enforcement
+- **Prometheus Metrics** for monitoring
 
 ### Database Design
 - **Shared Schema**: Global reference data (AI services, compliance frameworks)
@@ -96,6 +98,10 @@ ENCRYPTION_KEY=your-32-character-encryption-key
 # Development
 DEBUG=true
 RELOAD=true
+
+# Monitoring
+PROMETHEUS_ENABLED=true
+PROMETHEUS_PORT=9090
 ```
 
 **Important Notes**:
@@ -229,6 +235,23 @@ psql -U postgres -d ai_compliance -c "SELECT 1;"
 curl http://localhost:8000/health
 # Should return: {"status": "healthy", "version": "0.1.0"}
 ```
+
+## 📊 Monitoring
+
+### Prometheus Metrics
+- HTTP request metrics
+- Prompt analysis counters
+- Policy violation tracking
+- Database query performance
+- Authentication attempts
+
+### Health Checks
+- Database connectivity
+- Application status
+- API endpoint availability
+
+### Metrics Endpoint
+Access Prometheus metrics at: http://localhost:8000/metrics
 
 ## 📁 Project Structure
 

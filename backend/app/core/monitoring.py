@@ -8,7 +8,7 @@ from fastapi import Request, Response
 
 logger = logging.getLogger(__name__)
 
-
+# Prometheus metrics
 REQUEST_COUNT = Counter(
     'http_requests_total',
     'Total HTTP requests',
@@ -52,17 +52,17 @@ DATABASE_QUERY_DURATION = Histogram(
 
 
 def setup_monitoring() -> None:
-
+    """Setup monitoring and metrics collection."""
     logger.info("Setting up monitoring and metrics collection")
     
-
+    # Initialize gauge metrics (counters auto-initialize at 0)
     ACTIVE_CONNECTIONS.set(0)
     
     logger.info("Monitoring setup complete")
 
 
 def record_request_metrics(request: Request, response: Response, duration: float) -> None:
-
+    """Record request metrics."""
     method = request.method
     endpoint = request.url.path
     status_code = str(response.status_code)
@@ -76,7 +76,7 @@ def record_prompt_analysis(
     enforcement_action: str,
     risk_level: str,
 ) -> None:
-
+    """Record prompt analysis metrics."""
     PROMPT_ANALYSIS_COUNT.labels(
         client_id=client_id,
         enforcement_action=enforcement_action,
@@ -89,7 +89,7 @@ def record_policy_violation(
     violation_type: str,
     severity: str,
 ) -> None:
-
+    """Record policy violation metrics."""
     POLICY_VIOLATIONS.labels(
         client_id=client_id,
         violation_type=violation_type,
@@ -98,20 +98,20 @@ def record_policy_violation(
 
 
 def record_authentication_attempt(result: str, method: str) -> None:
-
+    """Record authentication attempt metrics."""
     AUTHENTICATION_ATTEMPTS.labels(result=result, method=method).inc()
 
 
 def record_database_query(operation: str, table: str, duration: float) -> None:
-
+    """Record database query metrics."""
     DATABASE_QUERY_DURATION.labels(operation=operation, table=table).observe(duration)
 
 
 def get_metrics() -> str:
-
+    """Get Prometheus metrics in text format."""
     return generate_latest()
 
 
 def get_metrics_content_type() -> str:
-
+    """Get content type for metrics endpoint."""
     return CONTENT_TYPE_LATEST

@@ -1,3 +1,4 @@
+import os
 
 
 from typing import List, Optional
@@ -53,11 +54,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str = Field(..., description="Application secret key")
     ENCRYPTION_KEY: str = Field(..., description="Encryption key for sensitive data")
     
-
+    # Monitoring
     PROMETHEUS_ENABLED: bool = True
     PROMETHEUS_PORT: int = 9090
     
-
+    # Email
     SMTP_HOST: Optional[str] = None
     SMTP_PORT: int = 587
     SMTP_USERNAME: Optional[str] = None
