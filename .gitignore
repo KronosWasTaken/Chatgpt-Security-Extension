@@ -24,6 +24,23 @@ yarn-error.log*
 
 # local env files
 .env*
+!.env.example
+
+# Additional environment file patterns
+*.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.test
+
+# Sensitive files
+*.key
+*.pem
+*.p12
+*.crt
+secrets.json
+keys.json
 
 out/
 build/

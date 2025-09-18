@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import Header from "~components/Header"
 import StatusToggle from "~components/StatusToggle"
 import ConfigPanel from "~components/ConfigPanel"
+import { BackendConfigPanel } from "~components/BackendConfigPanel"
 import LogsPanel from "~components/LogsPanel"
 import { useConfig, useLogs } from "~hooks/useStorage"
 import type { LogEntry } from "~types"
@@ -102,6 +103,12 @@ export default function OptionsPage() {
             config={config}
             onConfigChange={updateConfig}
             onSave={handleConfigSave}
+          />
+          
+          <BackendConfigPanel
+            onConfigChange={(backendConfig) => {
+              console.log('Backend config updated:', backendConfig)
+            }}
           />
         </div>
 
