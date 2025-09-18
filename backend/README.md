@@ -7,7 +7,7 @@ FastAPI-based backend for the AI Compliance Platform with multi-tenant architect
 ### Prerequisites
 - Python 3.11+
 - PostgreSQL 15+
-- uv package manager
+- PowerShell (for Windows setup script)
 
 ### Setup
 
@@ -16,44 +16,31 @@ FastAPI-based backend for the AI Compliance Platform with multi-tenant architect
    cd backend
    ```
 
-2. **Copy environment configuration**:
-   ```bash
-   copy env.example .env
+2. **Run the setup script**:
+   ```powershell
+   .\setup.ps1 start
    ```
 
-3. **Install dependencies**:
-   ```bash
-   uv sync
-   ```
+   This will automatically:
+   - Create .env file from template
+   - Install Python dependencies
+   - Set up PostgreSQL database
+   - Run database migrations
+   - Start the development server
 
-4. **Setup database**:
-   ```bash
-   # Create database (if not exists)
-   psql -U postgres -c "CREATE DATABASE ai_compliance;"
-   ```
-
-5. **Run migrations**:
-   ```bash
-   uv run alembic upgrade head
-   ```
-
-6. **Start development server**:
-   ```bash
-   uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-### Using PowerShell Script (Windows)
+### PowerShell Script Commands
 
 ```powershell
 # Full setup and start
 .\setup.ps1 start
 
 # Individual commands
-.\setup.ps1 setup-env    # Create .env file
-.\setup.ps1 install      # Install dependencies
-.\setup.ps1 setup-db     # Create database
-.\setup.ps1 migrate      # Run migrations
-.\setup.ps1 dev          # Start server
+.\setup.ps1 setup-env    # Create .env file from template
+.\setup.ps1 install      # Install Python dependencies using pip
+.\setup.ps1 setup-db     # Create PostgreSQL database
+.\setup.ps1 migrate      # Run Alembic migrations
+.\setup.ps1 dev          # Start development server
+.\setup.ps1 reset-db     # Reset database (WARNING: Deletes all data)
 ```
 
 ## 🌐 Access Points
@@ -61,7 +48,6 @@ FastAPI-based backend for the AI Compliance Platform with multi-tenant architect
 - **Health Check**: http://localhost:8000/health
 - **API Documentation**: http://localhost:8000/docs
 - **Alternative Docs**: http://localhost:8000/redoc
-- **Metrics**: http://localhost:8000/metrics
 
 ## 🏗️ Architecture
 
@@ -71,7 +57,6 @@ FastAPI-based backend for the AI Compliance Platform with multi-tenant architect
 - **PHI/PII Detection** using regex patterns and ML models
 - **Audit Logging** for SOC2 compliance
 - **Real-time Prompt Analysis** with policy enforcement
-- **Prometheus Metrics** for monitoring
 
 ### Database Design
 - **Shared Schema**: Global reference data (AI services, compliance frameworks)
@@ -113,41 +98,44 @@ DEBUG=true
 RELOAD=true
 ```
 
+**Important Notes**:
+- The backend is configured to work with Chrome extensions (note the `chrome-extension://*` in ALLOWED_ORIGINS)
+- In development mode (`DEBUG=true`), authentication is disabled for easier testing
+- The Chrome extension can connect to this backend via the BackendConfigPanel in the extension options
+
 ⚠️ **Security Warning**: Never use the example keys in production!
 
-**Generate secure keys**:
-```bash
-# Generate JWT secret key (32 characters)
-python -c "import secrets; print('JWT_SECRET_KEY=' + secrets.token_hex(32))"
+**Important Notes**:
+- The backend is configured to work with Chrome extensions (note the `chrome-extension://*` in ALLOWED_ORIGINS)
+- In development mode (`DEBUG=true`), authentication is disabled for easier testing
+- The Chrome extension can connect to this backend via the BackendConfigPanel in the extension options
 
-# Generate application secret key (32 characters)
-python -c "import secrets; print('SECRET_KEY=' + secrets.token_hex(32))"
+**Generate secure keys**:
+```powershell
+# Generate JWT secret key (64 characters)
+.venv\Scripts\python -c "import secrets; print('JWT_SECRET_KEY=' + secrets.token_hex(32))"
+
+# Generate application secret key (64 characters)
+.venv\Scripts\python -c "import secrets; print('SECRET_KEY=' + secrets.token_hex(32))"
 
 # Generate encryption key (exactly 32 characters)
-python -c "import secrets; print('ENCRYPTION_KEY=' + secrets.token_hex(16))"
+.venv\Scripts\python -c "import secrets; print('ENCRYPTION_KEY=' + secrets.token_hex(16))"
 ```
 
 ### Development Commands
 
-```bash
-# Run tests
-uv run pytest
-
-# Format code
-uv run black .
-uv run isort .
-
-# Lint code
-uv run ruff check .
-uv run mypy .
-
-# Database operations
-uv run alembic revision --autogenerate -m "description"  # Create migration
-uv run alembic upgrade head                               # Apply migrations
-uv run alembic downgrade -1                             # Rollback
+```powershell
+# Database operations (run from virtual environment)
+.venv\Scripts\python -m alembic revision --autogenerate -m "description"  # Create migration
+.venv\Scripts\python -m alembic upgrade head                               # Apply migrations
+.venv\Scripts\python -m alembic downgrade -1                             # Rollback
 
 # Health check
 curl http://localhost:8000/health
+
+# Or use PowerShell script
+.\setup.ps1 migrate      # Apply migrations
+.\setup.ps1 dev          # Start development server
 ```
 
 ## 🔒 Security Features
@@ -207,48 +195,40 @@ When `DEBUG=true` in your `.env` file:
 - Detailed error messages and stack traces
 - Auto-reload on code changes
 
-## 📈 Monitoring
-
-### Prometheus Metrics
-- HTTP request metrics
-- Prompt analysis counters
-- Policy violation tracking
-- Database query performance
-- Authentication attempts
-
-### Health Checks
-- Database connectivity
-- Application status
-- API endpoint availability
-
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
 **Database Connection Issues**:
-```bash
-# Check PostgreSQL status
-pg_isready
+```powershell
+# Test connection using PowerShell
+.\setup.ps1 setup-db     # Will test and create database if needed
 
-# Test connection
+# Manual test (requires psql in PATH)
 psql -U postgres -d ai_compliance -c "SELECT 1;"
 ```
 
 **Migration Issues**:
-```bash
+```powershell
 # Reset database (WARNING: Deletes all data)
 .\setup.ps1 reset-db
 
-# Manual reset
-psql -U postgres -c "DROP DATABASE IF EXISTS ai_compliance;"
-psql -U postgres -c "CREATE DATABASE ai_compliance;"
-uv run alembic upgrade head
+# Or manual reset
+.\setup.ps1 setup-db     # Recreates database
+.\setup.ps1 migrate      # Apply migrations
 ```
 
 **Permission Issues**:
 - Ensure PostgreSQL user has proper permissions
 - Check `.env` file credentials
 - Verify database exists
+
+**Health Check**:
+```powershell
+# Test if the server is running
+curl http://localhost:8000/health
+# Should return: {"status": "healthy", "version": "0.1.0"}
+```
 
 ## 📁 Project Structure
 
@@ -261,18 +241,21 @@ backend/
 │   ├── services/           # Business logic services
 │   └── main.py            # FastAPI application
 ├── alembic/               # Database migrations
-├── scripts/               # Utility scripts
-├── .env                   # Environment configuration
+├── scripts/               # Utility scripts (seed_data.py)
+├── .env                   # Environment configuration (create from .env.example)
+├── .env.example           # Environment template
 ├── pyproject.toml         # Dependencies and configuration
-└── setup.ps1             # Windows setup script
+├── setup.ps1             # Windows PowerShell setup script
+└── README.md             # This file
 ```
 
 ## 🤝 Contributing
 
-1. Ensure all tests pass: `uv run pytest`
-2. Format code: `uv run black . && uv run isort .`
-3. Check linting: `uv run ruff check .`
+1. Use the PowerShell setup script for consistent environment setup
+2. Test your changes with: `.\setup.ps1 dev`
+3. Ensure the health check passes: `curl http://localhost:8000/health`
 4. Update documentation as needed
+5. Follow the existing code structure and patterns
 
 ---
 
