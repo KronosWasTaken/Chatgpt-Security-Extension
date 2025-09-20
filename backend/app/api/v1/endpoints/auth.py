@@ -1,119 +1,250 @@
-
-
-from typing import Optional
-
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.auth import AuthService, JWTManager, PasswordManager
-from app.core.database import get_async_session
+from app.core.database import get_async_session, TenantContext
+from app.core.auth import create_access_token, verify_token, get_password_hash, verify_password
+from app.models.msp import MSP, MSPUser
+from app.models.client import ClientUser
+from pydantic import BaseModel, EmailStr
+from typing import Optional, List
+from datetime import datetime, timedelta
+import uuid
 
 router = APIRouter()
-
+security = HTTPBearer()
 
 class LoginRequest(BaseModel):
-
-    
     email: EmailStr
     password: str
 
-
-class LoginResponse(BaseModel):
-
-    
+class TokenResponse(BaseModel):
     access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
+    token_type: str
     expires_in: int
+    user_info: dict
 
+class UserInfo(BaseModel):
+    user_id: str
+    email: str
+    name: str
+    role: str
+    msp_id: Optional[str] = None
+    client_id: Optional[str] = None
+    department: Optional[str] = None
+    permissions: List[str] = []
 
-class RefreshTokenRequest(BaseModel):
-
-    
-    refresh_token: str
-
-
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=TokenResponse)
 async def login(
-    request: LoginRequest,
-    db: AsyncSession = Depends(get_async_session),
-) -> LoginResponse:
-
-    
-    auth_service = AuthService(db)
-    auth_context = await auth_service.authenticate_user(
-        email=request.email,
-        password=request.password,
-    )
-    
-    if not auth_context:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-
-    token_data = {
-        "sub": auth_context.user_id,
-        "email": auth_context.email,
-        "msp_id": auth_context.msp_id,
-        "client_ids": auth_context.client_ids,
-        "role": auth_context.role,
-        "permissions": auth_context.permissions,
-    }
-    
-    access_token = JWTManager.create_access_token(token_data)
-    refresh_token = JWTManager.create_refresh_token(token_data)
-    
-    return LoginResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        expires_in=30 * 60,
-    )
-
-
-@router.post("/refresh", response_model=LoginResponse)
-async def refresh_token(
-    request: RefreshTokenRequest,
-    db: AsyncSession = Depends(get_async_session),
-) -> LoginResponse:
-
-    
+    login_data: LoginRequest,
+    session: AsyncSession = Depends(get_async_session)
+):
     try:
-        payload = JWTManager.verify_token(request.refresh_token)
+        msp_user = await session.execute(
+            "SELECT * FROM msp_users WHERE email = :email AND is_active = true",
+            {"email": login_data.email}
+        )
+        msp_user = msp_user.fetchone()
         
-        if payload.get("type") != "refresh":
-            raise HTTPException(status_code=401, detail="Invalid token type")
+        if msp_user:
+            if not verify_password(login_data.password, msp_user.password_hash):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid credentials"
+                )
+            
+            msp = await session.execute(
+                "SELECT * FROM msps WHERE id = :msp_id",
+                {"msp_id": msp_user.msp_id}
+            )
+            msp = msp.fetchone()
+            
+            token_data = {
+                "sub": str(msp_user.id),
+                "email": msp_user.email,
+                "msp_id": str(msp_user.msp_id),
+                "client_id": None,
+                "role": msp_user.role,
+                "permissions": msp_user.permissions or [],
+                "exp": datetime.utcnow() + timedelta(hours=24)
+            }
+            
+            access_token = create_access_token(token_data)
+            
+            return TokenResponse(
+                access_token=access_token,
+                token_type="bearer",
+                expires_in=86400,  # 24 hours
+                user_info={
+                    "user_id": str(msp_user.id),
+                    "email": msp_user.email,
+                    "name": f"{msp_user.first_name} {msp_user.last_name}",
+                    "role": msp_user.role,
+                    "msp_id": str(msp_user.msp_id),
+                    "client_id": None,
+                    "department": msp_user.department,
+                    "permissions": msp_user.permissions or []
+                }
+            )
         
-
-        auth_service = AuthService(db)
-        auth_context = await auth_service.get_user_by_token(request.refresh_token)
+        client_user = await session.execute(
+            "SELECT * FROM client_users WHERE email = :email AND is_active = true",
+            {"email": login_data.email}
+        )
+        client_user = client_user.fetchone()
         
-        if not auth_context:
-            raise HTTPException(status_code=401, detail="Invalid token")
+        if client_user:
+            if not verify_password(login_data.password, client_user.password_hash):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid credentials"
+                )
+            
+            token_data = {
+                "sub": str(client_user.id),
+                "email": client_user.email,
+                "msp_id": None,
+                "client_id": str(client_user.client_id),
+                "role": client_user.role,
+                "permissions": client_user.permissions or [],
+                "exp": datetime.utcnow() + timedelta(hours=24)
+            }
+            
+            access_token = create_access_token(token_data)
+            
+            return TokenResponse(
+                access_token=access_token,
+                token_type="bearer",
+                expires_in=86400,
+                user_info={
+                    "user_id": str(client_user.id),
+                    "email": client_user.email,
+                    "name": f"{client_user.first_name} {client_user.last_name}",
+                    "role": client_user.role,
+                    "msp_id": None,
+                    "client_id": str(client_user.client_id),
+                    "department": client_user.department,
+                    "permissions": client_user.permissions or []
+                }
+            )
         
-
-        token_data = {
-            "sub": auth_context.user_id,
-            "email": auth_context.email,
-            "msp_id": auth_context.msp_id,
-            "client_ids": auth_context.client_ids,
-            "role": auth_context.role,
-            "permissions": auth_context.permissions,
-        }
-        
-        access_token = JWTManager.create_access_token(token_data)
-        refresh_token = JWTManager.create_refresh_token(token_data)
-        
-        return LoginResponse(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            expires_in=30 * 60,
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials"
         )
         
     except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Authentication failed: {str(e)}"
+        )
 
+@router.get("/me", response_model=UserInfo)
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        token_data = verify_token(credentials.credentials)
+        if not token_data:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+        
+        user_id = token_data.get("sub")
+        role = token_data.get("role")
+        msp_id = token_data.get("msp_id")
+        client_id = token_data.get("client_id")
+        
+        if msp_id:
+            user = await session.execute(
+                "SELECT * FROM msp_users WHERE id = :user_id",
+                {"user_id": user_id}
+            )
+            user = user.fetchone()
+            
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User not found"
+                )
+            
+            return UserInfo(
+                user_id=str(user.id),
+                email=user.email,
+                name=f"{user.first_name} {user.last_name}",
+                role=user.role,
+                msp_id=str(user.msp_id),
+                client_id=None,
+                department=user.department,
+                permissions=user.permissions or []
+            )
+        else:
+            user = await session.execute(
+                "SELECT * FROM client_users WHERE id = :user_id",
+                {"user_id": user_id}
+            )
+            user = user.fetchone()
+            
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="User not found"
+                )
+            
+            return UserInfo(
+                user_id=str(user.id),
+                email=user.email,
+                name=f"{user.first_name} {user.last_name}",
+                role=user.role,
+                msp_id=None,
+                client_id=str(user.client_id),
+                department=user.department,
+                permissions=user.permissions or []
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get user info: {str(e)}"
+        )
 
-@router.post("/logout")
-async def logout():
-
-    return {"message": "Logged out successfully"}
+@router.post("/refresh")
+async def refresh_token(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+):
+    try:
+        token_data = verify_token(credentials.credentials)
+        if not token_data:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+        
+        new_token_data = token_data.copy()
+        new_token_data["exp"] = datetime.utcnow() + timedelta(hours=24)
+        
+        access_token = create_access_token(new_token_data)
+        
+        return TokenResponse(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in=86400,
+            user_info={
+                "user_id": token_data.get("sub"),
+                "email": token_data.get("email"),
+                "role": token_data.get("role"),
+                "msp_id": token_data.get("msp_id"),
+                "client_id": token_data.get("client_id")
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Token refresh failed: {str(e)}"
+        )

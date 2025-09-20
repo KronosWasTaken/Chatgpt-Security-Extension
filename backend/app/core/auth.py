@@ -319,3 +319,16 @@ def require_role(required_role: str):
             return await func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def create_access_token(data: Dict[str, Any]) -> str:
+    return JWTManager.create_access_token(data)
+
+def verify_token(token: str) -> Dict[str, Any]:
+    return JWTManager.verify_token(token)
+
+def get_password_hash(password: str) -> str:
+    return PasswordManager.hash_password(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return PasswordManager.verify_password(plain_password, hashed_password)

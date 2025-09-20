@@ -12,6 +12,12 @@ chrome.runtime.onInstalled.addListener(async () => {
       isEnabled: true,
       apiKey: '',
       geminiApiKey: '',
+      backendConfig: {
+        apiUrl: 'http://localhost:8000',
+        enabled: false,
+        clientId: 'acme-health',
+        mspId: 'msp-001'
+      },
       advancedSettings: {
         blockEnvFiles: true,
         realTimeScanning: true,
@@ -513,7 +519,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
       
     case 'ADD_LOG':
-      chrome.storage.sync.get(['logs'], (result) => {
+      chrome.storage.sync.get(['logs', 'config'], (result) => {
         const logs = result.logs || [];
         const newLog = {
           id: Date.now().toString(),
@@ -528,6 +534,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.storage.sync.set({ logs: trimmedLogs }, () => {
           sendResponse({ success: true });
         });
+        
+        // Send to backend if enabled
+        if (result.config?.backendConfig?.enabled) {
+          fetch(`${result.config.backendConfig.apiUrl}/api/v1/audit/events`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(result.config.backendConfig.apiKey && { 'Authorization': `Bearer ${result.config.backendConfig.apiKey}` })
+            },
+            body: JSON.stringify({
+              eventType: request.category || 'system',
+              message: request.message,
+              severity: request.logType || 'info',
+              metadata: { source: 'chrome_extension' },
+              timestamp: new Date().toISOString(),
+              clientId: result.config.backendConfig.clientId,
+              mspId: result.config.backendConfig.mspId
+            })
+          }).catch(error => {
+            console.warn('Failed to send log to backend:', error);
+          });
+        }
       });
       break;
       

@@ -1,54 +1,99 @@
-"""
-Audit log endpoints.
-"""
-
-from typing import List, Optional
-from datetime import datetime
-
-from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.core.auth import AuthContext, require_permissions
 from app.core.database import get_async_session
+from app.core.auth import require_auth
+from pydantic import BaseModel
+from typing import Optional, Dict, Any
+from datetime import datetime
+import uuid
 
 router = APIRouter()
 
+class AuditEventRequest(BaseModel):
+    eventType: str
+    message: str
+    severity: str
+    metadata: Optional[Dict[str, Any]] = None
+    timestamp: str
+    source: str
+    clientId: Optional[str] = None
+    mspId: Optional[str] = None
 
-class AuditLogResponse(BaseModel):
-    """Audit log response model."""
-    
+class AuditEventResponse(BaseModel):
     id: str
-    user_id: str
-    session_id: Optional[str]
-    ai_service_id: Optional[str]
-    prompt_snippet: str
-    enforcement_action: str
-    risk_score: float
-    created_at: str
+    eventType: str
+    message: str
+    severity: str
+    timestamp: str
+    source: str
+    clientId: Optional[str] = None
+    mspId: Optional[str] = None
 
+@router.post("/events", response_model=AuditEventResponse)
+async def create_audit_event(
+    event: AuditEventRequest,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Create a new audit event"""
+    try:
+        # Generate unique ID
+        event_id = f"audit-{uuid.uuid4().hex[:8]}"
+        
+        # Parse timestamp
+        event_timestamp = datetime.fromisoformat(event.timestamp.replace('Z', '+00:00'))
+        
+        # Store in database (simplified - in real implementation, you'd use proper models)
+        audit_data = {
+            "id": event_id,
+            "event_type": event.eventType,
+            "message": event.message,
+            "severity": event.severity,
+            "metadata": event.metadata or {},
+            "timestamp": event_timestamp,
+            "source": event.source,
+            "client_id": event.clientId,
+            "msp_id": event.mspId
+        }
+        
+        # In a real implementation, you'd insert into an audit_logs table
+        # For now, we'll just return the event data
+        return AuditEventResponse(
+            id=event_id,
+            eventType=event.eventType,
+            message=event.message,
+            severity=event.severity,
+            timestamp=event.timestamp,
+            source=event.source,
+            clientId=event.clientId,
+            mspId=event.mspId
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create audit event: {str(e)}"
+        )
 
-@router.get("/", response_model=List[AuditLogResponse])
-async def get_audit_logs(
-    limit: int = Query(50, ge=1, le=1000),
-    offset: int = Query(0, ge=0),
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-    auth_context: AuthContext = Depends(require_permissions(["audit:read"])),
-    db: AsyncSession = Depends(get_async_session),
-) -> List[AuditLogResponse]:
-    """Get audit logs for the current client."""
-    
-    # Mock data for now
-    return [
-        AuditLogResponse(
-            id="log-1",
-            user_id="user-1",
-            session_id="session-123",
-            ai_service_id="ai-1",
-            prompt_snippet="Patient John Doe has symptoms of...",
-            enforcement_action="blocked",
-            risk_score=0.95,
-            created_at="2024-01-15T10:30:00Z",
-        ),
-    ]
+@router.get("/events")
+async def get_audit_events(
+    client_id: Optional[str] = None,
+    msp_id: Optional[str] = None,
+    limit: int = 100,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Get audit events with optional filtering"""
+    try:
+        # In a real implementation, you'd query the audit_logs table
+        # For now, return empty list
+        return {
+            "events": [],
+            "total": 0,
+            "client_id": client_id,
+            "msp_id": msp_id
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get audit events: {str(e)}"
+        )

@@ -1,11 +1,13 @@
 
 
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
+import uuid
 
-from sqlalchemy import Column, String, Text, Boolean, Integer, Date, ForeignKey, Numeric
+from sqlalchemy import Column, String, Text, Boolean, Integer, Date, ForeignKey, Numeric, DateTime
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 
 from app.models.base import Base
 
@@ -15,16 +17,18 @@ class MSP(Base):
     
     __tablename__ = "msps"
     
+    id: Mapped[str] = mapped_column(String(50), primary_key=True, default=lambda: f"msp-{uuid.uuid4().hex[:8]}")
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-
     subscription_tier: Mapped[str] = mapped_column(String(50), nullable=False)
-    billing_cycle: Mapped[str] = mapped_column(String(20), nullable=False)
+    billing_cycle: Mapped[str] = mapped_column(String(50), nullable=False)
     contact_info: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     billing_info: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     settings: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     compliance_requirements: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="active", nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="active", nullable=False)
     trial_ends_at: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
 
     users: Mapped[List["MSPUser"]] = relationship(
@@ -49,7 +53,8 @@ class MSPUser(Base):
     
     __tablename__ = "msp_users"
     
-    msp_id: Mapped[str] = mapped_column(UUID(as_uuid=True), ForeignKey("msps.id"), nullable=False)
+    id: Mapped[str] = mapped_column(String(50), primary_key=True, default=lambda: f"msp-user-{uuid.uuid4().hex[:8]}")
+    msp_id: Mapped[str] = mapped_column(String(50), ForeignKey("msps.id"), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -61,6 +66,8 @@ class MSPUser(Base):
     profile_data: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_login: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
 
     msp: Mapped["MSP"] = relationship("MSP", back_populates="users")
@@ -76,21 +83,25 @@ class Client(Base):
     
     __tablename__ = "clients"
     
-    msp_id: Mapped[str] = mapped_column(UUID(as_uuid=True), ForeignKey("msps.id"), nullable=False)
+    id: Mapped[str] = mapped_column(String(50), primary_key=True, default=lambda: f"client-{uuid.uuid4().hex[:8]}")
+    msp_id: Mapped[str] = mapped_column(String(50), ForeignKey("msps.id"), nullable=False)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     industry: Mapped[str] = mapped_column(String(100), nullable=False)
-    company_size: Mapped[str] = mapped_column(String(20), nullable=False)
-    compliance_requirements: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False)
-    schema_name: Mapped[str] = mapped_column(String(63), nullable=False)
+    company_size: Mapped[str] = mapped_column(String(50), nullable=False)
+    status: Mapped[str] = mapped_column(String(50), default="active", nullable=False)
+    subscription_tier: Mapped[str] = mapped_column(String(50), nullable=False)
     contact_email: Mapped[str] = mapped_column(String(255), nullable=False)
-    primary_contact_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    primary_contact_phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    primary_contact_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    primary_contact_phone: Mapped[str] = mapped_column(String(50), nullable=False)
+    schema_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    compliance_requirements: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=False)
     company_info: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     settings: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
     onboarding_data: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="active", nullable=False)
     contract_start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     contract_end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
 
     msp: Mapped["MSP"] = relationship("MSP", back_populates="clients")

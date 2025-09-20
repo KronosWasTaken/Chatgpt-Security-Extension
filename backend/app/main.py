@@ -92,7 +92,6 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix="/api/v1")
     
-    # Prometheus metrics endpoint
     if settings.PROMETHEUS_ENABLED:
         metrics_app = make_asgi_app()
         app.mount("/metrics", metrics_app)

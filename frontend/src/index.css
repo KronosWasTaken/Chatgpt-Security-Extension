@@ -1,0 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Cybercept Design System - Enterprise MSP Dashboard */
+
+@layer base {
+  :root {
+    /* Cybercept Brand Colors */
+    --cybercept-blue: 210 79% 50%;        /* #1F7AE0 */
+    --cybercept-teal: 189 85% 44%;        /* #0BBBD4 */
+    --cybercept-navy: 218 71% 14%;        /* #0B1E3A */
+    
+    /* Text Hierarchy */
+    --heading-text: 218 60% 10%;          /* #0E1726 */
+    --body-text: 215 25% 27%;             /* #334155 */
+    --subtext: 220 13% 46%;               /* #6B7280 */
+    
+    /* Interface Colors */
+    --app-bg: 214 32% 97%;                /* #F7FAFC */
+    --surface: 0 0% 100%;                 /* #FFFFFF */
+    --border-color: 220 13% 91%;          /* #E5E7EB */
+    
+    /* Status Colors */
+    --risk-low: 158 64% 52%;              /* #10B981 */
+    --risk-medium: 38 92% 50%;            /* #F59E0B */
+    --risk-high: 0 84% 60%;               /* #EF4444 */
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(90deg, hsl(var(--cybercept-blue)) 0%, hsl(var(--cybercept-teal)) 100%);
+    --gradient-brand-subtle: linear-gradient(135deg, hsl(var(--cybercept-blue) / 0.05) 0%, hsl(var(--cybercept-teal) / 0.05) 100%);
+    
+    /* Standard Design System Tokens */
+    --background: var(--app-bg);
+    --foreground: var(--heading-text);
+    
+    --card: var(--surface);
+    --card-foreground: var(--body-text);
+    
+    --popover: var(--surface);
+    --popover-foreground: var(--body-text);
+    
+    --primary: var(--cybercept-blue);
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: var(--cybercept-teal);
+    --secondary-foreground: 0 0% 100%;
+    
+    --muted: 220 14% 96%;
+    --muted-foreground: var(--subtext);
+    
+    --accent: var(--cybercept-teal);
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: var(--risk-high);
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: var(--border-color);
+    --input: var(--border-color);
+    --ring: var(--cybercept-blue);
+    
+    --radius: 1rem;
+    
+    /* Sidebar Specific */
+    --sidebar-background: var(--cybercept-navy);
+    --sidebar-foreground: 220 13% 76%;
+    --sidebar-primary: var(--cybercept-teal);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 71% 18%;
+    --sidebar-accent-foreground: 220 13% 76%;
+    --sidebar-border: 218 71% 18%;
+    --sidebar-ring: var(--cybercept-teal);
+  }
+
+  .dark {
+    /* Cybercept Dark Mode - Optional Future Enhancement */
+    --background: var(--cybercept-navy);
+    --foreground: 220 13% 91%;
+    
+    --card: 218 71% 16%;
+    --card-foreground: 220 13% 91%;
+    
+    --popover: 218 71% 16%;
+    --popover-foreground: 220 13% 91%;
+    
+    --primary: var(--cybercept-teal);
+    --primary-foreground: var(--cybercept-navy);
+    
+    --secondary: 218 71% 18%;
+    --secondary-foreground: 220 13% 91%;
+    
+    --muted: 218 71% 18%;
+    --muted-foreground: 220 13% 65%;
+    
+    --accent: 218 71% 18%;
+    --accent-foreground: 220 13% 91%;
+    
+    --destructive: var(--risk-high);
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 218 71% 18%;
+    --input: 218 71% 18%;
+    --ring: var(--cybercept-teal);
+    
+    --sidebar-background: var(--cybercept-navy);
+    --sidebar-foreground: 220 13% 76%;
+    --sidebar-primary: var(--cybercept-teal);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 71% 18%;
+    --sidebar-accent-foreground: 220 13% 76%;
+    --sidebar-border: 218 71% 18%;
+    --sidebar-ring: var(--cybercept-teal);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom animations for Login page */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.3s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.bg-gradient-radial {
+  background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+}

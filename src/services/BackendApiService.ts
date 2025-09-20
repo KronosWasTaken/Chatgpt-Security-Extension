@@ -32,6 +32,8 @@ interface BackendConfig {
   apiUrl: string
   enabled: boolean
   apiKey?: string
+  clientId?: string
+  mspId?: string
 }
 
 export class BackendApiService {
@@ -41,7 +43,9 @@ export class BackendApiService {
   private constructor() {
     this.config = {
       apiUrl: 'http://localhost:8000',
-      enabled: false
+      enabled: false,
+      clientId: 'acme-health', // Default client for demo
+      mspId: 'msp-001' // Default MSP for demo
     }
   }
   
@@ -105,7 +109,11 @@ export class BackendApiService {
           'Accept': 'application/json',
           ...(this.config.apiKey && { 'Authorization': `Bearer ${this.config.apiKey}` })
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify({
+          ...request,
+          clientId: this.config.clientId,
+          mspId: this.config.mspId
+        })
       })
       
       if (!response.ok) {
@@ -128,7 +136,7 @@ export class BackendApiService {
     }
     
     try {
-      const response = await fetch(`${this.config.apiUrl}/api/v1/analyze/ai-services`, {
+      const response = await fetch(`${this.config.apiUrl}/api/v1/ai-inventory/`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -141,7 +149,7 @@ export class BackendApiService {
       }
       
       const data = await response.json()
-      return data.services || []
+      return data.applications || []
     } catch (error) {
       console.error('Failed to get approved AI services:', error)
       return null
@@ -191,7 +199,9 @@ export class BackendApiService {
           severity: event.severity,
           metadata: event.data,
           timestamp: new Date().toISOString(),
-          source: 'chrome_extension'
+          source: 'chrome_extension',
+          clientId: this.config.clientId,
+          mspId: this.config.mspId
         })
       })
     } catch (error) {

@@ -1,11 +1,13 @@
 
 
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
+import uuid
 
-from sqlalchemy import Column, String, Text, Boolean, Integer, Date, ForeignKey, Index, Numeric
+from sqlalchemy import Column, String, Text, Boolean, Integer, Date, ForeignKey, Index, Numeric, DateTime
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID, INET
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 
 from app.models.base import Base
 
@@ -15,7 +17,8 @@ class ClientUser(Base):
     
     __tablename__ = "client_users"
     
-    client_id: Mapped[str] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    id: Mapped[str] = mapped_column(String(50), primary_key=True, default=lambda: f"client-user-{uuid.uuid4().hex[:8]}")
+    client_id: Mapped[str] = mapped_column(String(50), ForeignKey("clients.id"), nullable=False, index=True)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     first_name: Mapped[str] = mapped_column(String(100), nullable=False)
     last_name: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -29,6 +32,8 @@ class ClientUser(Base):
     auth_provider_id: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     last_login: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
 
     audit_logs: Mapped[List["ClientAuditLog"]] = relationship(
