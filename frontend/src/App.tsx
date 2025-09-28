@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { ProtectedRoute, RoleBasedRoute } from "@/components/ProtectedRoute";
+import { ProtectedRoute, RoleBasedRedirect } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Client from "./pages/Client";
@@ -25,90 +25,50 @@ import EducationHub from "./pages/EducationHub";
 const queryClient = new QueryClient();
 
 const App = () => (
+
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<RoleBasedRoute><Navigate to="/login" replace /></RoleBasedRoute>} />
+<Route path="/" element={<RoleBasedRedirect />} />
+
+
           <Route path="/login" element={<Login />} />
-          
-          {/* Protected MSP routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute requiredRole={['msp_admin', 'msp_user']}>
-              <Dashboard />
-            </ProtectedRoute>
-          } />
-          <Route path="/msp/ai-inventory" element={
-            <ProtectedRoute requiredRole={['msp_admin', 'msp_user']}>
-              <MSPAIInventory />
-            </ProtectedRoute>
-          } />
-          <Route path="/msp/ai-engagement" element={
-            <ProtectedRoute requiredRole={['msp_admin', 'msp_user']}>
-              <MSPAIEngagement />
-            </ProtectedRoute>
-          } />
-          <Route path="/msp/compliance" element={
-            <ProtectedRoute requiredRole={['msp_admin', 'msp_user']}>
-              <MSPCompliance />
-            </ProtectedRoute>
-          } />
-          <Route path="/reports/msp" element={
-            <ProtectedRoute requiredRole={['msp_admin', 'msp_user']}>
-              <MSPReports />
-            </ProtectedRoute>
-          } />
-          
+
+
+           <Route element={<ProtectedRoute requiredRole={['msp_admin', 'msp_user']} />}>
+                            
+
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/msp/ai-inventory" element={<MSPAIInventory />} />
+          <Route path="/msp/ai-engagement" element={<MSPAIEngagement />} />
+          <Route path="/msp/compliance" element={<MSPCompliance />} />
+          <Route path="/reports/msp" element={<MSPReports />} />
+          </Route>
+
+
           {/* Protected Client routes */}
-          <Route path="/client" element={
-            <ProtectedRoute requiredRole={['client_admin', 'end_user']}>
-              <Client />
-            </ProtectedRoute>
-          } />
-          <Route path="/client/ai-inventory" element={
-            <ProtectedRoute requiredRole={['client_admin', 'end_user']}>
-              <ClientAIInventory />
-            </ProtectedRoute>
-          } />
-          <Route path="/client/ai-engagement" element={
-            <ProtectedRoute requiredRole={['client_admin', 'end_user']}>
-              <ClientAIEngagement />
-            </ProtectedRoute>
-          } />
-          <Route path="/client/compliance" element={
-            <ProtectedRoute requiredRole={['client_admin', 'end_user']}>
-              <ClientCompliance />
-            </ProtectedRoute>
-          } />
-          <Route path="/client/ai-control" element={
-            <ProtectedRoute requiredRole={['client_admin', 'end_user']}>
-              <ClientAIControlCenter />
-            </ProtectedRoute>
-          } />
-          <Route path="/client/client-facing" element={
-            <ProtectedRoute requiredRole={['client_admin', 'end_user']}>
-              <ClientFacing />
-            </ProtectedRoute>
-          } />
-          <Route path="/reports/client" element={
-            <ProtectedRoute requiredRole={['client_admin', 'end_user']}>
-              <ClientReports />
-            </ProtectedRoute>
-          } />
+           <Route element={<ProtectedRoute requiredRole={['client_admin', 'end_user']}/>}>
+                    
+
+          <Route path="/client" element={<Client />} />
+          <Route path="/client/ai-inventory" element={<ClientAIInventory />} />
+          <Route path="/client/ai-engagement" element={ <ClientAIEngagement />} />
+          <Route path="/client/compliance" element={   <ClientCompliance />} />
+          <Route path="/client/ai-control" element={ <ClientAIControlCenter />} />
+          <Route path="/client/client-facing" element={<ClientFacing />} />
+          <Route path="/reports/client" element={<ClientReports /> } />
+          </Route>
           
           {/* Shared routes */}
           <Route path="/policies" element={
-            <ProtectedRoute>
               <Policies />
-            </ProtectedRoute>
           } />
           <Route path="/reports" element={<Navigate to="/reports/msp" replace />} />
           <Route path="/education" element={
-            <ProtectedRoute>
               <EducationHub />
-            </ProtectedRoute>
           } />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -120,3 +80,8 @@ const App = () => (
 );
 
 export default App;
+
+
+
+   
+

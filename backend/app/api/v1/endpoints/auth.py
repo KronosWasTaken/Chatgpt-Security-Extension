@@ -1,22 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import get_async_session, TenantContext
-from app.core.auth import create_access_token, verify_token, get_password_hash, verify_password
-from app.models.msp import MSP, MSPUser
-from app.models.client import ClientUser
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List
-from datetime import datetime, timedelta
+from fastapi import APIRouter,Depends,HTTPException,status as http_status
+from fastapi.security import HTTPBearer,HTTPAuthorizationCredentials
+from pydantic import BaseModel,EmailStr
 import uuid
+from typing import Optional,List
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_async_session
+from app.core.auth import PasswordManager,JWTManager
+from app.models.users import User
+from sqlalchemy import select
+from datetime import datetime,timedelta
+router=APIRouter()
+security=HTTPBearer()
 
-router = APIRouter()
-security = HTTPBearer()
 
 class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
+    email:EmailStr
+    password:str
+    
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str
@@ -24,7 +24,7 @@ class TokenResponse(BaseModel):
     user_info: dict
 
 class UserInfo(BaseModel):
-    user_id: str
+    user_id:str
     email: str
     name: str
     role: str
@@ -33,108 +33,70 @@ class UserInfo(BaseModel):
     department: Optional[str] = None
     permissions: List[str] = []
 
-@router.post("/login", response_model=TokenResponse)
+    
+
+
+
+@router.post("/login",response_model=TokenResponse)
 async def login(
-    login_data: LoginRequest,
-    session: AsyncSession = Depends(get_async_session)
+    login_data:LoginRequest,
+    session:AsyncSession=Depends(get_async_session)
 ):
     try:
-        msp_user = await session.execute(
-            "SELECT * FROM msp_users WHERE email = :email AND is_active = true",
-            {"email": login_data.email}
-        )
-        msp_user = msp_user.fetchone()
+        user = (await session.execute(
+    select(User).where(User.email == login_data.email, User.is_active == True)
+)).scalars().first()
         
-        if msp_user:
-            if not verify_password(login_data.password, msp_user.password_hash):
+        if user:
+            if not PasswordManager.verify_password(login_data.password,user.hashed_password):
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid credentials"
-                )
-            
-            msp = await session.execute(
-                "SELECT * FROM msps WHERE id = :msp_id",
-                {"msp_id": msp_user.msp_id}
-            )
-            msp = msp.fetchone()
-            
-            token_data = {
-                "sub": str(msp_user.id),
-                "email": msp_user.email,
-                "msp_id": str(msp_user.msp_id),
-                "client_id": None,
-                "role": msp_user.role,
-                "permissions": msp_user.permissions or [],
-                "exp": datetime.utcnow() + timedelta(hours=24)
-            }
-            
-            access_token = create_access_token(token_data)
-            
-            return TokenResponse(
-                access_token=access_token,
-                token_type="bearer",
-                expires_in=86400,  # 24 hours
-                user_info={
-                    "user_id": str(msp_user.id),
-                    "email": msp_user.email,
-                    "name": f"{msp_user.first_name} {msp_user.last_name}",
-                    "role": msp_user.role,
-                    "msp_id": str(msp_user.msp_id),
-                    "client_id": None,
-                    "department": msp_user.department,
-                    "permissions": msp_user.permissions or []
-                }
-            )
-        
-        client_user = await session.execute(
-            "SELECT * FROM client_users WHERE email = :email AND is_active = true",
-            {"email": login_data.email}
+            status_code=http_status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
         )
-        client_user = client_user.fetchone()
-        
-        if client_user:
-            if not verify_password(login_data.password, client_user.password_hash):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Invalid credentials"
-                )
             
-            token_data = {
-                "sub": str(client_user.id),
-                "email": client_user.email,
-                "msp_id": None,
-                "client_id": str(client_user.client_id),
-                "role": client_user.role,
-                "permissions": client_user.permissions or [],
-                "exp": datetime.utcnow() + timedelta(hours=24)
+            user.last_login=datetime.utcnow().date()
+            await session.commit()
+            token_data={
+                "sub":str(user.id),
+                "email":user.email,
+                "type":user.user_type,
+                "msp_id":str(user.msp_id) if user.msp_id else None,
+                "client_id":str(user.client_id) if user.client_id else None,
+                "role":user.role,
+                "permissions":user.permissions or [],
+                 "exp": datetime.utcnow() + timedelta(hours=24)
+                
             }
-            
-            access_token = create_access_token(token_data)
-            
+            print(token_data)
+            access_token=JWTManager.create_access_token(token_data)
+            user_info={
+        "user_id": str(user.id),
+        "email": user.email,
+        "name": user.name,
+        "role": user.role,
+        "msp_id": str(user.msp_id) if user.msp_id else None,
+        "client_id": str(user.client_id) if user.client_id else None,
+        "department": user.department,
+        "permissions": user.permissions or []
+    }
             return TokenResponse(
                 access_token=access_token,
                 token_type="bearer",
                 expires_in=86400,
-                user_info={
-                    "user_id": str(client_user.id),
-                    "email": client_user.email,
-                    "name": f"{client_user.first_name} {client_user.last_name}",
-                    "role": client_user.role,
-                    "msp_id": None,
-                    "client_id": str(client_user.client_id),
-                    "department": client_user.department,
-                    "permissions": client_user.permissions or []
-                }
+               user_info=user_info
+                
             )
-        
+            
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials"
-        )
+               status_code=http_status.HTTP_401_UNAUTHORIZED,
+               detail="Invalid credentials"
+           )
+        
+            
         
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Authentication failed: {str(e)}"
         )
 
@@ -144,90 +106,65 @@ async def get_current_user(
     session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        token_data = verify_token(credentials.credentials)
+        token_data = JWTManager.verify_token(credentials.credentials)
         if not token_data:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=http_status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
             )
-        
+
         user_id = token_data.get("sub")
-        role = token_data.get("role")
         msp_id = token_data.get("msp_id")
         client_id = token_data.get("client_id")
-        
+
         if msp_id:
-            user = await session.execute(
-                "SELECT * FROM msp_users WHERE id = :user_id",
-                {"user_id": user_id}
-            )
-            user = user.fetchone()
-            
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="User not found"
-                )
-            
-            return UserInfo(
-                user_id=str(user.id),
-                email=user.email,
-                name=f"{user.first_name} {user.last_name}",
-                role=user.role,
-                msp_id=str(user.msp_id),
-                client_id=None,
-                department=user.department,
-                permissions=user.permissions or []
+            result = await session.execute(
+                select(User).where((User.id == user_id) & (User.msp_id == msp_id))
             )
         else:
-            user = await session.execute(
-                "SELECT * FROM client_users WHERE id = :user_id",
-                {"user_id": user_id}
+            result = await session.execute(
+                select(User).where((User.id == user_id) & (User.client_id == client_id))
             )
-            user = user.fetchone()
-            
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail="User not found"
-                )
-            
-            return UserInfo(
-                user_id=str(user.id),
-                email=user.email,
-                name=f"{user.first_name} {user.last_name}",
-                role=user.role,
-                msp_id=None,
-                client_id=str(user.client_id),
-                department=user.department,
-                permissions=user.permissions or []
+
+        user = result.scalars().first()
+
+        if not user:
+            raise HTTPException(
+                status_code=http_status.HTTP_404_NOT_FOUND,
+                detail="User not found"
             )
-            
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get user info: {str(e)}"
+        print(user,"user exists")
+
+        return UserInfo(
+            user_id=str(user.id),
+            email=user.email,
+            name=user.name,
+            role=user.role,
+            msp_id=str(user.msp_id) if user.msp_id else None,
+            client_id=str(user.client_id) if user.client_id else None,
+            department=user.department,
+            permissions=user.permissions or []
         )
 
-@router.post("/refresh")
-async def refresh_token(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
-):
+    except Exception as e:
+        raise HTTPException(
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get current user: {str(e)}"
+        )
+
+@router.post("/refresh" )
+def refresh_token( credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token_data = verify_token(credentials.credentials)
         if not token_data:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+                status_code=http_status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
             )
         
         new_token_data = token_data.copy()
         new_token_data["exp"] = datetime.utcnow() + timedelta(hours=24)
-        
-        access_token = create_access_token(new_token_data)
-        
+        access_token=JWTManager.create_access_token(new_token_data)
         return TokenResponse(
             access_token=access_token,
             token_type="bearer",
@@ -240,11 +177,13 @@ async def refresh_token(
                 "client_id": token_data.get("client_id")
             }
         )
-        
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Token refresh failed: {str(e)}"
         )
+        
+        
+    

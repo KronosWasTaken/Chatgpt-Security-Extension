@@ -6,7 +6,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { apiClient, AIApplication } from "@/services/api";
 import { useEffect, useState } from "react";
-import { Plus, Eye, Edit, Trash2 } from "lucide-react";
+import {Eye, Edit, Trash2 } from "lucide-react";
+
+import AddApplicationDialog from "@/components/ai-inventory/AddApplicationDialog";
+import UpdateAiDialog from "@/components/ai-inventory/UpdateAIDialog";
 
 export default function MSPAIInventory() {
   const [applications, setApplications] = useState<AIApplication[]>([]);
@@ -19,7 +22,9 @@ export default function MSPAIInventory() {
         setIsLoading(true);
         setError(null);
         const data = await apiClient.getAIInventory();
-        setApplications(data);
+     const allItems = data.flatMap(obj => obj?.items);
+setApplications(allItems);
+
       } catch (err) {
         console.error('Failed to load AI applications:', err);
         setError('Failed to load AI applications');
@@ -91,10 +96,7 @@ export default function MSPAIInventory() {
               Manage and track AI applications across your client portfolio
             </p>
           </div>
-          <Button className="bg-cybercept-blue hover:bg-cybercept-blue/90">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Application
-          </Button>
+        <AddApplicationDialog/>
         </div>
 
         {/* Summary Cards */}
@@ -205,9 +207,8 @@ export default function MSPAIInventory() {
                             <Button variant="ghost" size="sm">
                               <Eye className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="w-4 h-4" />
-                            </Button>
+                            <UpdateAiDialog app={app}/>
+                           
                             <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
                               <Trash2 className="w-4 h-4" />
                             </Button>

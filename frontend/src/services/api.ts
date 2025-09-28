@@ -138,6 +138,8 @@ class ApiClient {
 
     try {
       const response = await fetch(`${this.baseURL}${endpoint}`, config);
+
+      console.log(response,"authdata");
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -269,7 +271,16 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ assigned_to: assignedTo }),
     });
+
+ 
   }
+
+ 
+  
+
+
+
+  
 
   async getAlertsFeed(): Promise<{ alerts: Alert[] }> {
     return this.request<{ alerts: Alert[] }>('/alerts/feed/real-time');

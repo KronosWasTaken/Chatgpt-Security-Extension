@@ -38,13 +38,15 @@ const Dashboard = () => {
         setError(null);
         
         // Load clients and alerts in parallel
-        const [clientsData, alertsData] = await Promise.all([
-          apiClient.getClients(),
-          apiClient.getAlerts({ limit: 10 })
-        ]);
-        
+        // const [clientsData, alertsData] = await Promise.all([
+        //   apiClient.getClients(),
+        //   apiClient.getAlerts({ limit: 10 })
+        // ]);
+
+        const clientsData=await apiClient.getClients();
+       
         setClients(clientsData);
-        setAlerts(alertsData);
+        // setAlerts(alertsData);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
         setError('Failed to load dashboard data');
