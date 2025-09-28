@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends,Request
+from fastapi import APIRouter, Depends, Request, Query, HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
@@ -8,15 +8,15 @@ from datetime import datetime, date
 from uuid import UUID
 from app.models import (
     Client, ClientAIServices, MSPAuditSummary, ClientMetrics, 
-    Alert, DepartmentEngagement, ApplicationEngagement, 
-    AgentEngagement, UserEngagement, ProductivityCorrelation,
+    Alert, AgentEngagement, UserEngagement, ProductivityCorrelation,
     AIService, ClientComplianceReport, PortfolioValueReport, MSP,
     ClientAIServiceUsage
 )
-from sqlalchemy import select, func, case, join
+from sqlalchemy import select, func, case, join, and_, desc
 from sqlalchemy.orm import aliased
 from app.core.utils import *
 from app.services.metrics_calculator import MetricsCalculator
+from app.services.engagement_service import EngagementService
 from datetime import date
 
 def get_risk_score_for_service(service: ClientAIServices) -> int:
@@ -325,9 +325,11 @@ async def get_client_inventory(
 async def get_client_engagement(
     client_id: str,
     request: Request,
+    department: Optional[str] = None,
+    target_date: Optional[date] = None,
     session: AsyncSession = Depends(get_async_session)
 ):
-    """Get AI engagement data for a specific client"""
+    """Get AI engagement data for a specific client with optional department filtering"""
     user = request.state.user
     
     if user['role'] not in ["msp_admin", "msp_user"]:
@@ -350,85 +352,70 @@ async def get_client_engagement(
             departments=[], applications=[], agents=[], productivity_correlations={}
         )
     
-    # Get latest engagement data (today's data)
-    today = date.today()
+    # Use new engagement service
+    engagement_service = EngagementService(session)
+    target_date = target_date or date.today()
     
-    # Department engagement
-    dept_query = select(DepartmentEngagement).where(
-        and_(
-            DepartmentEngagement.client_id == UUID(client_id),
-            DepartmentEngagement.date == today
-        )
+    # Get engagement data calculated at runtime
+    engagement_data = await engagement_service.get_engagement_summary(
+        client_id, target_date, department
     )
-    dept_result = await session.execute(dept_query)
-    departments = []
-    for dept in dept_result.scalars().all():
-        departments.append(DepartmentEngagementResponse(
-            department=dept.department,
-            interactions=dept.interactions,
-            active_users=dept.active_users,
-            pct_change_vs_prev_7d=float(dept.pct_change_vs_prev_7d)
-        ))
     
-    # Application engagement
-    app_query = select(ApplicationEngagement).where(
-        and_(
-            ApplicationEngagement.client_id == UUID(client_id),
-            ApplicationEngagement.date == today
+    # Convert to response format
+    departments = [
+        DepartmentEngagementResponse(
+            department=dept['department'],
+            interactions=dept['interactions'],
+            active_users=dept['active_users'],
+            pct_change_vs_prev_7d=dept['pct_change_vs_prev_7d']
         )
-    )
-    app_result = await session.execute(app_query)
-    applications = []
-    for app in app_result.scalars().all():
-        applications.append(ApplicationEngagementResponse(
-            application=app.application,
-            vendor=app.vendor,
-            icon=app.icon or "default",
-            active_users=app.active_users,
-            interactions_per_day=app.interactions_per_day,
-            trend_pct_7d=float(app.trend_pct_7d),
-            utilization=app.utilization,
-            recommendation=app.recommendation or ""
-        ))
+        for dept in engagement_data['departments']
+    ]
     
-    # Agent engagement
-    agent_query = select(AgentEngagement).where(
-        and_(
-            AgentEngagement.client_id == UUID(client_id),
-            AgentEngagement.date == today
+    applications = [
+        ApplicationEngagementResponse(
+            application=app['application'],
+            vendor=app['vendor'],
+            icon=app['icon'] or "default",
+            active_users=app['active_users'],
+            interactions_per_day=app['interactions_per_day'],
+            trend_pct_7d=app['trend_pct_7d'],
+            utilization=app['utilization'],
+            recommendation=app['recommendation']
         )
-    )
-    agent_result = await session.execute(agent_query)
-    agents = []
-    for agent in agent_result.scalars().all():
-        agents.append(AgentEngagementResponse(
-            agent=agent.agent,
-            vendor=agent.vendor,
-            icon=agent.icon or "bot",
-            deployed=agent.deployed,
-            avg_prompts_per_day=agent.avg_prompts_per_day,
-            flagged_actions=agent.flagged_actions,
-            trend_pct_7d=float(agent.trend_pct_7d),
-            status=agent.status,
-            last_activity_iso=agent.last_activity_iso or "",
-            associated_apps=agent.associated_apps or []
-        ))
+        for app in engagement_data['applications']
+    ]
     
-    # Productivity correlations
-    prod_query = select(ProductivityCorrelation).where(
-        and_(
-            ProductivityCorrelation.client_id == UUID(client_id),
-            ProductivityCorrelation.date == today
+    # Get data from kept tables (agents and productivity correlations)
+    agents_data = await engagement_service.get_agent_engagement_from_table(client_id, target_date)
+    productivity_data = await engagement_service.get_productivity_correlations_from_table(client_id, target_date)
+    
+    # Convert agents to response format
+    agents = [
+        AgentEngagementResponse(
+            agent=agent['agent'],
+            vendor=agent['vendor'],
+            icon=agent['icon'],
+            deployed=agent['deployed'],
+            avg_prompts_per_day=agent['avg_prompts_per_day'],
+            flagged_actions=agent['flagged_actions'],
+            trend_pct_7d=agent['trend_pct_7d'],
+            status=agent['status'],
+            last_activity_iso=agent['last_activity_iso'],
+            associated_apps=agent['associated_apps']
         )
-    )
-    prod_result = await session.execute(prod_query)
-    productivity_correlations = {}
-    for prod in prod_result.scalars().all():
-        productivity_correlations[prod.department] = ProductivityCorrelationResponse(
-            ai_interactions_7d=prod.ai_interactions_7d,
-            output_metric_7d=prod.output_metric_7d,
-            note=prod.note or ""
+        for agent in agents_data
+    ]
+    
+    # Convert productivity correlations to response format
+    productivity_correlations = {
+        dept: ProductivityCorrelationResponse(
+            ai_interactions_7d=corr['ai_interactions_7d'],
+            output_metric_7d=corr['output_metric_7d'],
+            note=corr['note']
         )
+        for dept, corr in productivity_data.items()
+    }
     
     return AIEngagementDataResponse(
         departments=departments,
@@ -542,5 +529,166 @@ async def get_portfolio_totals(
         "agents_deployed": total_agents,
         "avg_risk_score": round(avg_risk_score, 1)
     }
+
+
+# Request/Response models for adding client AI applications
+class AddClientAIApplicationRequest(BaseModel):
+    name: str
+    vendor: str
+    type: str  # 'Application' or 'Agent'
+    status: str  # 'Permitted' or 'Unsanctioned'
+    users: int = 0
+    avg_daily_interactions: int = 0
+    integrations: Optional[List[str]] = []
+    ai_service_id: str
+    risk_tolerance: str
+    department_restrictions: Optional[dict] = None
+    approved_at: Optional[date] = None
+    approved_by: Optional[str] = None
+
+class AddClientAIApplicationResponse(BaseModel):
+    id: str
+    name: str
+    vendor: str
+    type: str
+    status: str
+    users: int
+    avg_daily_interactions: int
+    integrations: List[str]
+    ai_service_id: str
+    risk_tolerance: str
+    department_restrictions: Optional[dict]
+    approved_at: Optional[date]
+    approved_by: Optional[str]
+    created_at: datetime
+
+@router.post("/{client_id}/ai-applications", response_model=AddClientAIApplicationResponse)
+async def add_client_ai_application(
+    client_id: str,
+    request_data: AddClientAIApplicationRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Add a new AI application to a client"""
+    user = request.state.user
+    
+    if user['role'] not in ["msp_admin", "msp_user"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Verify client belongs to user's MSP
+    client_query = select(Client).where(
+        and_(
+            Client.id == UUID(client_id),
+            Client.msp_id == UUID(user['msp_id'])
+        )
+    )
+    client_result = await session.execute(client_query)
+    client = client_result.scalar_one_or_none()
+    
+    if not client:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    # Verify AI service exists
+    ai_service_query = select(AIService).where(AIService.id == UUID(request_data.ai_service_id))
+    ai_service_result = await session.execute(ai_service_query)
+    ai_service = ai_service_result.scalar_one_or_none()
+    
+    if not ai_service:
+        raise HTTPException(status_code=404, detail="AI service not found")
+    
+    # Validate type
+    if request_data.type not in ["Application", "Agent"]:
+        raise HTTPException(status_code=400, detail="Type must be 'Application' or 'Agent'")
+    
+    # Validate status
+    if request_data.status not in ["Permitted", "Unsanctioned"]:
+        raise HTTPException(status_code=400, detail="Status must be 'Permitted' or 'Unsanctioned'")
+    
+    # Validate risk tolerance
+    valid_risk_tolerances = ["Low", "Medium", "High", "Critical"]
+    if request_data.risk_tolerance not in valid_risk_tolerances:
+        raise HTTPException(status_code=400, detail=f"Risk tolerance must be one of: {', '.join(valid_risk_tolerances)}")
+    
+    # Check if application already exists for this client
+    existing_query = select(ClientAIServices).where(
+        and_(
+            ClientAIServices.client_id == UUID(client_id),
+            ClientAIServices.name == request_data.name,
+            ClientAIServices.vendor == request_data.vendor
+        )
+    )
+    existing_result = await session.execute(existing_query)
+    existing_app = existing_result.scalar_one_or_none()
+    
+    if existing_app:
+        raise HTTPException(status_code=409, detail="AI application with this name and vendor already exists for this client")
+    
+    # Create new client AI application
+    client_ai_app = ClientAIServices(
+        client_id=UUID(client_id),
+        name=request_data.name,
+        vendor=request_data.vendor,
+        type=request_data.type,
+        status=request_data.status,
+        users=request_data.users,
+        avg_daily_interactions=request_data.avg_daily_interactions,
+        integrations=request_data.integrations or [],
+        ai_service_id=UUID(request_data.ai_service_id),
+        risk_tolerance=request_data.risk_tolerance,
+        department_restrictions=request_data.department_restrictions,
+        approved_at=request_data.approved_at,
+        approved_by=UUID(request_data.approved_by) if request_data.approved_by else None
+    )
+    
+    session.add(client_ai_app)
+    await session.commit()
+    await session.refresh(client_ai_app)
+    
+    return AddClientAIApplicationResponse(
+        id=str(client_ai_app.id),
+        name=client_ai_app.name,
+        vendor=client_ai_app.vendor,
+        type=client_ai_app.type,
+        status=client_ai_app.status,
+        users=client_ai_app.users,
+        avg_daily_interactions=client_ai_app.avg_daily_interactions,
+        integrations=client_ai_app.integrations or [],
+        ai_service_id=str(client_ai_app.ai_service_id),
+        risk_tolerance=client_ai_app.risk_tolerance,
+        department_restrictions=client_ai_app.department_restrictions,
+        approved_at=client_ai_app.approved_at,
+        approved_by=str(client_ai_app.approved_by) if client_ai_app.approved_by else None,
+        created_at=client_ai_app.created_at
+    )
+
+@router.get("/ai-services", response_model=List[dict])
+async def get_available_ai_services(
+    request: Request,
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Get list of available AI services for adding to clients"""
+    user = request.state.user
+    
+    if user['role'] not in ["msp_admin", "msp_user"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Get all active AI services
+    ai_services_query = select(AIService).where(AIService.is_active == True)
+    result = await session.execute(ai_services_query)
+    ai_services = result.scalars().all()
+    
+    return [
+        {
+            "id": str(service.id),
+            "name": service.name,
+            "vendor": service.vendor,
+            "category": service.category,
+            "risk_level": service.risk_level,
+            "domain_patterns": service.domain_patterns,
+            "detection_patterns": service.detection_patterns,
+            "service_metadata": service.service_metadata
+        }
+        for service in ai_services
+    ]
 
 

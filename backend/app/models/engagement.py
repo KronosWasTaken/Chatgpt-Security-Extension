@@ -7,23 +7,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 
-class ApplicationEngagement(Base):
-    __tablename__ = "application_engagement"
-    
-    client_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False, index=True)
-    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    
-    application: Mapped[str] = mapped_column(String(255), nullable=False)
-    vendor: Mapped[str] = mapped_column(String(255), nullable=False)
-    icon: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    active_users: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    interactions_per_day: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    trend_pct_7d: Mapped[float] = mapped_column(Numeric(5, 2), default=0, nullable=False)
-    utilization: Mapped[str] = mapped_column(String(20), nullable=False)  # 'High', 'Medium', 'Low'
-    recommendation: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
-    client: Mapped["Client"] = relationship("Client", back_populates="application_engagement")
-
+# ApplicationEngagement table removed - data can be calculated from ClientAIServiceUsage at runtime
+# This eliminates data duplication while maintaining the same functionality
 
 class AgentEngagement(Base):
     __tablename__ = "agent_engagement"

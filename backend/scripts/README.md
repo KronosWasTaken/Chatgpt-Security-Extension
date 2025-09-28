@@ -1,165 +1,223 @@
-# Database Seed Scripts
+# Mock Data Seeding Scripts
 
-This directory contains scripts to populate the database with test data.
+This directory contains scripts for seeding the AI Compliance Platform with comprehensive mock data for development and testing.
 
-## Scripts
+## 🚀 Quick Start
 
-### 1. `seed_complete_data.py` - Full Production Data
-**Purpose**: Seeds the database with comprehensive, realistic data matching the frontend mock data exactly.
-
-**What it creates**:
-- 1 MSP (Cybercept MSP)
-- 2 MSP users (admin and analyst)
-- 3 clients (Acme Health, TechCorp Solutions, Metro Finance)
-- 15 AI services
-- Client AI services (inventory) for each client
-- Client metrics for dashboard
-- Department engagement data
-- Application engagement data
-- Agent engagement data
-- Productivity correlations
-- 8 sample alerts
-- Client policies
-- Compliance reports
-- Portfolio reports
-
-**Usage**:
+### Run Complete Seeding
 ```bash
 cd backend
-uv run python scripts/seed_complete_data.py
+python scripts/run_seed.py
 ```
 
-### 2. `seed_minimal_data.py` - Basic Test Data
-**Purpose**: Seeds the database with minimal data for basic testing and development.
-
-**What it creates**:
-- 1 MSP (Test MSP)
-- 1 user (test@testmsp.com)
-- 1 client (Test Client)
-- 1 AI service (ChatGPT)
-- Basic engagement data
-- 1 sample alert
-- 1 policy
-
-**Usage**:
+### Run Individual Seeding
 ```bash
 cd backend
-uv run python scripts/seed_minimal_data.py
+python scripts/seed_mock_data.py
 ```
 
-## Prerequisites
+## 📊 What Gets Seeded
 
-1. **Database Migration**: Ensure all migrations have been run
-   ```bash
-   uv run alembic upgrade head
-   ```
+### **Core Data**
+- **1 MSP** - Cybercept MSP (Enterprise tier)
+- **3 Users** - Admin, User, and Analyst roles
+- **4 Clients** - TechCorp, FinanceFirst Bank, HealthCare Plus, RetailMax
+- **6 AI Services** - ChatGPT, Claude, Microsoft Copilot, Jasper, Notion AI, Perplexity
 
-2. **Environment**: Make sure your database connection is configured in `.env`
+### **Client Applications**
+- **5 AI Applications** - Realistic applications for each client
+- **Department Restrictions** - Proper access controls
+- **Integration Data** - Connected systems and tools
+- **Approval Status** - Compliance tracking
 
-3. **Dependencies**: Ensure all required packages are installed
-   ```bash
-   uv sync
-   ```
+### **Usage Data**
+- **30 Days of Usage** - Realistic interaction patterns
+- **Department Filtering** - Engineering, Sales, Marketing, Support, Finance
+- **Daily/Total Interactions** - Progressive usage tracking
 
-## Data Details
+### **Engagement Data**
+- **Agent Engagement** - Internal AI agents and their metrics
+- **User Engagement** - User activity patterns
+- **Productivity Correlations** - AI usage vs. productivity metrics
 
-### Client Data
-The complete seed script creates three clients matching the frontend mock data:
+### **Compliance Data**
+- **3 Frameworks** - HIPAA, GDPR, PCI DSS
+- **4 Detection Patterns** - SSN, Medical Records, Email, Credit Cards
+- **Alert Data** - Realistic security and compliance alerts
 
-1. **Acme Health** (Healthcare, Medium)
-   - 6 AI services (3 Applications, 3 Agents)
-   - 18 apps monitored, 12,450 interactions
-   - 7 agents deployed, 75% risk score, 87% compliance
+## 🏢 Seeded Clients
 
-2. **TechCorp Solutions** (Technology, Large)
-   - 4 AI services (3 Applications, 1 Agent)
-   - 24 apps monitored, 28,900 interactions
-   - 12 agents deployed, 45% risk score, 93% compliance
+### **TechCorp Solutions** (Technology)
+- **Industry**: Technology
+- **Employees**: 250
+- **Compliance**: SOC2, ISO27001
+- **AI Apps**: ChatGPT Enterprise, Claude for Work
+- **Focus**: Engineering and Product teams
 
-3. **Metro Finance** (Financial Services, Large)
-   - 3 AI services (2 Applications, 1 Agent)
-   - 31 apps monitored, 15,670 interactions
-   - 9 agents deployed, 85% risk score, 91% compliance
+### **FinanceFirst Bank** (Financial Services)
+- **Industry**: Financial Services
+- **Employees**: 500
+- **Compliance**: PCI-DSS, SOX, GDPR
+- **AI Apps**: Microsoft Copilot
+- **Focus**: Operations and Customer Service
 
-### Engagement Data
-- **Departments**: Sales, Marketing, Customer Support, Engineering, Finance, HR
-- **Applications**: ChatGPT, Claude, Microsoft Copilot, GitHub Copilot, etc.
-- **Agents**: Sales Email Coach, Support Reply Summarizer, etc.
-- **Productivity Correlations**: Realistic 7-day interaction patterns
+### **HealthCare Plus** (Healthcare)
+- **Industry**: Healthcare
+- **Employees**: 150
+- **Compliance**: HIPAA, HITECH
+- **AI Apps**: Notion AI
+- **Focus**: Administration and Research
 
-### Alert Data
-- **Types**: Unsanctioned Use, Sensitive Data, Agent Risk, Usage Anomaly
-- **Severities**: Low, Medium, High, Critical
-- **Statuses**: Unassigned, Pending, Complete, AI Resolved
-- **Frameworks**: NIST, ISO_42001, EU_AI
+### **RetailMax Stores** (Retail)
+- **Industry**: Retail
+- **Employees**: 1000
+- **Compliance**: PCI-DSS, CCPA
+- **AI Apps**: Jasper AI
+- **Focus**: Marketing and Content
 
-## Authentication
+## 🤖 AI Services
 
-The seed scripts create test users with the following credentials:
+### **ChatGPT** (OpenAI)
+- **Category**: Text Generation
+- **Risk Level**: Medium
+- **Domains**: openai.com, chat.openai.com
+- **Features**: Code review, content generation
 
-**MSP Admin**:
-- Email: `john.smith@cybercept.com`
-- Password: `admin123`
+### **Claude** (Anthropic)
+- **Category**: Text Generation
+- **Risk Level**: Medium
+- **Domains**: claude.ai, anthropic.com
+- **Features**: Analysis, writing assistance
 
-**MSP User**:
-- Email: `sarah.johnson@cybercept.com`
-- Password: `admin123`
+### **Microsoft Copilot** (Microsoft)
+- **Category**: Productivity
+- **Risk Level**: Low
+- **Domains**: copilot.microsoft.com, office.com
+- **Features**: Office integration, Teams integration
 
-**Test User** (minimal script):
-- Email: `test@testmsp.com`
-- Password: `admin123`
+### **Jasper** (Jasper)
+- **Category**: Content Creation
+- **Risk Level**: Low
+- **Domains**: jasper.ai
+- **Features**: Marketing content, templates
 
-## API Testing
+### **Notion AI** (Notion)
+- **Category**: Productivity
+- **Risk Level**: Low
+- **Domains**: notion.so, notion.site
+- **Features**: Writing, summarization, translation
 
-After seeding, you can test the API endpoints:
+### **Perplexity** (Perplexity)
+- **Category**: Research
+- **Risk Level**: Medium
+- **Domains**: perplexity.ai
+- **Features**: Research, citations, real-time data
 
-```bash
-# Get all clients
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8000/api/v1/clients/
+## 🛡️ Compliance Frameworks
 
-# Get client inventory
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8000/api/v1/clients/{client_id}/inventory
+### **HIPAA** (Healthcare)
+- **Version**: 2023
+- **Requirements**: Administrative, Physical, Technical Safeguards
+- **Industries**: Healthcare, Insurance, Pharmaceuticals
+- **Key Rules**: Privacy Rule, Security Rule, Breach Notification
 
-# Get client engagement
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8000/api/v1/clients/{client_id}/engagement
-```
+### **GDPR** (EU Data Protection)
+- **Version**: 2018
+- **Requirements**: Data Protection by Design, Impact Assessments
+- **Industries**: All industries processing EU data
+- **Key Rights**: Access, Rectification, Erasure, Portability
 
-## Troubleshooting
+### **PCI DSS** (Payment Card Industry)
+- **Version**: 4.0
+- **Requirements**: Network Security, Data Protection, Access Control
+- **Industries**: Retail, E-commerce, Financial Services
+- **Key Standards**: Secure networks, protect cardholder data
 
-### Common Issues
+## 🔍 Detection Patterns
 
-1. **Migration Errors**: Make sure to run migrations first
-   ```bash
-   uv run alembic upgrade head
-   ```
+### **SSN Detection** (HIPAA)
+- **Pattern**: `\b\d{3}-?\d{2}-?\d{4}\b`
+- **Severity**: Critical
+- **Context**: SSN, Social Security, Tax ID
 
-2. **Database Connection**: Check your `.env` file for correct database URL
+### **Medical Record Number** (HIPAA)
+- **Pattern**: `\bMRN[:\s]*\d{6,12}\b`
+- **Severity**: High
+- **Context**: Medical Record, Patient, MRN
 
-3. **Permission Errors**: Ensure the database user has CREATE/INSERT permissions
+### **Email Address** (GDPR)
+- **Pattern**: `\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`
+- **Severity**: Medium
+- **Context**: Email, Contact, Personal
 
-4. **Duplicate Data**: The scripts check for existing data and won't create duplicates
+### **Credit Card Number** (PCI DSS)
+- **Pattern**: `\b(?:\d{4}[-\s]?){3}\d{4}\b`
+- **Severity**: Critical
+- **Context**: Credit Card, Payment, Card Number
 
-### Resetting Data
+## 📈 Usage Patterns
 
-To reset the database and start fresh:
+### **Realistic Data Generation**
+- **Base Interactions**: 50-250 per service per day
+- **Department Variation**: Different usage by department
+- **Time Progression**: 30 days of historical data
+- **Growth Patterns**: Realistic usage trends
 
-```bash
-# Drop and recreate database (be careful!)
-uv run alembic downgrade base
-uv run alembic upgrade head
-uv run python scripts/seed_complete_data.py
-```
+### **Department Distribution**
+- **Engineering**: High usage, technical focus
+- **Sales**: Medium usage, customer-facing
+- **Marketing**: Medium usage, content creation
+- **Support**: High usage, customer service
+- **Finance**: Low usage, restricted access
 
-## Customization
+## 🚨 Alert Data
 
-You can modify the seed scripts to:
-- Add more clients
-- Change engagement data
-- Modify alert types
-- Add different AI services
-- Update compliance frameworks
+### **Usage Anomaly**
+- **Title**: "Unusual AI Usage Pattern Detected"
+- **Severity**: Medium
+- **Description**: 150% increase in ChatGPT usage
 
-The scripts are designed to be easily customizable while maintaining data consistency.
+### **Data Leakage Risk**
+- **Title**: "Potential Data Leakage Risk"
+- **Severity**: High
+- **Description**: Sensitive financial data in AI prompt
+
+### **Compliance Violation**
+- **Title**: "HIPAA Compliance Violation"
+- **Severity**: Critical
+- **Description**: Patient data found in AI conversation
+
+
+
+## 🔧 Customization
+
+### **Modify Client Data**
+Edit the `clients_data` list in `seed_mock_data.py` to add more clients or modify existing ones.
+
+### **Add AI Services**
+Edit the `ai_services_data` list to add new AI services or modify existing ones.
+
+### **Adjust Usage Patterns**
+Modify the `seed_client_usage_data` function to change usage patterns and volumes.
+
+### **Add Compliance Frameworks**
+Edit the `frameworks_data` list to add new compliance frameworks.
+
+## 📝 Notes
+
+- **Idempotent**: Scripts can be run multiple times safely
+- **Realistic Data**: All data is designed to be realistic and useful for testing
+- **Relationships**: Proper foreign key relationships are maintained
+- **Timestamps**: Realistic timestamps and date ranges
+- **Validation**: All data passes model validation
+
+## 🎯 Use Cases
+
+This seeded data is perfect for:
+- **API Testing**: Test all endpoints with realistic data
+- **Frontend Development**: Build UI components with real data
+- **Integration Testing**: Test data flows and relationships
+- **Performance Testing**: Test with realistic data volumes
+- **Demo Purposes**: Show realistic system behavior
+
+The seeded data provides a complete, realistic environment for development and testing! 🎉

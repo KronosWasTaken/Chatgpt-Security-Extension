@@ -2,13 +2,12 @@ from .base import Base
 from .users import User
 from .clients import (
     Client, ClientAIServices, ClientPolicy, ClientPolicyViolation, 
-    ClientAuditLog, ClientAIServiceUsage, ClientMetrics, Alert, 
-    DepartmentEngagement
+    ClientAuditLog, ClientAIServiceUsage, ClientMetrics, Alert
 )
 from .msp import MSP, MSPAuditSummary
 from .shared import AIService, ComplianceFramework, DetectionPattern
 from .engagement import (
-    ApplicationEngagement, AgentEngagement, UserEngagement, 
+   AgentEngagement, UserEngagement, 
     ProductivityCorrelation
 )
 from .reports import ClientComplianceReport, PortfolioValueReport
@@ -24,13 +23,11 @@ __all__ = [
     "ClientAIServiceUsage",
     "ClientMetrics",
     "Alert",
-    "DepartmentEngagement",
     "MSP",
     "MSPAuditSummary",
     "AIService",
     "ComplianceFramework",
     "DetectionPattern",
-    "ApplicationEngagement",
     "AgentEngagement",
     "UserEngagement",
     "ProductivityCorrelation",

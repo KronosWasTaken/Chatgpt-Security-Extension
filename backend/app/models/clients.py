@@ -33,8 +33,7 @@ class Client(Base):
     usage_stats: Mapped[List["ClientAIServiceUsage"]] = relationship("ClientAIServiceUsage", back_populates="client")
     metrics: Mapped[List["ClientMetrics"]] = relationship("ClientMetrics", back_populates="client", cascade="all, delete-orphan")
     alerts: Mapped[List["Alert"]] = relationship("Alert", back_populates="client", cascade="all, delete-orphan")
-    department_engagement: Mapped[List["DepartmentEngagement"]] = relationship("DepartmentEngagement", back_populates="client", cascade="all, delete-orphan")
-    application_engagement: Mapped[List["ApplicationEngagement"]] = relationship("ApplicationEngagement", back_populates="client", cascade="all, delete-orphan")
+    # DepartmentEngagement and ApplicationEngagement relationships removed - data calculated at runtime
     agent_engagement: Mapped[List["AgentEngagement"]] = relationship("AgentEngagement", back_populates="client", cascade="all, delete-orphan")
     user_engagement: Mapped[List["UserEngagement"]] = relationship("UserEngagement", back_populates="client", cascade="all, delete-orphan")
     productivity_correlations: Mapped[List["ProductivityCorrelation"]] = relationship("ProductivityCorrelation", back_populates="client", cascade="all, delete-orphan")
@@ -138,18 +137,8 @@ class Alert(Base):
     client: Mapped["Client"] = relationship("Client", back_populates="alerts")
 
 
-class DepartmentEngagement(Base):
-    __tablename__ = "department_engagement"
-    
-    client_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False, index=True)
-    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
-    department: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
-    
-    interactions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    active_users: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    pct_change_vs_prev_7d: Mapped[float] = mapped_column(Numeric(5, 2), default=0, nullable=False)
-    
-    client: Mapped["Client"] = relationship("Client", back_populates="department_engagement")
+# DepartmentEngagement table removed - data can be calculated from ClientAIServiceUsage at runtime
+# This eliminates data duplication while maintaining the same functionality
     
     
     

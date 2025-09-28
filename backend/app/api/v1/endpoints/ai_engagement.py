@@ -1,14 +1,12 @@
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, Request, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from typing import List, Optional
 from datetime import date
 from uuid import UUID
-from app.models import (
-    Client, DepartmentEngagement, ApplicationEngagement, 
-    AgentEngagement, UserEngagement, ProductivityCorrelation
-)
+from app.models import Client, AgentEngagement, ProductivityCorrelation, UserEngagement
+from app.services.engagement_service import EngagementService
 from sqlalchemy import select, and_, desc
 
 router = APIRouter()
@@ -64,9 +62,11 @@ class AIEngagementDataResponse(BaseModel):
 async def get_client_engagement(
     client_id: str,
     request: Request,
+    department: Optional[str] = Query(None, description="Filter by department"),
+    target_date: Optional[date] = Query(None, description="Target date (defaults to today)"),
     session: AsyncSession = Depends(get_async_session)
 ):
-    """Get AI engagement data for a specific client"""
+    """Get AI engagement data for a specific client with optional department filtering"""
     user = request.state.user
     
     if user['role'] not in ["msp_admin", "msp_user"]:
@@ -85,85 +85,70 @@ async def get_client_engagement(
     if not client:
         raise HTTPException(status_code=404, detail="Client not found")
     
-    # Get latest engagement data (today's data)
-    today = date.today()
+    # Use new engagement service
+    engagement_service = EngagementService(session)
+    target_date = target_date or date.today()
     
-    # Department engagement
-    dept_query = select(DepartmentEngagement).where(
-        and_(
-            DepartmentEngagement.client_id == UUID(client_id),
-            DepartmentEngagement.date == today
-        )
+    # Get engagement data calculated at runtime
+    engagement_data = await engagement_service.get_engagement_summary(
+        client_id, target_date, department
     )
-    dept_result = await session.execute(dept_query)
-    departments = []
-    for dept in dept_result.scalars().all():
-        departments.append(DepartmentEngagementResponse(
-            department=dept.department,
-            interactions=dept.interactions,
-            active_users=dept.active_users,
-            pct_change_vs_prev_7d=float(dept.pct_change_vs_prev_7d)
-        ))
     
-    # Application engagement
-    app_query = select(ApplicationEngagement).where(
-        and_(
-            ApplicationEngagement.client_id == UUID(client_id),
-            ApplicationEngagement.date == today
+    # Convert to response format
+    departments = [
+        DepartmentEngagementResponse(
+            department=dept['department'],
+            interactions=dept['interactions'],
+            active_users=dept['active_users'],
+            pct_change_vs_prev_7d=dept['pct_change_vs_prev_7d']
         )
-    )
-    app_result = await session.execute(app_query)
-    applications = []
-    for app in app_result.scalars().all():
-        applications.append(ApplicationEngagementResponse(
-            application=app.application,
-            vendor=app.vendor,
-            icon=app.icon or "default",
-            active_users=app.active_users,
-            interactions_per_day=app.interactions_per_day,
-            trend_pct_7d=float(app.trend_pct_7d),
-            utilization=app.utilization,
-            recommendation=app.recommendation or ""
-        ))
+        for dept in engagement_data['departments']
+    ]
     
-    # Agent engagement
-    agent_query = select(AgentEngagement).where(
-        and_(
-            AgentEngagement.client_id == UUID(client_id),
-            AgentEngagement.date == today
+    applications = [
+        ApplicationEngagementResponse(
+            application=app['application'],
+            vendor=app['vendor'],
+            icon=app['icon'] or "default",
+            active_users=app['active_users'],
+            interactions_per_day=app['interactions_per_day'],
+            trend_pct_7d=app['trend_pct_7d'],
+            utilization=app['utilization'],
+            recommendation=app['recommendation']
         )
-    )
-    agent_result = await session.execute(agent_query)
-    agents = []
-    for agent in agent_result.scalars().all():
-        agents.append(AgentEngagementResponse(
-            agent=agent.agent,
-            vendor=agent.vendor,
-            icon=agent.icon or "bot",
-            deployed=agent.deployed,
-            avg_prompts_per_day=agent.avg_prompts_per_day,
-            flagged_actions=agent.flagged_actions,
-            trend_pct_7d=float(agent.trend_pct_7d),
-            status=agent.status,
-            last_activity_iso=agent.last_activity_iso or "",
-            associated_apps=agent.associated_apps or []
-        ))
+        for app in engagement_data['applications']
+    ]
     
-    # Productivity correlations
-    prod_query = select(ProductivityCorrelation).where(
-        and_(
-            ProductivityCorrelation.client_id == UUID(client_id),
-            ProductivityCorrelation.date == today
+    # Get data from kept tables (agents and productivity correlations)
+    agents_data = await engagement_service.get_agent_engagement_from_table(client_id, target_date)
+    productivity_data = await engagement_service.get_productivity_correlations_from_table(client_id, target_date)
+    
+    # Convert agents to response format
+    agents = [
+        AgentEngagementResponse(
+            agent=agent['agent'],
+            vendor=agent['vendor'],
+            icon=agent['icon'],
+            deployed=agent['deployed'],
+            avg_prompts_per_day=agent['avg_prompts_per_day'],
+            flagged_actions=agent['flagged_actions'],
+            trend_pct_7d=agent['trend_pct_7d'],
+            status=agent['status'],
+            last_activity_iso=agent['last_activity_iso'],
+            associated_apps=agent['associated_apps']
         )
-    )
-    prod_result = await session.execute(prod_query)
-    productivity_correlations = {}
-    for prod in prod_result.scalars().all():
-        productivity_correlations[prod.department] = ProductivityCorrelationResponse(
-            ai_interactions_7d=prod.ai_interactions_7d,
-            output_metric_7d=prod.output_metric_7d,
-            note=prod.note or ""
+        for agent in agents_data
+    ]
+    
+    # Convert productivity correlations to response format
+    productivity_correlations = {
+        dept: ProductivityCorrelationResponse(
+            ai_interactions_7d=corr['ai_interactions_7d'],
+            output_metric_7d=corr['output_metric_7d'],
+            note=corr['note']
         )
+        for dept, corr in productivity_data.items()
+    }
     
     return AIEngagementDataResponse(
         departments=departments,
@@ -176,9 +161,11 @@ async def get_client_engagement(
 async def get_department_engagement(
     client_id: str,
     request: Request,
+    department: Optional[str] = Query(None, description="Filter by department"),
+    target_date: Optional[date] = Query(None, description="Target date (defaults to today)"),
     session: AsyncSession = Depends(get_async_session)
 ):
-    """Get department engagement data for a specific client"""
+    """Get department engagement data for a specific client with optional department filtering"""
     user = request.state.user
     
     if user['role'] not in ["msp_admin", "msp_user"]:
@@ -197,24 +184,25 @@ async def get_department_engagement(
     if not client:
         return []
     
-    # Get latest department engagement data
-    today = date.today()
-    dept_query = select(DepartmentEngagement).where(
-        and_(
-            DepartmentEngagement.client_id == UUID(client_id),
-            DepartmentEngagement.date == today
-        )
-    ).order_by(desc(DepartmentEngagement.interactions))
+    # Use new engagement service
+    engagement_service = EngagementService(session)
+    target_date = target_date or date.today()
     
-    dept_result = await session.execute(dept_query)
-    departments = []
-    for dept in dept_result.scalars().all():
-        departments.append(DepartmentEngagementResponse(
-            department=dept.department,
-            interactions=dept.interactions,
-            active_users=dept.active_users,
-            pct_change_vs_prev_7d=float(dept.pct_change_vs_prev_7d)
-        ))
+    # Get department engagement data calculated at runtime
+    departments_data = await engagement_service.get_department_engagement(
+        client_id, target_date, department
+    )
+    
+    # Convert to response format and sort by interactions
+    departments = [
+        DepartmentEngagementResponse(
+            department=dept['department'],
+            interactions=dept['interactions'],
+            active_users=dept['active_users'],
+            pct_change_vs_prev_7d=dept['pct_change_vs_prev_7d']
+        )
+        for dept in sorted(departments_data, key=lambda x: x['interactions'], reverse=True)
+    ]
     
     return departments
 
@@ -222,9 +210,11 @@ async def get_department_engagement(
 async def get_application_engagement(
     client_id: str,
     request: Request,
+    department: Optional[str] = Query(None, description="Filter by department"),
+    target_date: Optional[date] = Query(None, description="Target date (defaults to today)"),
     session: AsyncSession = Depends(get_async_session)
 ):
-    """Get application engagement data for a specific client"""
+    """Get application engagement data for a specific client with optional department filtering"""
     user = request.state.user
     
     if user['role'] not in ["msp_admin", "msp_user"]:
@@ -243,28 +233,29 @@ async def get_application_engagement(
     if not client:
         return []
     
-    # Get latest application engagement data
-    today = date.today()
-    app_query = select(ApplicationEngagement).where(
-        and_(
-            ApplicationEngagement.client_id == UUID(client_id),
-            ApplicationEngagement.date == today
-        )
-    ).order_by(desc(ApplicationEngagement.interactions_per_day))
+    # Use new engagement service
+    engagement_service = EngagementService(session)
+    target_date = target_date or date.today()
     
-    app_result = await session.execute(app_query)
-    applications = []
-    for app in app_result.scalars().all():
-        applications.append(ApplicationEngagementResponse(
-            application=app.application,
-            vendor=app.vendor,
-            icon=app.icon or "default",
-            active_users=app.active_users,
-            interactions_per_day=app.interactions_per_day,
-            trend_pct_7d=float(app.trend_pct_7d),
-            utilization=app.utilization,
-            recommendation=app.recommendation or ""
-        ))
+    # Get application engagement data calculated at runtime
+    applications_data = await engagement_service.get_application_engagement(
+        client_id, target_date, department
+    )
+    
+    # Convert to response format and sort by interactions
+    applications = [
+        ApplicationEngagementResponse(
+            application=app['application'],
+            vendor=app['vendor'],
+            icon=app['icon'] or "default",
+            active_users=app['active_users'],
+            interactions_per_day=app['interactions_per_day'],
+            trend_pct_7d=app['trend_pct_7d'],
+            utilization=app['utilization'],
+            recommendation=app['recommendation']
+        )
+        for app in sorted(applications_data, key=lambda x: x['interactions_per_day'], reverse=True)
+    ]
     
     return applications
 
