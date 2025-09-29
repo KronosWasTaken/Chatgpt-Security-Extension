@@ -25,7 +25,7 @@ export const FEATURE_FLAGS = {
 // Default Values
 export const DEFAULTS = {
   PAGE_SIZE: 20,
-  REFRESH_INTERVAL: 30000, // 30 seconds
-  TOAST_DURATION: 5000, // 5 seconds
-  DEBOUNCE_DELAY: 300, // 300ms
+  REFRESH_INTERVAL: 30000,
+  TOAST_DURATION: 5000, 
+  DEBOUNCE_DELAY: 300, 
 };

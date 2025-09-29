@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { KPITiles } from "@/components/ai-engagement/KPITiles";
 import { DepartmentUsage } from "@/components/ai-engagement/DepartmentUsage";
@@ -8,8 +8,13 @@ import { ProductivityInsights } from "@/components/ai-engagement/ProductivityIns
 import { RecommendationsPanel } from "@/components/ai-engagement/RecommendationsPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "lucide-react";
+import { apiClient } from "@/services/api";
 
 export default function MSPAIEngagement() {
+
+
+
+
   const [dateRange, setDateRange] = useState("30");
   const [activeSection, setActiveSection] = useState<string>("");
 
@@ -24,6 +29,15 @@ export default function MSPAIEngagement() {
       });
     }
   };
+
+
+  useEffect(()=>{
+    const loadEngagementData=async()=>{
+      const data=await apiClient.GetAIEngagement();
+      console.log(data);
+    }
+    loadEngagementData();
+  },[])
 
   return (
     <AppLayout>

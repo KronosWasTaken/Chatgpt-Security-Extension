@@ -30,7 +30,7 @@ class AIService(Base):
         back_populates="ai_service",
         cascade="all, delete-orphan"
     )
-    usage_stats: Mapped[List["ClientAIServiceUsage"]] = relationship("ClientAIServiceUsage", back_populates="ai_service")
+    # usage_stats relationship removed since usage now links to client-specific services
 
 
 

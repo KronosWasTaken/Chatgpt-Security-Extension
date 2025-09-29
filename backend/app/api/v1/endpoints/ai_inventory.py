@@ -121,10 +121,13 @@ async def get_ai_inventory(
     inventory_data = []
     
     for client in clients:
-        # Get AI services for this client
-        ai_services_query = select(ClientAIServices).where(
-            ClientAIServices.client_id == client.id
-        )
+        # Get AI services for this client that have usage (filter using usage table)
+        ai_services_query = select(ClientAIServices).join(
+            ClientAIServiceUsage,
+            ClientAIServiceUsage.ai_service_id == ClientAIServices.id
+        ).where(
+            ClientAIServiceUsage.client_id == client.id
+        ).group_by(ClientAIServices.id)
         ai_services_result = await session.execute(ai_services_query)
         ai_services = ai_services_result.scalars().all()
         
@@ -136,7 +139,7 @@ async def get_ai_inventory(
             
             # Calculate average daily interactions from usage table
             avg_daily_interactions = await calculate_avg_daily_interactions(
-                session, str(client.id), str(service.ai_service_id)
+                session, str(client.id), str(service.id)
             )
             
             items.append({

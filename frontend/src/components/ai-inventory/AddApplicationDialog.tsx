@@ -65,7 +65,7 @@ console.log(data);
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="Github">Github</SelectItem>
+                  <SelectItem value="Microsoft">Microsoft</SelectItem>
                   <SelectItem value="OpenAI">OpenAI</SelectItem>
                   <SelectItem value="Anthropic">Anthropic</SelectItem>
                 </SelectGroup>

@@ -63,6 +63,7 @@ class ClientAIServices(Base):
 
     client: Mapped["Client"] = relationship("Client", back_populates="ai_services")
     ai_service: Mapped["AIService"] = relationship("AIService", back_populates="client_approvals")
+    alerts: Mapped[List["Alert"]] = relationship("Alert", back_populates="ai_service")
 
 
 class ClientPolicy(Base):
@@ -91,7 +92,7 @@ class ClientAIServiceUsage(Base):
     __tablename__="client_ai_service_usage"
     
     client_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False, index=True)
-    ai_service_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("shared.ai_services.id"), nullable=False, index=True)
+    ai_service_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("clients_ai_services.id"), nullable=False, index=True)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
     
     department: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, index=True)
@@ -100,7 +101,7 @@ class ClientAIServiceUsage(Base):
     total_interactions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)  
     
     client: Mapped["Client"] = relationship("Client", back_populates="usage_stats")
-    ai_service: Mapped["AIService"] = relationship("AIService", back_populates="usage_stats")
+    ai_service: Mapped["ClientAIServices"] = relationship("ClientAIServices")
     user: Mapped["User"] = relationship("User", back_populates="usage_stats")
 
 
@@ -123,7 +124,8 @@ class Alert(Base):
     __tablename__ = "alerts"
     
     client_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False, index=True)
-    app: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    ai_service_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(as_uuid=True), ForeignKey("clients_ai_services.id"), nullable=True, index=True)
+    app: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)  # Keep for backward compatibility
     asset_kind: Mapped[str] = mapped_column(String(50), nullable=False)  # 'Application' or 'Agent'
     family: Mapped[str] = mapped_column(String(50), nullable=False)  # Alert family type
     subtype: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
@@ -135,6 +137,7 @@ class Alert(Base):
     status: Mapped[str] = mapped_column(String(20), nullable=False)  # 'Unassigned', 'Pending', 'Complete', 'AI Resolved'
     
     client: Mapped["Client"] = relationship("Client", back_populates="alerts")
+    ai_service: Mapped[Optional["ClientAIServices"]] = relationship("ClientAIServices", back_populates="alerts")
 
 
 # DepartmentEngagement table removed - data can be calculated from ClientAIServiceUsage at runtime

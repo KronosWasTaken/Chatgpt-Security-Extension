@@ -17,7 +17,7 @@ from app.models import (
     ClientComplianceReport, PortfolioValueReport, ComplianceFramework,
     DetectionPattern, ClientAIServiceUsage, MSPAuditSummary
 )
-from sqlalchemy import select
+from sqlalchemy import select, and_
 from passlib.context import CryptContext
 
 # Create password context for hashing
@@ -466,7 +466,7 @@ async def seed_client_ai_applications(session: AsyncSession, clients, ai_service
         # TechCorp Solutions
         {
             "client_name": "TechCorp Solutions",
-            "name": "ChatGPT Enterprise",
+            "name": "ChatGPT",
             "vendor": "OpenAI",
             "type": "Application",
             "status": "Permitted",
@@ -483,7 +483,7 @@ async def seed_client_ai_applications(session: AsyncSession, clients, ai_service
         },
         {
             "client_name": "TechCorp Solutions",
-            "name": "Claude for Work",
+            "name": "Claude",
             "vendor": "Anthropic",
             "type": "Application",
             "status": "Permitted",
@@ -537,7 +537,7 @@ async def seed_client_ai_applications(session: AsyncSession, clients, ai_service
         # RetailMax Stores
         {
             "client_name": "RetailMax Stores",
-            "name": "Jasper AI",
+            "name": "Jasper",
             "vendor": "Jasper",
             "type": "Application",
             "status": "Permitted",
@@ -614,8 +614,14 @@ async def seed_client_usage_data(session: AsyncSession, clients, ai_services, us
         client_user_list = [user for user in client_users if user.client_id == client.id]
         if not client_user_list:
             continue
-            
-        for service in ai_services:
+        # Fetch this client's approved AI services to link usage to client-specific service IDs
+        client_services_result = await session.execute(
+            select(ClientAIServices).where(ClientAIServices.client_id == client.id)
+        )
+        client_services = client_services_result.scalars().all()
+        if not client_services:
+            continue
+        for service in client_services:
             for days_ago in range(30):
                 usage_date = date.today() - timedelta(days=days_ago)
                 
@@ -978,7 +984,8 @@ async def seed_alerts(session: AsyncSession, clients):
     alerts_data = [
         {
             "client_name": "TechCorp Solutions",
-            "app": "ChatGPT Enterprise",
+            "app": "ChatGPT",
+            "ai_service_name": "ChatGPT",  # Match with ClientAIServices name
             "asset_kind": "Application",
             "family": "Usage Anomaly",
             "subtype": "High Usage",
@@ -992,8 +999,9 @@ async def seed_alerts(session: AsyncSession, clients):
         {
             "client_name": "FinanceFirst Bank",
             "app": "Microsoft Copilot",
+            "ai_service_name": "Microsoft Copilot",  # Match with ClientAIServices name
             "asset_kind": "Application",
-            "family": "Data Leakage",
+            "family": "Sensitive Data",
             "subtype": "Sensitive Data",
             "severity": "High",
             "users_affected": 3,
@@ -1005,8 +1013,9 @@ async def seed_alerts(session: AsyncSession, clients):
         {
             "client_name": "HealthCare Plus",
             "app": "Notion AI",
+            "ai_service_name": "Notion AI",  # Match with ClientAIServices name
             "asset_kind": "Application",
-            "family": "Compliance Violation",
+            "family": "Policy Violation",
             "subtype": "Patient Data",
             "severity": "Critical",
             "users_affected": 1,
@@ -1024,6 +1033,16 @@ async def seed_alerts(session: AsyncSession, clients):
         if not client:
             continue
         
+        # Find the corresponding AI service for this client
+        ai_service_query = select(ClientAIServices).where(
+            and_(
+                ClientAIServices.client_id == client.id,
+                ClientAIServices.name == alert_data["ai_service_name"]
+            )
+        )
+        ai_service_result = await session.execute(ai_service_query)
+        ai_service = ai_service_result.scalar_one_or_none()
+        
         # Check if alert already exists
         existing_alert = await session.execute(
             select(Alert).where(
@@ -1036,13 +1055,15 @@ async def seed_alerts(session: AsyncSession, clients):
         if not alert:
             alert_data_copy = alert_data.copy()
             del alert_data_copy["client_name"]
+            del alert_data_copy["ai_service_name"]
             alert_data_copy["client_id"] = client.id
+            alert_data_copy["ai_service_id"] = ai_service.id if ai_service else None
             
             alert = Alert(**alert_data_copy)
             session.add(alert)
             await session.commit()
             await session.refresh(alert)
-            print(f"  ✅ Created alert: {alert.family} for {client.name}")
+            print(f"  ✅ Created alert: {alert.family} for {client.name} (AI Service: {ai_service.name if ai_service else 'None'})")
         else:
             print(f"  ✅ Alert already exists: {alert.family}")
 

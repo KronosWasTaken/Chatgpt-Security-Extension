@@ -7,7 +7,8 @@ from app.api.v1.endpoints import(
     ai_inventory,
     ai_engagement,
     policies,
-    reports
+    reports,
+    alerts
 )
 
 
@@ -27,6 +28,8 @@ api_router.include_router(ai_engagement.router,prefix="/ai-engagement",tags=["ai
 api_router.include_router(policies.router,prefix="/policies",tags=["policies"])
 
 api_router.include_router(reports.router,prefix="/reports",tags=["reports"])
+
+api_router.include_router(alerts.router,prefix="/alerts",tags=["alerts"])
 
 
 

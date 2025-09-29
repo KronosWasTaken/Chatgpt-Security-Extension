@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/services/api";
 export default function UpdateAiDialog({app}) {
 
-console.log(app.id);
+
 const [formData, setFormData] = useState({
     name: app.name,
     vendor: app.vendor,
@@ -55,7 +55,7 @@ console.log(data)
             />
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* <div className="flex items-center gap-4">
             <Label>Vendor:</Label>
             <Select value={formData.vendor} onValueChange={v => handleChange("vendor", v)}>
               <SelectTrigger>
@@ -63,13 +63,13 @@ console.log(data)
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="GitHub">Github</SelectItem>
+                  <SelectItem value="GitHub">Microsoft</SelectItem>
                   <SelectItem value="OpenAI">OpenAI</SelectItem>
                   <SelectItem value="Anthropic">Anthropic</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-4">
             <Label>Type:</Label>
@@ -121,7 +121,7 @@ console.log(data)
             </Select>
           </div>
 
-          <Button onClick={handleSubmit}>Create</Button>
+          <Button onClick={handleSubmit}>Update</Button>
         </div>
       </DialogContent>
     </Dialog>

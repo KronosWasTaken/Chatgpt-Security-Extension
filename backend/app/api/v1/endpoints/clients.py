@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from uuid import UUID
 from app.models import (
     Client, ClientAIServices, MSPAuditSummary, ClientMetrics, 
@@ -127,6 +127,9 @@ class ClientResponse(BaseModel):
     compliance_coverage: int
     created_at: datetime
     updated_at: datetime
+    apps_added_7d: int
+    interactions_pct_change_7d: float
+    agents_deployed_change_7d: int
 
 class ClientCreate(BaseModel):
     name: str
@@ -247,6 +250,61 @@ async def get_clients(
             # Update metrics in database
             await update_client_metrics_in_db(session, str(client.id), metrics)
             
+            # 7-day comparisons
+            seven_days_ago = date.today() - timedelta(days=7)
+
+            # Apps added in last 7 days (applications and agents as services)
+            apps_added_query = select(func.count()).where(
+                and_(
+                    ClientAIServices.client_id == client.id,
+                    ClientAIServices.created_at >= seven_days_ago
+                )
+            )
+            apps_added_result = await session.execute(apps_added_query)
+            apps_added_7d = int(apps_added_result.scalar() or 0)
+
+            # Interactions percentage change: last 7 days vs previous 7 days
+            current_start = seven_days_ago
+            prev_start = seven_days_ago - timedelta(days=7)
+
+            interactions_current_query = select(func.sum(ClientAIServiceUsage.daily_interactions)).where(
+                and_(
+                    ClientAIServiceUsage.client_id == client.id,
+                    ClientAIServiceUsage.created_at >= current_start,
+                    ClientAIServiceUsage.created_at < date.today() + timedelta(days=1)
+                )
+            )
+            interactions_prev_query = select(func.sum(ClientAIServiceUsage.daily_interactions)).where(
+                and_(
+                    ClientAIServiceUsage.client_id == client.id,
+                    ClientAIServiceUsage.created_at >= prev_start,
+                    ClientAIServiceUsage.created_at < current_start
+                )
+            )
+            interactions_current = (await session.execute(interactions_current_query)).scalar() or 0
+            interactions_prev = (await session.execute(interactions_prev_query)).scalar() or 0
+            if interactions_prev == 0:
+                interactions_pct_change_7d = 0.0
+            else:
+                interactions_pct_change_7d = round(((interactions_current - interactions_prev) / interactions_prev) * 100, 2)
+
+            # Agents deployed change: compare total deployed today vs 7 days ago
+            agents_today_query = select(func.sum(AgentEngagement.deployed)).where(
+                and_(
+                    AgentEngagement.client_id == client.id,
+                    AgentEngagement.date == date.today()
+                )
+            )
+            agents_prev_query = select(func.sum(AgentEngagement.deployed)).where(
+                and_(
+                    AgentEngagement.client_id == client.id,
+                    AgentEngagement.date == seven_days_ago
+                )
+            )
+            agents_today = (await session.execute(agents_today_query)).scalar() or 0
+            agents_prev = (await session.execute(agents_prev_query)).scalar() or 0
+            agents_deployed_change_7d = int(agents_today - agents_prev)
+
             clients.append(ClientResponse(
                 id=str(client.id),
                 name=client.name,
@@ -260,7 +318,10 @@ async def get_clients(
                 risk_score=int(metrics["risk_score"]),
                 compliance_coverage=int(metrics["compliance_coverage"]),
                 created_at=client.created_at,
-                updated_at=client.updated_at
+                updated_at=client.updated_at,
+                apps_added_7d=apps_added_7d,
+                interactions_pct_change_7d=interactions_pct_change_7d,
+                agents_deployed_change_7d=agents_deployed_change_7d
             ))
       
     return clients
@@ -302,7 +363,7 @@ async def get_client_inventory(
     for service in ai_services:
         # Calculate average daily interactions from usage table
         avg_daily_interactions = await calculate_avg_daily_interactions(
-            session, client_id, str(service.ai_service_id)
+            session, client_id, str(service.id)
         )
         
         items.append(InventoryItemResponse(
@@ -689,6 +750,7 @@ async def get_available_ai_services(
             "service_metadata": service.service_metadata
         }
         for service in ai_services
+        
     ]
 
 

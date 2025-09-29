@@ -38,15 +38,15 @@ const Dashboard = () => {
         setError(null);
         
         // Load clients and alerts in parallel
-        // const [clientsData, alertsData] = await Promise.all([
-        //   apiClient.getClients(),
-        //   apiClient.getAlerts({ limit: 10 })
-        // ]);
+        const [clientsData, alertsData] = await Promise.all([
+          apiClient.getClients(),
+          apiClient.getAlerts({ limit: 10 })
+        ]);
 
-        const clientsData=await apiClient.getClients();
+        // const clientsData=await apiClient.getClients();
        
         setClients(clientsData);
-        // setAlerts(alertsData);
+        setAlerts(alertsData);
       } catch (err) {
         console.error('Failed to load dashboard data:', err);
         setError('Failed to load dashboard data');
@@ -74,11 +74,15 @@ const Dashboard = () => {
     portfolioTotals.avgRiskScore = Math.round(portfolioTotals.avgRiskScore / clients.length);
   }
 
-  // Mock trending data for now (would come from backend in real implementation)
-  const portfolioTrending = {
-    appsMonitoredDelta: 3,
-    agentsDeployedDelta: 1,
-  };
+const portfolioTrending = clients.reduce(
+  (acc, c) => ({
+    appsMonitoredDelta: acc.appsMonitoredDelta + c.apps_added_7d,
+    interactionsMonitoredDelta: acc.interactionsMonitoredDelta + c.interactions_pct_change_7d,
+    agentsDeployedDelta: acc.agentsDeployedDelta + c.agents_deployed_change_7d,
+  }),
+  { appsMonitoredDelta: 0, interactionsMonitoredDelta: 0, agentsDeployedDelta: 0 }
+);
+
 
   const handleClientClick = (clientId: string) => {
     navigate(`/client?id=${clientId}`);
@@ -97,7 +101,7 @@ const Dashboard = () => {
       title: "Interactions Monitored", 
       value: portfolioTotals.interactionsMonitored,
       icon: TrendingUp,
-      trend: 12.5,
+      trend: Math.round(portfolioTrending.interactionsMonitoredDelta),
       description: "Daily AI interactions tracked",
       trendType: "percentage" as const
     },

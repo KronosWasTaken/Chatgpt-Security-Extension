@@ -25,7 +25,7 @@ class AuthMiddleWare(BaseHTTPMiddleware):
         
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer"):
-            raise HTTPException(status_code=401, detail="Missing token")
+            raise HTTPException(status=401, detail="Missing token")
         
         token = auth_header.split(" ")[1]
         
@@ -33,7 +33,7 @@ class AuthMiddleWare(BaseHTTPMiddleware):
        
        
         if not token_data:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(status=401, detail="Invalid token")
         
         
         

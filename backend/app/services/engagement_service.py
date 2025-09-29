@@ -73,7 +73,7 @@ class EngagementService:
             ClientAIServiceUsage.ai_service_id,
             ClientAIServices.name.label('application'),
             ClientAIServices.vendor,
-            ClientAIServices.icon,
+            ClientAIServices.type.label('service_type'),
             func.sum(ClientAIServiceUsage.daily_interactions).label('interactions_per_day'),
             func.count(func.distinct(ClientAIServiceUsage.user_id)).label('active_users')
         ).join(
@@ -84,7 +84,7 @@ class EngagementService:
             ClientAIServiceUsage.ai_service_id,
             ClientAIServices.name,
             ClientAIServices.vendor,
-            ClientAIServices.icon
+            ClientAIServices.type
         )
         
         result = await self.session.execute(query)
@@ -101,7 +101,8 @@ class EngagementService:
                 'ai_service_id': str(row.ai_service_id),
                 'application': row.application,
                 'vendor': row.vendor,
-                'icon': row.icon,
+                'type': row.service_type,
+                'icon': 'default',
                 'interactions_per_day': row.interactions_per_day or 0,
                 'active_users': row.active_users or 0,
                 'trend_pct_7d': trend,
@@ -184,7 +185,7 @@ class EngagementService:
     
     async def get_agent_engagement_from_table(self, client_id: str, target_date: date) -> List[Dict[str, Any]]:
         """Get agent engagement data from AgentEngagement table (kept for actual agent deployments)"""
-        
+        # Fetch agent rows for the specific day
         query = select(AgentEngagement).where(
             and_(
                 AgentEngagement.client_id == client_id,
@@ -193,22 +194,66 @@ class EngagementService:
         )
         result = await self.session.execute(query)
         agents = result.scalars().all()
-        
-        return [
-            {
+
+        # Build a mapping of agent (name,vendor) -> ai_service_id for this client
+        services_query = select(ClientAIServices).where(
+            and_(
+                ClientAIServices.client_id == client_id,
+                ClientAIServices.type == "Agent"
+            )
+        )
+        services_result = await self.session.execute(services_query)
+        agent_services = services_result.scalars().all()
+
+        name_vendor_to_service_id: Dict[str, Any] = {}
+        for svc in agent_services:
+            key = f"{svc.name}||{svc.vendor}"
+            name_vendor_to_service_id[key] = svc.id
+
+        # Compute 30-day average prompts per agent service from usage table
+        thirty_days_ago = target_date - timedelta(days=30)
+        if agent_services:
+            service_ids = [svc.id for svc in agent_services]
+            usage_query = select(
+                ClientAIServiceUsage.ai_service_id,
+                func.avg(ClientAIServiceUsage.daily_interactions).label('avg_prompts')
+            ).where(
+                and_(
+                    ClientAIServiceUsage.client_id == client_id,
+                    ClientAIServiceUsage.ai_service_id.in_(service_ids),
+                    ClientAIServiceUsage.created_at >= thirty_days_ago,
+                    ClientAIServiceUsage.created_at <= target_date
+                )
+            ).group_by(ClientAIServiceUsage.ai_service_id)
+
+            usage_result = await self.session.execute(usage_query)
+            service_id_to_avg: Dict[Any, int] = {}
+            for row in usage_result:
+                service_id_to_avg[row.ai_service_id] = int(row.avg_prompts or 0)
+        else:
+            service_id_to_avg = {}
+
+        # Return agents, overriding avg_prompts_per_day with dynamic averages when available
+        response: List[Dict[str, Any]] = []
+        for agent in agents:
+            key = f"{agent.agent}||{agent.vendor}"
+            svc_id = name_vendor_to_service_id.get(key)
+            dynamic_avg = service_id_to_avg.get(svc_id) if svc_id is not None else None
+
+            response.append({
                 'agent': agent.agent,
                 'vendor': agent.vendor,
                 'icon': agent.icon or "bot",
                 'deployed': agent.deployed,
-                'avg_prompts_per_day': agent.avg_prompts_per_day,
+                'avg_prompts_per_day': dynamic_avg if dynamic_avg is not None else agent.avg_prompts_per_day,
                 'flagged_actions': agent.flagged_actions,
                 'trend_pct_7d': float(agent.trend_pct_7d),
                 'status': agent.status,
                 'last_activity_iso': agent.last_activity_iso or "",
                 'associated_apps': agent.associated_apps or []
-            }
-            for agent in agents
-        ]
+            })
+
+        return response
     
     async def get_productivity_correlations_from_table(self, client_id: str, target_date: date) -> Dict[str, Any]:
         """Get productivity correlations from ProductivityCorrelation table (kept for external metrics)"""

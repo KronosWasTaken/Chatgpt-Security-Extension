@@ -210,7 +210,7 @@ export function AlertsFeed({ clientId, familyFilter, severityFilter, alerts, cli
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
-                            {alert.frameworks ? Object.keys(alert.frameworks).map(framework => (
+                            {alert.frameworks ? alert.frameworks.map(framework => (
                               <Badge
                                 key={framework}
                                 variant="outline"

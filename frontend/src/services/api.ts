@@ -1,4 +1,5 @@
 import { toast } from "@/hooks/use-toast";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
@@ -127,35 +128,35 @@ class ApiClient {
   ): Promise<T> {
     const token = TokenManager.getToken();
     
-    const config: RequestInit = {
+    const axiosConfig: AxiosRequestConfig = {
+      url: `${this.baseURL}${endpoint}`,
+      method: (options.method as AxiosRequestConfig["method"]) || "GET",
       headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers as Record<string, string> | undefined),
       },
-      ...options,
+      data: options.body,
     };
 
     try {
-      const response = await fetch(`${this.baseURL}${endpoint}`, config);
-
-      console.log(response,"authdata");
-      
-      if (!response.ok) {
-        if (response.status === 401) {
+      const response = await axios.request<T>(axiosConfig);
+      return response.data;
+    } catch (err) {
+      const error = err as AxiosError<any>;
+      if (error.response) {
+        if (error.response.status === 401) {
           TokenManager.removeToken();
           window.location.href = '/login';
           throw new Error('Unauthorized');
         }
-        
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `HTTP ${response.status}`);
+        const detail = (error.response.data as any)?.detail;
+        throw new Error(detail || `HTTP ${error.response.status}`);
       }
-
-      return await response.json();
-    } catch (error) {
-      console.error('API request failed:', error);
-      throw error;
+      if (error.request) {
+        throw new Error('Network error: No response received');
+      }
+      throw new Error(error.message || 'API request failed');
     }
   }
 
@@ -231,6 +232,8 @@ class ApiClient {
     return this.request<void>(`/ai-inventory/${appId}`, {
       method: 'DELETE',
     });
+
+    
   }
 
   // Alert endpoints
@@ -272,9 +275,19 @@ class ApiClient {
       body: JSON.stringify({ assigned_to: assignedTo }),
     });
 
+
+
+
+
  
   }
 
+  
+ async GetAIEngagement():Promise<void>{
+    return this.request<void>(`/ai-engagement/msp/clients`,{
+      method:'GET',
+    })
+  } 
  
   
 
