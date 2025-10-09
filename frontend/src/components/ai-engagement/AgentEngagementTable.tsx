@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, TrendingDown, Bot, ExternalLink, AlertCircle } from "lucide-react";
-import { aiEngagementData, AgentEngagement } from "@/data/aiEngagement";
+import { TrendingUp, TrendingDown, Bot, ExternalLink, AlertCircle, Loader2 } from "lucide-react";
+import { aiEngagementData, AgentEngagement, isDataInitialized } from "@/data/aiEngagement";
 import { AgentDrawer } from "./AgentDrawer";
+import { useAIEngagementData } from "@/hooks/useAIEngagementData";
 
-export const AgentEngagementTable = ({ id }: { id?: string }) => {
+export const AgentEngagementTable = ({ id, days }: { id?: string; days?: number }) => {
   const [selectedAgent, setSelectedAgent] = useState<AgentEngagement | null>(null);
+   const { data: engagementData, isLoading } = useAIEngagementData(days);
   
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -28,6 +30,26 @@ export const AgentEngagementTable = ({ id }: { id?: string }) => {
     if (diffDays === 1) return "Yesterday";
     return `${diffDays} days ago`;
   };
+
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Agent Engagement</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-12 bg-muted animate-pulse rounded" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>

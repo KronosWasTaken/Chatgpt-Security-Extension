@@ -1,19 +1,22 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { aiEngagementData } from "@/data/aiEngagement";
-import { TrendingUp } from "lucide-react";
+import { aiEngagementData} from "@/data/aiEngagement";
+import { TrendingUp, Loader2 } from "lucide-react";
+import { useAIEngagementData } from "@/hooks/useAIEngagementData";
 
-export const ProductivityInsights = ({ id }: { id?: string }) => {
+export const ProductivityInsights = ({ id, days }: { id?: string; days?: number }) => {
+   const { data: engagementData, isLoading } = useAIEngagementData(days);
+  
   // Transform correlation data for the chart
-  const chartData = aiEngagementData.productivity_correlations.Sales.ai_interactions_7d.map((_, index) => ({
+  const chartData = engagementData.productivity_correlations.Sales?.ai_interactions_7d?.map((_, index) => ({
     day: index + 1,
-    salesAI: aiEngagementData.productivity_correlations.Sales.ai_interactions_7d[index],
-    salesOutput: aiEngagementData.productivity_correlations.Sales.output_metric_7d[index],
-    supportAI: aiEngagementData.productivity_correlations["Customer Support"].ai_interactions_7d[index],
-    supportOutput: aiEngagementData.productivity_correlations["Customer Support"].output_metric_7d[index],
-    marketingAI: aiEngagementData.productivity_correlations.Marketing.ai_interactions_7d[index],
-    marketingOutput: aiEngagementData.productivity_correlations.Marketing.output_metric_7d[index]
-  }));
+    salesAI: engagementData.productivity_correlations.Sales?.ai_interactions_7d?.[index] || 0,
+    salesOutput: engagementData.productivity_correlations.Sales?.output_metric_7d?.[index] || 0,
+    supportAI: engagementData.productivity_correlations["Customer Support"]?.ai_interactions_7d?.[index] || 0,
+    supportOutput: engagementData.productivity_correlations["Customer Support"]?.output_metric_7d?.[index] || 0,
+    marketingAI: engagementData.productivity_correlations.Marketing?.ai_interactions_7d?.[index] || 0,
+    marketingOutput: engagementData.productivity_correlations.Marketing?.output_metric_7d?.[index] || 0
+  })) || [];
 
   const insights = [
     {
@@ -57,6 +60,31 @@ export const ProductivityInsights = ({ id }: { id?: string }) => {
     }
     return null;
   };
+
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Productivity Insights (Correlations)</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="h-80 bg-muted animate-pulse rounded" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="border-l-4">
+                <CardContent className="pt-4">
+                  <div className="h-20 bg-muted animate-pulse rounded" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card id={id} className="scroll-mt-20">

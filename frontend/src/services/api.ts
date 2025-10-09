@@ -124,12 +124,27 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit & { params?: Record<string, any> } = {}
   ): Promise<T> {
     const token = TokenManager.getToken();
     
+    // Handle query parameters
+    let url = `${this.baseURL}${endpoint}`;
+    if (options.params) {
+      const searchParams = new URLSearchParams();
+      Object.entries(options.params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+      const queryString = searchParams.toString();
+      if (queryString) {
+        url += `?${queryString}`;
+      }
+    }
+    
     const axiosConfig: AxiosRequestConfig = {
-      url: `${this.baseURL}${endpoint}`,
+      url,
       method: (options.method as AxiosRequestConfig["method"]) || "GET",
       headers: {
         "Content-Type": "application/json",
@@ -243,19 +258,10 @@ class ApiClient {
     limit?: number;
     offset?: number;
   }): Promise<Alert[]> {
-    const searchParams = new URLSearchParams();
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined) {
-          searchParams.append(key, value.toString());
-        }
-      });
-    }
-    
-    const queryString = searchParams.toString();
-    const endpoint = queryString ? `/alerts/?${queryString}` : '/alerts/';
-    
-    return this.request<Alert[]>(endpoint);
+    return this.request<Alert[]>('/alerts/', {
+      method: 'GET',
+      params
+    });
   }
 
   async getAlert(alertId: string): Promise<Alert> {
@@ -283,10 +289,11 @@ class ApiClient {
   }
 
   
- async GetAIEngagement():Promise<void>{
-    return this.request<void>(`/ai-engagement/msp/clients`,{
-      method:'GET',
-    })
+ async GetAIEngagement(days?: number): Promise<any> {
+    return this.request<any>(`/ai-engagement/msp/clients`, {
+      method: 'GET',
+      params: days ? { days } : undefined
+    });
   } 
  
   

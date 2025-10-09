@@ -3,11 +3,13 @@ from fastapi import APIRouter, Depends, Request, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_async_session
 from typing import List, Optional, Dict, Any
-from datetime import date
+from datetime import date,timedelta
 from uuid import UUID
 from app.models import Client, AgentEngagement, ProductivityCorrelation, UserEngagement,ClientAIServiceUsage
 from app.services.engagement_service import EngagementService
 from sqlalchemy import select, and_, desc, func
+import asyncio
+from decimal import  Decimal
 
 router = APIRouter()
 
@@ -92,7 +94,7 @@ async def get_client_engagement(
     
     # Use new engagement service
     engagement_service = EngagementService(session)
-    target_date = target_date or date.today()
+    target_date = target_date or date.today()-timedelta(days=30)
     
     # Get engagement data calculated at runtime
     engagement_data = await engagement_service.get_engagement_summary(
@@ -191,7 +193,8 @@ async def get_department_engagement(
     
     # Use new engagement service
     engagement_service = EngagementService(session)
-    target_date = target_date or date.today()
+    target_date = target_date or date.today()-timedelta(days=30)
+
     
     # Get department engagement data calculated at runtime
     departments_data = await engagement_service.get_department_engagement(
@@ -240,7 +243,8 @@ async def get_application_engagement(
     
     # Use new engagement service
     engagement_service = EngagementService(session)
-    target_date = target_date or date.today()
+    target_date = target_date or date.today()-timedelta(days=30)
+
     
     # Get application engagement data calculated at runtime
     applications_data = await engagement_service.get_application_engagement(
@@ -477,90 +481,126 @@ async def get_msp_departments_engagement(
 async def get_msp_aggregate_engagement(
     request: Request,
     department: Optional[str] = Query(None, description="Filter by department"),
-    target_date: Optional[date] = Query(None, description="Target date (defaults to today)"),
+    days:Optional[int]=Query(30,description="days to filter by"),
     session: AsyncSession = Depends(get_async_session)
 ):
-    """Return a single MSP-wide aggregate of departments, applications, and agents across all clients."""
     user = request.state.user
 
     if user['role'] not in ["msp_admin", "msp_user"]:
         raise HTTPException(status_code=403, detail="Access denied")
 
-    # Gather all client IDs for MSP
     clients_query = select(Client.id).where(Client.msp_id == UUID(user['msp_id']))
     clients_result = await session.execute(clients_query)
     client_ids = [row.id for row in clients_result]
 
     if not client_ids:
         return AIEngagementDataResponse(departments=[], applications=[], agents=[], productivity_correlations={})
+    
+    
 
     engagement_service = EngagementService(session)
-    target_date = target_date or date.today()
+    target_date =  date.today()-timedelta(days=days)
 
-    # Aggregate departments and applications
-    # Reuse usage-based calculations from service across each client and merge
+    
+  
+
     dept_map = {}
     app_map = {}
     agents_all: List[AgentEngagementResponse] = []
     prod_corr: dict = {}
 
-    for cid in client_ids:
-        summary = await engagement_service.get_engagement_summary(str(cid), target_date, department)
+    # Parallelize per-client summary retrieval
+    summaries = await asyncio.gather(*[
+        engagement_service.get_engagement_summary(str(cid), target_date, department)
+        for cid in client_ids
+    ])
 
+    for summary in summaries:
         for d in summary['departments']:
-            key = d['department'] or 'Unknown'
-            agg = dept_map.get(key, {'department': key, 'interactions': 0, 'active_users': 0, 'pct_change_vs_prev_7d': 0.0, 'contributors': 0})
-            agg['interactions'] += d['interactions']
-            agg['active_users'] += d['active_users']
-            # Average pct across contributing clients
-            agg['pct_change_vs_prev_7d'] = ((agg['pct_change_vs_prev_7d'] * agg['contributors']) + d['pct_change_vs_prev_7d']) / (agg['contributors'] + 1)
+            key = d.get('department') or 'Unknown'
+            agg = dept_map.get(key, {
+                'department': key,
+                'interactions': 0,
+                'active_users': 0,
+                'pct_change_vs_prev_7d': 0.0,
+                'contributors': 0
+            })
+            agg['interactions'] += d.get('interactions', 0)
+            agg['active_users'] += d.get('active_users', 0)
+            agg['pct_change_vs_prev_7d'] = (
+                Decimal(agg['pct_change_vs_prev_7d'] * agg['contributors']) + Decimal(d.get('pct_change_vs_prev_7d', 0.0))
+            ) / (agg['contributors'] + 1)
             agg['contributors'] += 1
             dept_map[key] = agg
 
-        # Only aggregate Application-type items into applications bucket
         for a in summary['applications']:
+            # Filter applications based on type field
             if a.get('type') != 'Application':
                 continue
-            key = (a['application'], a['vendor'])
+                
+            key = (a.get('application'), a.get('vendor'))
             agg = app_map.get(key, {
-                'application': a['application'], 'vendor': a['vendor'], 'icon': a['icon'] or 'default',
-                'active_users': 0, 'interactions_per_day': 0, 'trend_pct_7d': 0.0, 'contributors': 0,
-                'utilization_counts': {'High': 0, 'Medium': 0, 'Low': 0}, 'recommendation': a['recommendation']
+                'application': a.get('application'),
+                'vendor': a.get('vendor'),
+                'icon': a.get('icon') or 'default',
+                'active_users': 0,
+                'interactions_per_day': 0,
+                'trend_pct_7d': 0.0,
+                'contributors': 0,
+                'utilization_counts': {'High': 0, 'Medium': 0, 'Low': 0},
+                'recommendation': a.get('recommendation') or ''
             })
-            agg['active_users'] += a['active_users']
-            agg['interactions_per_day'] += a['interactions_per_day']
-            agg['trend_pct_7d'] = ((agg['trend_pct_7d'] * agg['contributors']) + a['trend_pct_7d']) / (agg['contributors'] + 1)
-            # Track most common utilization tier
-            util = a['utilization']
+            agg['active_users'] += a.get('active_users', 0)
+            agg['interactions_per_day'] += a.get('interactions_per_day', 0)
+            agg['trend_pct_7d'] = (
+                Decimal(agg['trend_pct_7d'] * agg['contributors']) + Decimal(a.get('trend_pct_7d', 0.0))
+            ) / (agg['contributors'] + 1)
+            util = a.get('utilization') or 'Low'
             if util in agg['utilization_counts']:
                 agg['utilization_counts'][util] += 1
             agg['contributors'] += 1
             app_map[key] = agg
 
-        # Agents: concatenate from table-based method for fidelity
-        for ag in summary['agents']:
+        # Process applications that are actually agents (type='Agent')
+        for a in summary['applications']:
+            if a.get('type') != 'Agent':
+                continue
+                
+            # Convert agent applications to AgentEngagementResponse format
             agents_all.append(AgentEngagementResponse(
-                agent=ag['agent'],
-                vendor=ag['vendor'],
-                icon=ag['icon'],
-                deployed=ag['deployed'],
-                avg_prompts_per_day=ag['avg_prompts_per_day'],
-                flagged_actions=ag['flagged_actions'],
-                trend_pct_7d=ag['trend_pct_7d'],
-                status=ag['status'],
-                last_activity_iso=ag['last_activity_iso'],
-                associated_apps=ag['associated_apps']
+                agent=a.get('application'),  # Use application name as agent name
+                vendor=a.get('vendor'),
+                icon=a.get('icon') or 'bot',
+                deployed=1,  # Assume deployed if in usage
+                avg_prompts_per_day=a.get('interactions_per_day', 0),
+                flagged_actions=0,  # Default value, could be calculated from alerts
+                trend_pct_7d=a.get('trend_pct_7d', 0.0),
+                status='Stable',  # Default status
+                last_activity_iso='',  # Could be calculated from latest usage
+                associated_apps=[]  # Could be populated from relationships
             ))
 
-        # Merge productivity correlations per department by concatenating arrays if present
+        # Process agents from the dedicated agents table
+        for ag in summary['agents']:
+            agents_all.append(AgentEngagementResponse(
+                agent=ag.get('agent'),
+                vendor=ag.get('vendor'),
+                icon=ag.get('icon') or 'bot',
+                deployed=ag.get('deployed', 0),
+                avg_prompts_per_day=ag.get('avg_prompts_per_day', 0),
+                flagged_actions=ag.get('flagged_actions', 0),
+                trend_pct_7d=ag.get('trend_pct_7d', 0.0),
+                status=ag.get('status') or 'Stable',
+                last_activity_iso=ag.get('last_activity_iso') or '',
+                associated_apps=ag.get('associated_apps') or []
+            ))
+
         for dept, corr in summary['productivity_correlations'].items():
             if dept not in prod_corr:
                 prod_corr[dept] = corr
             else:
-                # Simple merge strategy: keep existing (can be enhanced later)
                 continue
 
-    # Build final lists
     departments = [
         DepartmentEngagementResponse(
             department=v['department'],
@@ -573,7 +613,6 @@ async def get_msp_aggregate_engagement(
 
     applications = []
     for v in app_map.values():
-        # Pick the dominant utilization tier
         utilization = max(v['utilization_counts'], key=v['utilization_counts'].get)
         applications.append(ApplicationEngagementResponse(
             application=v['application'],
@@ -586,8 +625,10 @@ async def get_msp_aggregate_engagement(
             recommendation=v['recommendation']
         ))
 
-    # Sort apps by interactions
     applications.sort(key=lambda a: a.interactions_per_day, reverse=True)
+
+    # Sort aggregated agents by activity descending
+    agents_all.sort(key=lambda a: a.avg_prompts_per_day, reverse=True)
 
     return AIEngagementDataResponse(
         departments=departments,

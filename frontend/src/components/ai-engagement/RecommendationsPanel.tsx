@@ -1,10 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, Scissors, Trophy, AlertTriangle } from "lucide-react";
-import { getRecommendations } from "@/data/aiEngagement";
-
-export const RecommendationsPanel = ({ id }: { id?: string }) => {
-  const recommendations = getRecommendations();
+import { TrendingUp, Scissors, Trophy, AlertTriangle, Loader2 } from "lucide-react";
+import { getRecommendations} from "@/data/aiEngagement";
+import { useAIEngagementData } from "@/hooks/useAIEngagementData";
+export const RecommendationsPanel = ({ id, days }: { id?: string; days?: number }) => {
+ const { data: engagementData, isLoading } = useAIEngagementData(days);
+  const recommendations = getRecommendations(engagementData);
 
   const sections = [
     {
@@ -36,6 +37,33 @@ export const RecommendationsPanel = ({ id }: { id?: string }) => {
       iconColor: "text-red-600"
     }
   ];
+
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Recommendations Panel</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="space-y-3">
+                <div className="h-6 bg-muted animate-pulse rounded w-24" />
+                <div className="space-y-3">
+                  {[1, 2].map((j) => (
+                    <div key={j} className="h-16 bg-muted animate-pulse rounded" />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card id={id} className="scroll-mt-20">

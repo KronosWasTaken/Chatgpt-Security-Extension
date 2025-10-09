@@ -1,9 +1,103 @@
+import { apiClient } from "@/services/api";
+
+// Fallback data structure for when API is not available
+const fallbackData: AIEngagementData = {
+  departments: [],
+  applications: [],
+  agents: [],
+  productivity_correlations: {}
+};
+
+// Global state for AI engagement data
+let cachedData: AIEngagementData | null = null;
+let isInitialized = false;
+
+// Event listeners for data updates
+type DataUpdateListener = () => void;
+const dataUpdateListeners: DataUpdateListener[] = [];
+
+// Function to notify all listeners that data has been updated
+const notifyDataUpdate = () => {
+  dataUpdateListeners.forEach(listener => {
+    try {
+      listener();
+    } catch (error) {
+      console.error('Error in data update listener:', error);
+    }
+  });
+};
+
+// Function to fetch AI engagement data from API
+export const fetchAIEngagementData = async (days?: number): Promise<AIEngagementData> => {
+  try {
+    const data = await apiClient.GetAIEngagement(days);
+    cachedData = data as AIEngagementData;
+    isInitialized = true;
+    notifyDataUpdate(); // Notify all components that data is ready
+    return cachedData;
+  } catch (error) {
+    console.error('Failed to fetch AI engagement data:', error);
+    // Use fallback data if API fails
+    cachedData = fallbackData;
+    isInitialized = true;
+    notifyDataUpdate(); // Notify even with fallback data
+    return cachedData;
+  }
+};
+
+// Function to get cached data (for synchronous access)
+export const getCachedAIEngagementData = (): AIEngagementData | null => {
+  return cachedData;
+};
+
+// Function to initialize data (call this in your app startup)
+export const initializeAIEngagementData = async (days?: number): Promise<void> => {
+  try {
+    await fetchAIEngagementData(days);
+  } catch (error) {
+    console.error('Failed to initialize AI engagement data:', error);
+  }
+};
+
+// Check if data is initialized
+export const isDataInitialized = (): boolean => {
+  return isInitialized;
+};
+
+// Function to subscribe to data updates
+export const subscribeToDataUpdates = (listener: DataUpdateListener): (() => void) => {
+  dataUpdateListeners.push(listener);
+  
+  // Return unsubscribe function
+  return () => {
+    const index = dataUpdateListeners.indexOf(listener);
+    if (index > -1) {
+      dataUpdateListeners.splice(index, 1);
+    }
+  };
+};
+
+// Auto-initialize data on first access
+let autoInitPromise: Promise<void> | null = null;
+
+const autoInitialize = async (): Promise<void> => {
+  if (!autoInitPromise) {
+    autoInitPromise = initializeAIEngagementData();
+  }
+  return autoInitPromise;
+};
+
 export interface DepartmentEngagement {
   department: string;
   interactions: number;
   active_users: number;
   pct_change_vs_prev_7d: number;
 }
+
+
+
+
+
 
 export interface ApplicationEngagement {
   application: string;
@@ -42,188 +136,117 @@ export interface AIEngagementData {
   productivity_correlations: Record<string, ProductivityCorrelation>;
 }
 
-// Sample data as specified
-export const aiEngagementData: AIEngagementData = {
-  departments: [
-    {"department":"Sales","interactions":1820,"active_users":64,"pct_change_vs_prev_7d":12},
-    {"department":"Marketing","interactions":1330,"active_users":41,"pct_change_vs_prev_7d":8},
-    {"department":"Customer Support","interactions":980,"active_users":28,"pct_change_vs_prev_7d":15},
-    {"department":"Engineering","interactions":720,"active_users":22,"pct_change_vs_prev_7d":-5},
-    {"department":"Finance","interactions":310,"active_users":11,"pct_change_vs_prev_7d":3},
-    {"department":"HR","interactions":140,"active_users":6,"pct_change_vs_prev_7d":-2}
-  ],
-  applications: [
-    {
-      "application":"ChatGPT Enterprise",
-      "vendor":"OpenAI",
-      "icon":"chatgpt",
-      "active_users":72,
-      "interactions_per_day":210,
-      "trend_pct_7d":14,
-      "utilization":"High",
-      "recommendation":"Maintain momentum in Sales & Support"
-    },
-    {
-      "application":"Claude for Work",
-      "vendor":"Anthropic",
-      "icon":"claude",
-      "active_users":38,
-      "interactions_per_day":96,
-      "trend_pct_7d":9,
-      "utilization":"Medium",
-      "recommendation":"Promote to Marketing playbooks"
-    },
-    {
-      "application":"Microsoft Copilot (M365)",
-      "vendor":"Microsoft",
-      "icon":"copilot",
-      "active_users":51,
-      "interactions_per_day":115,
-      "trend_pct_7d":5,
-      "utilization":"High",
-      "recommendation":"Roll training to Finance"
-    },
-    {
-      "application":"Jasper",
-      "vendor":"Jasper",
-      "icon":"jasper",
-      "active_users":12,
-      "interactions_per_day":24,
-      "trend_pct_7d":-7,
-      "utilization":"Low",
-      "recommendation":"Candidate to cut or consolidate"
-    },
-    {
-      "application":"Notion Q&A",
-      "vendor":"Notion",
-      "icon":"notion",
-      "active_users":17,
-      "interactions_per_day":31,
-      "trend_pct_7d":3,
-      "utilization":"Medium",
-      "recommendation":"Coach HR on search prompts"
-    },
-    {
-      "application":"Perplexity Teams",
-      "vendor":"Perplexity",
-      "icon":"perplexity",
-      "active_users":9,
-      "interactions_per_day":18,
-      "trend_pct_7d":-4,
-      "utilization":"Low",
-      "recommendation":"Underutilized—consider removing seats"
-    }
-  ],
-  agents: [
-    {
-      "agent":"Sales Email Coach",
-      "vendor":"Internal",
-      "icon":"bot",
-      "deployed":8,
-      "avg_prompts_per_day":62,
-      "flagged_actions":1,
-      "trend_pct_7d":18,
-      "status":"Rising",
-      "last_activity_iso":"2025-09-10T13:45:00Z",
-      "associated_apps":["ChatGPT Enterprise","Copilot (M365)"]
-    },
-    {
-      "agent":"Support Reply Summarizer",
-      "vendor":"Internal",
-      "icon":"bot",
-      "deployed":5,
-      "avg_prompts_per_day":41,
-      "flagged_actions":0,
-      "trend_pct_7d":11,
-      "status":"Rising",
-      "last_activity_iso":"2025-09-10T14:02:00Z",
-      "associated_apps":["Claude for Work","ChatGPT Enterprise"]
-    },
-    {
-      "agent":"Marketing Brief Generator",
-      "vendor":"Internal",
-      "icon":"bot",
-      "deployed":4,
-      "avg_prompts_per_day":12,
-      "flagged_actions":2,
-      "trend_pct_7d":-6,
-      "status":"Stable",
-      "last_activity_iso":"2025-09-09T22:18:00Z",
-      "associated_apps":["Claude for Work","Jasper"]
-    },
-    {
-      "agent":"Finance Reconciliation Helper",
-      "vendor":"Internal",
-      "icon":"bot",
-      "deployed":3,
-      "avg_prompts_per_day":7,
-      "flagged_actions":0,
-      "trend_pct_7d":-3,
-      "status":"Dormant",
-      "last_activity_iso":"2025-09-04T16:10:00Z",
-      "associated_apps":["Copilot (M365)"]
-    }
-  ],
-  productivity_correlations: {
-    "Sales": {
-      "ai_interactions_7d":[210,235,260,250,270,295,300],
-      "output_metric_7d":[420,445,470,465,490,510,525],
-      "note":"Higher AI usage aligns with +12% emails drafted"
-    },
-    "Customer Support": {
-      "ai_interactions_7d":[110,125,140,150,160,180,215],
-      "output_metric_7d":[88,92,95,97,101,106,114],
-      "note":"Increasing AI use correlates with faster resolutions"
-    },
-    "Marketing": {
-      "ai_interactions_7d":[160,170,175,180,190,200,225],
-      "output_metric_7d":[35,38,37,39,41,42,45],
-      "note":"Steady lift with creative output"
-    }
+// Backward compatibility: Export a getter for aiEngagementData
+export const getAIEngagementData = (): AIEngagementData => {
+  if (!isInitialized) {
+    console.warn('AI Engagement data not initialized. Using fallback data. Auto-initializing in background...');
+    // Trigger auto-initialization in background
+    autoInitialize().catch(console.error);
+    return fallbackData;
   }
+  return cachedData || fallbackData;
 };
 
-// Utility functions
-export const getTotalInteractions = () => {
-  return aiEngagementData.departments.reduce((sum, dept) => sum + dept.interactions, 0);
+export const aiEngagementData = new Proxy({} as AIEngagementData, {
+  get(target, prop) {
+    const data = getAIEngagementData();
+    return data[prop as keyof AIEngagementData];
+  }
+});
+
+export const getTotalInteractions = (data?: AIEngagementData) => {
+  const dataToUse = data || getAIEngagementData();
+  return dataToUse.departments.reduce((sum, dept) => sum + dept.interactions, 0);
 };
 
-export const getTotalActiveUsers = () => {
-  return aiEngagementData.departments.reduce((sum, dept) => sum + dept.active_users, 0);
+export const getTotalActiveUsers = (data?: AIEngagementData) => {
+  const dataToUse = data || getAIEngagementData();
+  return dataToUse.departments.reduce((sum, dept) => sum + dept.active_users, 0);
 };
 
-export const getMostActiveDepartment = () => {
-  return aiEngagementData.departments.reduce((max, dept) => 
+export const getMostActiveDepartment = (data?: AIEngagementData) => {
+  const dataToUse = data || getAIEngagementData();
+  if (dataToUse.departments.length === 0) {
+    return { department: "No Data", interactions: 0, active_users: 0, pct_change_vs_prev_7d: 0 };
+  }
+  return dataToUse.departments.reduce((max, dept) => 
     dept.interactions > max.interactions ? dept : max
   );
 };
 
-export const getTopApplication = () => {
-  return aiEngagementData.applications.reduce((max, app) => 
+export const getTopApplication = (data?: AIEngagementData) => {
+  const dataToUse = data || getAIEngagementData();
+  if (dataToUse.applications.length === 0) {
+    return { 
+      application: "No Data", 
+      vendor: "", 
+      icon: "", 
+      active_users: 0, 
+      interactions_per_day: 0, 
+      trend_pct_7d: 0, 
+      utilization: "Low" as const, 
+      recommendation: "No data available" 
+    };
+  }
+  return dataToUse.applications.reduce((max, app) => 
     app.interactions_per_day > max.interactions_per_day ? app : max
   );
 };
 
-export const getUnderutilizedAppsCount = () => {
-  return aiEngagementData.applications.filter(app => app.utilization === "Low").length;
+export const getUnderutilizedAppsCount = (data?: AIEngagementData) => {
+  const dataToUse = data || getAIEngagementData();
+  return dataToUse.applications.filter(app => app.utilization === "Low").length;
 };
 
-export const getRecommendations = () => {
+export const getRecommendations = (data?: AIEngagementData) => {
+  const dataToUse = data || getAIEngagementData();
+  
+  // Return default recommendations if no data
+  if (dataToUse.departments.length === 0 || dataToUse.applications.length === 0) {
+    return {
+      pushAdoption: [
+        "No data available for adoption recommendations",
+        "Initialize AI engagement data to see recommendations"
+      ],
+      cutWaste: [
+        "No data available for waste reduction recommendations",
+        "Initialize AI engagement data to see recommendations"
+      ],
+      celebrateWins: [
+        "No data available for success celebrations",
+        "Initialize AI engagement data to see recommendations"
+      ],
+      riskWatch: [
+        "No data available for risk monitoring",
+        "Initialize AI engagement data to see recommendations"
+      ]
+    };
+  }
+  
+  const financeDept = dataToUse.departments.find(d => d.department === "Finance");
+  const hrDept = dataToUse.departments.find(d => d.department === "HR");
+  const salesDept = dataToUse.departments.find(d => d.department === "Sales");
+  const supportDept = dataToUse.departments.find(d => d.department === "Customer Support");
+  
+  const jasperApp = dataToUse.applications.find(app => app.application === "Jasper");
+  const perplexityApp = dataToUse.applications.find(app => app.application === "Perplexity Teams");
+  const marketingAgent = dataToUse.agents.find(agent => agent.agent === "Marketing Brief Generator");
+  
   return {
     pushAdoption: [
-      "Finance accounts for just 3% of interactions — pilot Copilot (M365) workflows to increase adoption.",
-      "HR usage is low and trending flat — run a Notion Q&A training to boost document discovery."
+      financeDept ? `Finance accounts for just ${Math.round((financeDept.interactions / getTotalInteractions(dataToUse)) * 100)}% of interactions — pilot Copilot (M365) workflows to increase adoption.` : "Finance usage is low — pilot Copilot (M365) workflows to increase adoption.",
+      hrDept ? `HR usage is low and trending ${hrDept.pct_change_vs_prev_7d > 0 ? 'up' : 'flat'} — run a Notion Q&A training to boost document discovery.` : "HR usage is low — run a Notion Q&A training to boost document discovery."
     ],
     cutWaste: [
-      "Jasper has 12 active users / 24 interactions/day with a negative trend — consolidate or cut licenses.",
-      "Perplexity Teams is below utilization threshold — consider removing seats or targeting a specific team use case."
+      jasperApp ? `${jasperApp.application} has ${jasperApp.active_users} active users / ${jasperApp.interactions_per_day} interactions/day with a ${jasperApp.trend_pct_7d > 0 ? 'positive' : 'negative'} trend — consolidate or cut licenses.` : "Some applications show low utilization — consider consolidating licenses.",
+      perplexityApp ? `${perplexityApp.application} is below utilization threshold — consider removing seats or targeting a specific team use case.` : "Some applications are underutilized — consider removing seats."
     ],
     celebrateWins: [
-      "Sales is the most active department (+12% vs. last 7d); Sales Email Coach agent adoption is rising.",
-      "Customer Support AI usage up 15% — correlates with higher tickets resolved."
+      salesDept ? `Sales is the most active department (+${salesDept.pct_change_vs_prev_7d}% vs. last 7d); Sales Email Coach agent adoption is rising.` : "Sales department shows strong AI adoption.",
+      supportDept ? `Customer Support AI usage up ${supportDept.pct_change_vs_prev_7d}% — correlates with higher tickets resolved.` : "Customer Support shows improved AI usage."
     ],
     riskWatch: [
-      "Marketing Brief Generator logged 2 flagged actions this week — review prompts and guardrails."
+      marketingAgent ? `${marketingAgent.agent} logged ${marketingAgent.flagged_actions} flagged actions this week — review prompts and guardrails.` : "Review flagged actions across all agents."
     ]
   };
 };

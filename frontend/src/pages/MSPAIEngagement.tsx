@@ -8,15 +8,17 @@ import { ProductivityInsights } from "@/components/ai-engagement/ProductivityIns
 import { RecommendationsPanel } from "@/components/ai-engagement/RecommendationsPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "lucide-react";
-import { apiClient } from "@/services/api";
+import { useAIEngagementData } from "@/hooks/useAIEngagementData";
 
 export default function MSPAIEngagement() {
-
-
-
-
   const [dateRange, setDateRange] = useState("30");
   const [activeSection, setActiveSection] = useState<string>("");
+
+  // Convert string to number for the API call
+  const days = parseInt(dateRange);
+
+  // Get loading state from one of the components to show overall loading
+  const { isLoading } = useAIEngagementData(days);
 
   const scrollToSection = (section: string) => {
     setActiveSection(section);
@@ -31,13 +33,6 @@ export default function MSPAIEngagement() {
   };
 
 
-  useEffect(()=>{
-    const loadEngagementData=async()=>{
-      const data=await apiClient.GetAIEngagement();
-      console.log(data);
-    }
-    loadEngagementData();
-  },[])
 
   return (
     <AppLayout>
@@ -49,7 +44,7 @@ export default function MSPAIEngagement() {
               <div>
                 <h1 className="text-2xl font-semibold text-heading-text">AI Engagement</h1>
                 <p className="text-subtext text-sm mt-1">
-                  Portfolio Overview
+                  Portfolio Overview - Last {dateRange} days
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -64,6 +59,12 @@ export default function MSPAIEngagement() {
                     <SelectItem value="90">Last 90 days</SelectItem>
                   </SelectContent>
                 </Select>
+                {isLoading && (
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin"></div>
+                    Refreshing data...
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -71,22 +72,22 @@ export default function MSPAIEngagement() {
 
         <div className="px-6 py-6 space-y-8">
           {/* KPI Tiles */}
-          <KPITiles onTileClick={scrollToSection} />
+          <KPITiles onTileClick={scrollToSection} days={days} />
 
           {/* Department Usage */}
-          <DepartmentUsage id="departments" />
+          <DepartmentUsage id="departments" days={days} />
 
           {/* Application Engagement */}
-          <ApplicationEngagementTable id="applications" />
+          <ApplicationEngagementTable id="applications" days={days} />
 
           {/* Agent Engagement */}
-          <AgentEngagementTable id="agents" />
+          <AgentEngagementTable id="agents" days={days} />
 
           {/* Productivity Insights */}
-          <ProductivityInsights id="productivity" />
+          <ProductivityInsights id="productivity" days={days} />
 
           {/* Recommendations */}
-          <RecommendationsPanel id="recommendations" />
+          <RecommendationsPanel id="recommendations" days={days} />
         </div>
       </div>
     </AppLayout>

@@ -1,12 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { aiEngagementData } from "@/data/aiEngagement";
-import { TrendingUp, TrendingDown } from "lucide-react";
+import { TrendingUp, TrendingDown, Loader2 } from "lucide-react";
+import { useAIEngagementData } from "@/hooks/useAIEngagementData";
 
-export const DepartmentUsage = ({ id }: { id?: string }) => {
-  const data = aiEngagementData.departments.map(dept => ({
+export const DepartmentUsage = ({ id, days }: { id?: string; days?: number }) => {
+  const { data: engagementData, isLoading } = useAIEngagementData(days);
+  const data = engagementData.departments.map(dept => ({
     ...dept,
-    interactions_per_user: Math.round(dept.interactions / dept.active_users)
+    interactions_per_user: dept.active_users > 0 ? Math.round(dept.interactions / dept.active_users) : 0
   }));
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -36,6 +37,30 @@ export const DepartmentUsage = ({ id }: { id?: string }) => {
     }
     return null;
   };
+
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Usage by Department</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64 mb-6 bg-muted animate-pulse rounded" />
+          <div className="space-y-2">
+            <h4 className="font-medium mb-3">Department Details</h4>
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-8 bg-muted animate-pulse rounded" />
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card id={id} className="scroll-mt-20">

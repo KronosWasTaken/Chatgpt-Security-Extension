@@ -2,12 +2,16 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, TrendingDown, Bot, ExternalLink } from "lucide-react";
-import { aiEngagementData, ApplicationEngagement } from "@/data/aiEngagement";
+import { TrendingUp, TrendingDown, Bot, ExternalLink, Loader2 } from "lucide-react";
+import { aiEngagementData, ApplicationEngagement, isDataInitialized } from "@/data/aiEngagement";
 import { ApplicationDrawer } from "./ApplicationDrawer";
 
-export const ApplicationEngagementTable = ({ id }: { id?: string }) => {
+import { useAIEngagementData } from "@/hooks/useAIEngagementData";
+
+export const ApplicationEngagementTable = ({ id, days }: { id?: string; days?: number }) => {
   const [selectedApp, setSelectedApp] = useState<ApplicationEngagement | null>(null);
+
+   const { data: engagementData, isLoading } = useAIEngagementData(days);
   
   const getUtilizationColor = (utilization: string) => {
     switch (utilization) {
@@ -23,6 +27,26 @@ export const ApplicationEngagementTable = ({ id }: { id?: string }) => {
     // In real implementation, you'd map iconName to actual app icons
     return <Bot className="h-4 w-4" />;
   };
+
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Application Engagement</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-12 bg-muted animate-pulse rounded" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>

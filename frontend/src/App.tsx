@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute, RoleBasedRedirect } from "@/components/ProtectedRoute";
+import { initializeAIEngagementData } from "@/data/aiEngagement";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Client from "./pages/Client";
@@ -23,6 +24,9 @@ import ClientReports from "./pages/ClientReports";
 import EducationHub from "./pages/EducationHub";
 
 const queryClient = new QueryClient();
+
+// Initialize AI engagement data when the app starts
+initializeAIEngagementData().catch(console.error);
 
 const App = () => (
 

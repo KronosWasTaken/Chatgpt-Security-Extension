@@ -22,7 +22,7 @@ class EngagementService:
         
         conditions = [
             ClientAIServiceUsage.client_id == client_id,
-            ClientAIServiceUsage.created_at >= target_date,
+            ClientAIServiceUsage.created_at >= (target_date),
             ClientAIServiceUsage.created_at < target_date + timedelta(days=1)
         ]
         
@@ -61,7 +61,7 @@ class EngagementService:
         
         conditions = [
             ClientAIServiceUsage.client_id == client_id,
-            ClientAIServiceUsage.created_at >= target_date,
+            ClientAIServiceUsage.created_at >= (target_date),
             ClientAIServiceUsage.created_at < target_date + timedelta(days=1)
         ]
         
@@ -117,7 +117,7 @@ class EngagementService:
         
         conditions = [
             ClientAIServiceUsage.client_id == client_id,
-            ClientAIServiceUsage.created_at >= target_date,
+            ClientAIServiceUsage.created_at >= (target_date),
             ClientAIServiceUsage.created_at < target_date + timedelta(days=1)
         ]
         
@@ -261,7 +261,7 @@ class EngagementService:
         query = select(ProductivityCorrelation).where(
             and_(
                 ProductivityCorrelation.client_id == client_id,
-                ProductivityCorrelation.date == target_date
+                ProductivityCorrelation.date >= target_date
             )
         )
         result = await self.session.execute(query)
