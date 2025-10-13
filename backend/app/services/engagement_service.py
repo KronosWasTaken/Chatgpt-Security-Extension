@@ -4,18 +4,20 @@ Eliminates the need for redundant engagement tables by computing everything dyna
 """
 
 from typing import Dict, Any, List, Optional
+import logging
 from datetime import date, timedelta
 from sqlalchemy import select, func, and_, desc, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import ClientAIServiceUsage, ClientAIServices, User, Alert, UserEngagement, AgentEngagement, ProductivityCorrelation
 from sqlalchemy.dialects.postgresql import UUID
+from app.services.gemini_client import GeminiClient
 
 
 class EngagementService:
     """Service to calculate engagement data at runtime from ClientAIServiceUsage"""
-    
     def __init__(self, session: AsyncSession):
         self.session = session
+        self._logger = logging.getLogger(__name__)
     
     async def get_department_engagement(self, client_id: str, target_date: date, department: str = None) -> List[Dict[str, Any]]:
         """Get department engagement data calculated from ClientAIServiceUsage"""
@@ -25,7 +27,6 @@ class EngagementService:
             ClientAIServiceUsage.created_at >= (target_date),
             ClientAIServiceUsage.created_at < target_date + timedelta(days=1)
         ]
-        
         if department:
             conditions.append(ClientAIServiceUsage.department == department)
         
@@ -53,12 +54,10 @@ class EngagementService:
                 'active_users': row.active_users or 0,
                 'pct_change_vs_prev_7d': trend
             })
-        
         return departments
     
     async def get_application_engagement(self, client_id: str, target_date: date, department: str = None) -> List[Dict[str, Any]]:
         """Get application engagement data calculated from ClientAIServiceUsage"""
-        
         conditions = [
             ClientAIServiceUsage.client_id == client_id,
             ClientAIServiceUsage.created_at >= (target_date),
@@ -93,11 +92,9 @@ class EngagementService:
         for row in result:
             # Calculate 7-day trend
             trend = await self._calculate_7d_trend_for_service(client_id, row.ai_service_id, target_date)
-            
             # Calculate utilization based on interactions
             utilization = self._calculate_utilization(row.interactions_per_day or 0)
-            
-            applications.append({
+            app_entry: Dict[str, Any] = {
                 'ai_service_id': str(row.ai_service_id),
                 'application': row.application,
                 'vendor': row.vendor,
@@ -107,9 +104,20 @@ class EngagementService:
                 'active_users': row.active_users or 0,
                 'trend_pct_7d': trend,
                 'utilization': utilization,
-                'recommendation': self._get_utilization_recommendation(utilization)
-            })
-        
+            }
+
+            # Get recommendation from Gemini; if unavailable, fall back to rule-based text
+            self._logger.info(
+                "Engagement: requesting Gemini recommendation for app=%s vendor=%s type=%s interactions=%s users=%s trend=%s util=%s",
+                app_entry.get('application'), app_entry.get('vendor'), app_entry.get('type'),
+                app_entry.get('interactions_per_day'), app_entry.get('active_users'), app_entry.get('trend_pct_7d'),
+                app_entry.get('utilization')
+            )
+            gemini_rec = await self._get_gemini_app_recommendation(app_entry)
+            self._logger.info("Engagement: Gemini recommendation received length=%s", len(gemini_rec) if gemini_rec else 0)
+            fallback_rec = self._get_utilization_recommendation(app_entry.get('utilization'))
+            app_entry['recommendation'] = (gemini_rec or fallback_rec or '').strip()
+            applications.append(app_entry)
         return applications
     
     async def get_user_engagement(self, client_id: str, target_date: date, department: str = None) -> List[Dict[str, Any]]:
@@ -123,7 +131,6 @@ class EngagementService:
         
         if department:
             conditions.append(ClientAIServiceUsage.department == department)
-        
         # Join with User to get user details
         query = select(
             ClientAIServiceUsage.user_id,
@@ -431,3 +438,30 @@ class EngagementService:
             return 'Consider training users or evaluating necessity'
         else:
             return 'Monitor for changes in usage patterns'
+
+    async def _get_gemini_app_recommendation(self, app_entry: Dict[str, Any]) -> Optional[str]:
+        """Generate a concise recommendation using Gemini, if configured.
+
+        Returns a single-sentence recommendation or None on failure/unconfigured.
+        """
+        if not GeminiClient.is_available():
+            self._logger.warning("Gemini unavailable: missing API key or SDK; skipping recommendation")
+            return None
+
+        try:
+            prompt = (
+                "You are an enterprise AI adoption advisor. Given application engagement metrics, "
+                "produce ONE short actionable recommendation (max 22 words). Avoid generic text.\n\n"
+                f"Application: {app_entry.get('application')}\n"
+                f"Vendor: {app_entry.get('vendor')}  Type: {app_entry.get('type')}\n"
+                f"Interactions/day: {app_entry.get('interactions_per_day')}  Active users: {app_entry.get('active_users')}\n"
+                f"7d trend %: {app_entry.get('trend_pct_7d')}  Utilization: {app_entry.get('utilization')}\n\n"
+                "Respond with ONLY the recommendation sentence."
+            )
+
+            self._logger.info("Engagement: calling Gemini with prompt length=%s", len(prompt))
+            text = GeminiClient.generate_text(model='gemini-2.5-flash-lite', contents=[prompt])
+            self._logger.info("Engagement: Gemini returned length=%s", len(text) if text else 0)
+            return text
+        except Exception:
+            return None

@@ -1,6 +1,7 @@
 import { LayoutDashboard, Building2, Shield, FileText, ChevronDown, GraduationCap, BarChart3, Target, Users, ShieldCheck, List, ClipboardCheck, TrendingUp } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useAuditLog } from "@/services/auditLogService";
 import {
   Sidebar,
   SidebarContent,
@@ -56,6 +57,7 @@ export function AppSidebar() {
   // Force refresh - sidebar navigation structure
   const [openSections, setOpenSections] = useState<string[]>([]);
   const location = useLocation();
+  const auditLog = useAuditLog();
 
   // Keep parent sections open based on current route
   useEffect(() => {
@@ -74,9 +76,20 @@ export function AppSidebar() {
 
     setOpenSections(prev => {
       const combined = [...prev, ...sectionsToOpen];
-      return Array.from(new Set(combined)); // Remove duplicates
+      const unique = Array.from(new Set(combined)); // Remove duplicates
+      // Only update if there's actually a change to prevent infinite loops
+      if (JSON.stringify(unique.sort()) !== JSON.stringify(prev.sort())) {
+        return unique;
+      }
+      return prev;
     });
-  }, [location.pathname]);
+
+    // Log navigation
+    auditLog.logUserAction('navigation', {
+      route: currentPath,
+      timestamp: new Date().toISOString(),
+    });
+  }, [location.pathname, auditLog]);
 
   const toggleSection = (title: string) => {
     setOpenSections(prev => 

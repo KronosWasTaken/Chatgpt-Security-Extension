@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .log-output {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Complete Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 Backend API Tests</h2>
+        <button onclick="testBackendHealth()">Test Backend Health</button>
+        <button onclick="testAuditLogging()">Test Audit Logging</button>
+        <button onclick="testFileScanning()">Test File Scanning</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 Extension Tests</h2>
+        <button onclick="testExtensionFileUpload()">Test Extension File Upload</button>
+        <button onclick="testExtensionAuditLog()">Test Extension Audit Log</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Console Logs</h2>
+        <div id="log-output" class="log-output">Waiting for test logs...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const logOutput = document.getElementById('log-output');
+        const testResults = document.getElementById('test-results');
+        
+        function addToLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logOutput.textContent += logEntry;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        function addTestResult(message, type = 'success') {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${type}`;
+            resultDiv.textContent = message;
+            testResults.appendChild(resultDiv);
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog(args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog(args.join(' '), 'warn');
+        };
+
+        // Backend API Tests
+        async function testBackendHealth() {
+            console.log('🧪 Testing backend health...');
+            try {
+                const response = await axios.get('http://localhost:8000/health', {
+                    timeout: 5000
+                });
+                console.log('✅ Backend health check successful:', response.data);
+                addTestResult('✅ Backend Health: OK', 'success');
+            } catch (error) {
+                console.error('❌ Backend health check failed:', error);
+                addTestResult('❌ Backend Health: FAILED', 'error');
+            }
+        }
+
+        async function testAuditLogging() {
+            console.log('🧪 Testing audit logging...');
+            try {
+                const auditEntry = {
+                    event_type: 'integration_test',
+                    event_category: 'system',
+                    severity: 'low',
+                    message: 'Integration test audit log',
+                    details: { test: 'complete_integration' },
+                    source: 'frontend',
+                };
+                
+                const response = await axios.post('http://localhost:8000/api/v1/audit/events', auditEntry, {
+                    timeout: 10000
+                });
+                
+                console.log('✅ Audit logging successful:', response.data);
+                addTestResult('✅ Audit Logging: OK', 'success');
+            } catch (error) {
+                console.error('❌ Audit logging failed:', error);
+                addTestResult('❌ Audit Logging: FAILED', 'error');
+            }
+        }
+
+        async function testFileScanning() {
+            console.log('🧪 Testing file scanning...');
+            try {
+                // Create a test file
+                const testContent = 'This is a test file for scanning';
+                const blob = new Blob([testContent], { type: 'text/plain' });
+                const file = new File([blob], 'test.txt', { type: 'text/plain' });
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('text', testContent);
+                
+                const response = await axios.post('http://localhost:8000/api/v1/scan/file', formData, {
+                    timeout: 30000,
+                    headers: {
+                        // Let axios set the Content-Type with boundary
+                    }
+                });
+                
+                console.log('✅ File scanning successful:', response.data);
+                addTestResult('✅ File Scanning: OK', 'success');
+            } catch (error) {
+                console.error('❌ File scanning failed:', error);
+                addTestResult('❌ File Scanning: FAILED', 'error');
+            }
+        }
+
+        // Extension Tests (simulated)
+        async function testExtensionFileUpload() {
+            console.log('🧪 Testing extension file upload simulation...');
+            try {
+                // Simulate extension file upload
+                const testContent = 'This is a test file for extension scanning';
+                const blob = new Blob([testContent], { type: 'text/plain' });
+                const file = new File([blob], 'extension_test.txt', { type: 'text/plain' });
+                
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('text', testContent);
+                
+                const response = await axios.post('http://localhost:8000/api/v1/scan/file', formData, {
+                    timeout: 30000,
+                    headers: {
+                        // Simulate extension headers
+                        'User-Agent': 'Chrome Extension Test'
+                    }
+                });
+                
+                console.log('✅ Extension file upload simulation successful:', response.data);
+                addTestResult('✅ Extension File Upload: OK', 'success');
+            } catch (error) {
+                console.error('❌ Extension file upload simulation failed:', error);
+                addTestResult('❌ Extension File Upload: FAILED', 'error');
+            }
+        }
+
+        async function testExtensionAuditLog() {
+            console.log('🧪 Testing extension audit log simulation...');
+            try {
+                const auditEntry = {
+                    event_type: 'extension_file_scan',
+                    event_category: 'file_scan',
+                    severity: 'low',
+                    message: 'Extension file scan completed',
+                    details: { 
+                        source: 'extension',
+                        file_name: 'test.txt',
+                        scan_result: 'success'
+                    },
+                    source: 'extension',
+                };
+                
+                const response = await axios.post('http://localhost:8000/api/v1/audit/events', auditEntry, {
+                    timeout: 10000
+                });
+                
+                console.log('✅ Extension audit log successful:', response.data);
+                addTestResult('✅ Extension Audit Log: OK', 'success');
+            } catch (error) {
+                console.error('❌ Extension audit log failed:', error);
+                addTestResult('❌ Extension Audit Log: FAILED', 'error');
+            }
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, starting integration tests...');
+            setTimeout(() => {
+                testBackendHealth();
+            }, 1000);
+            setTimeout(() => {
+                testAuditLogging();
+            }, 2000);
+            setTimeout(() => {
+                testFileScanning();
+            }, 3000);
+            setTimeout(() => {
+                testExtensionFileUpload();
+            }, 4000);
+            setTimeout(() => {
+                testExtensionAuditLog();
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

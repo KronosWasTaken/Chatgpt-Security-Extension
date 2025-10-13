@@ -58,6 +58,14 @@ class Settings(BaseSettings):
     PROMETHEUS_ENABLED: bool = True
     PROMETHEUS_PORT: int = 9090
     
+    # AI / LLM integrations
+    GEMINI_API_KEY: Optional[str] = None
+    GEMINI_MODEL: str = "gemini-2.0-flash"
+    
+    # VirusTotal
+    VT_API_KEY: Optional[str] = None
+    VT_API_BASE: str = "https://www.virustotal.com/api/v3"
+    
     # Email
     SMTP_HOST: Optional[str] = None
     SMTP_PORT: int = 587

@@ -10,6 +10,7 @@ from app.services.engagement_service import EngagementService
 from sqlalchemy import select, and_, desc, func
 import asyncio
 from decimal import  Decimal
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -485,6 +486,7 @@ async def get_msp_aggregate_engagement(
     session: AsyncSession = Depends(get_async_session)
 ):
     user = request.state.user
+    
 
     if user['role'] not in ["msp_admin", "msp_user"]:
         raise HTTPException(status_code=403, detail="Access denied")

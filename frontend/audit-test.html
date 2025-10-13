@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Audit Log Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .log-output {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Frontend Audit Log Test</h1>
+    
+    <div class="test-section">
+        <h2>📋 Test Audit Logging</h2>
+        <p>Test the frontend audit logging functionality:</p>
+        
+        <button onclick="testLoginLog()">Test Login Log</button>
+        <button onclick="testFileScanLog()">Test File Scan Log</button>
+        <button onclick="testUserActionLog()">Test User Action Log</button>
+        <button onclick="testSystemEventLog()">Test System Event Log</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📋 Console Logs</h2>
+        <div id="log-output" class="log-output">Waiting for test logs...</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        const logOutput = document.getElementById('log-output');
+        
+        function addToLog(message, type = 'log') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logOutput.textContent += logEntry;
+            logOutput.scrollTop = logOutput.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addToLog(args.join(' '), 'log');
+        };
+
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addToLog(args.join(' '), 'error');
+        };
+
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addToLog(args.join(' '), 'warn');
+        };
+
+        function clearLogs() {
+            logOutput.textContent = 'Logs cleared...\n';
+        }
+
+        // Mock audit log service for testing
+        const mockAuditLogService = {
+            async logAuthentication(action, details) {
+                console.log(`🔍 Mock logAuthentication called with action: ${action}, details:`, details);
+                
+                try {
+                    const auditEntry = {
+                        event_type: `auth_${action}`,
+                        event_category: 'authentication',
+                        severity: action === 'login_failed' ? 'medium' : 'low',
+                        message: `User ${action}${action === 'login_failed' ? ' failed' : ''}`,
+                        details,
+                        source: 'frontend',
+                    };
+                    
+                    console.log('🔍 Sending audit entry:', auditEntry);
+                    
+                    const response = await axios.post('http://localhost:8000/api/v1/audit/events', auditEntry, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        timeout: 10000,
+                    });
+                    
+                    console.log('✅ Audit log successful:', response.status, response.data);
+                } catch (error) {
+                    console.error('❌ Audit log error:', error);
+                    if (axios.isAxiosError && axios.isAxiosError(error)) {
+                        console.error('❌ Axios error details:', {
+                            message: error.message,
+                            status: error.response?.status,
+                            statusText: error.response?.statusText,
+                            data: error.response?.data,
+                        });
+                    }
+                }
+            },
+
+            async logFileScan(action, details) {
+                console.log(`🔍 Mock logFileScan called with action: ${action}, details:`, details);
+                
+                try {
+                    const auditEntry = {
+                        event_type: `file_scan_${action}`,
+                        event_category: 'file_scan',
+                        severity: action === 'file_blocked' || action === 'scan_failed' ? 'high' : 'low',
+                        message: `File scan ${action.replace('_', ' ')}`,
+                        details,
+                        source: 'frontend',
+                    };
+                    
+                    console.log('🔍 Sending audit entry:', auditEntry);
+                    
+                    const response = await axios.post('http://localhost:8000/api/v1/audit/events', auditEntry, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        timeout: 10000,
+                    });
+                    
+                    console.log('✅ Audit log successful:', response.status, response.data);
+                } catch (error) {
+                    console.error('❌ Audit log error:', error);
+                    if (axios.isAxiosError && axios.isAxiosError(error)) {
+                        console.error('❌ Axios error details:', {
+                            message: error.message,
+                            status: error.response?.status,
+                            statusText: error.response?.statusText,
+                            data: error.response?.data,
+                        });
+                    }
+                }
+            },
+
+            async logUserAction(action, details) {
+                console.log(`🔍 Mock logUserAction called with action: ${action}, details:`, details);
+                
+                try {
+                    const auditEntry = {
+                        event_type: `user_action_${action}`,
+                        event_category: 'user_action',
+                        severity: 'low',
+                        message: `User action: ${action}`,
+                        details,
+                        source: 'frontend',
+                    };
+                    
+                    console.log('🔍 Sending audit entry:', auditEntry);
+                    
+                    const response = await axios.post('http://localhost:8000/api/v1/audit/events', auditEntry, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        timeout: 10000,
+                    });
+                    
+                    console.log('✅ Audit log successful:', response.status, response.data);
+                } catch (error) {
+                    console.error('❌ Audit log error:', error);
+                    if (axios.isAxiosError && axios.isAxiosError(error)) {
+                        console.error('❌ Axios error details:', {
+                            message: error.message,
+                            status: error.response?.status,
+                            statusText: error.response?.statusText,
+                            data: error.response?.data,
+                        });
+                    }
+                }
+            },
+
+            async logSystemEvent(event, severity = 'low', details) {
+                console.log(`🔍 Mock logSystemEvent called with event: ${event}, severity: ${severity}, details:`, details);
+                
+                try {
+                    const auditEntry = {
+                        event_type: `system_${event}`,
+                        event_category: 'system',
+                        severity,
+                        message: `System event: ${event}`,
+                        details,
+                        source: 'frontend',
+                    };
+                    
+                    console.log('🔍 Sending audit entry:', auditEntry);
+                    
+                    const response = await axios.post('http://localhost:8000/api/v1/audit/events', auditEntry, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        timeout: 10000,
+                    });
+                    
+                    console.log('✅ Audit log successful:', response.status, response.data);
+                } catch (error) {
+                    console.error('❌ Audit log error:', error);
+                    if (axios.isAxiosError && axios.isAxiosError(error)) {
+                        console.error('❌ Axios error details:', {
+                            message: error.message,
+                            status: error.response?.status,
+                            statusText: error.response?.statusText,
+                            data: error.response?.data,
+                        });
+                    }
+                }
+            }
+        };
+
+        function testLoginLog() {
+            console.log('🧪 Testing login audit log...');
+            mockAuditLogService.logAuthentication('login', {
+                user_email: 'test@example.com',
+                user_role: 'admin',
+                login_time: new Date().toISOString(),
+            });
+        }
+
+        function testFileScanLog() {
+            console.log('🧪 Testing file scan audit log...');
+            mockAuditLogService.logFileScan('file_blocked', {
+                file_name: 'test.exe',
+                file_size: 1024000,
+                file_type: 'application/octet-stream',
+                block_reason: 'Potentially dangerous executable file',
+                risk_level: 'high',
+            });
+        }
+
+        function testUserActionLog() {
+            console.log('🧪 Testing user action audit log...');
+            mockAuditLogService.logUserAction('button_click', {
+                button: 'export_data',
+                page: 'dashboard',
+                timestamp: new Date().toISOString(),
+            });
+        }
+
+        function testSystemEventLog() {
+            console.log('🧪 Testing system event audit log...');
+            mockAuditLogService.logSystemEvent('error_occurred', 'high', {
+                error: 'Database connection failed',
+                component: 'auth_service',
+                timestamp: new Date().toISOString(),
+            });
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            console.log('🚀 Page loaded, testing audit logging...');
+            setTimeout(() => {
+                testLoginLog();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -5,15 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { apiClient, Client, Alert } from "@/services/api";
+import { Client, Alert } from "@/services/api";
 import { getFrameworksForClient } from "@/data/frameworks";
 import { getRiskLevel, getRiskBadgeClass, formatNumber } from "@/data/utils";
 import { TrendingUp, Users, Shield, Activity } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
-import { useEffect, useState } from "react";
 import { AlertsRibbon } from "@/components/alerts-ribbon";
 import { AlertsFeed } from "@/components/alerts-feed";
 import { AlertFamily } from "@/data/alerts";
+import { useClients, useAlerts } from "@/hooks/useApi";
+import { useState } from "react";
 
 // Mock sparkline data generator
 const generateSparklineData = () => {
@@ -25,41 +26,22 @@ const generateSparklineData = () => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
   const [alertFamilyFilter, setAlertFamilyFilter] = useState<AlertFamily | null>(null);
-  const [clients, setClients] = useState<Client[]>([]);
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [error, setError] = useState<string | null>(null);
+  
+  // Use React Query hooks for data fetching
+  const { data: clients = [], isLoading: clientsLoading, error: clientsError, refetch: refetchClients } = useClients();
+  const { data: alerts = [], isLoading: alertsLoading, error: alertsError, refetch: refetchAlerts } = useAlerts({ limit: 10 });
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Load clients and alerts in parallel
-        const [clientsData, alertsData] = await Promise.all([
-          apiClient.getClients(),
-          apiClient.getAlerts({ limit: 10 })
-        ]);
+  const isLoading = clientsLoading || alertsLoading;
+  const error = clientsError || alertsError;
 
-        // const clientsData=await apiClient.getClients();
-       
-        setClients(clientsData);
-        setAlerts(alertsData);
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err);
-        setError('Failed to load dashboard data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
+  const handleRetry = () => {
+    refetchClients();
+    refetchAlerts();
+  };
 
   // Calculate portfolio totals from real data
-  const portfolioTotals = clients.reduce(
+  const portfolioTotals = (clients as Client[]).reduce(
     (acc, client) => ({
       appsMonitored: acc.appsMonitored + client.apps_monitored,
       interactionsMonitored: acc.interactionsMonitored + client.interactions_monitored,
@@ -70,19 +52,18 @@ const Dashboard = () => {
   );
 
   // Calculate average risk score
-  if (clients.length > 0) {
-    portfolioTotals.avgRiskScore = Math.round(portfolioTotals.avgRiskScore / clients.length);
+  if ((clients as Client[]).length > 0) {
+    portfolioTotals.avgRiskScore = Math.round(portfolioTotals.avgRiskScore / (clients as Client[]).length);
   }
 
-const portfolioTrending = clients.reduce(
+const portfolioTrending = (clients as Client[]).reduce(
   (acc, c) => ({
-    appsMonitoredDelta: acc.appsMonitoredDelta + c.apps_added_7d,
-    interactionsMonitoredDelta: acc.interactionsMonitoredDelta + c.interactions_pct_change_7d,
-    agentsDeployedDelta: acc.agentsDeployedDelta + c.agents_deployed_change_7d,
+    appsMonitoredDelta: acc.appsMonitoredDelta + (c as any).apps_added_7d || 0,
+    interactionsMonitoredDelta: acc.interactionsMonitoredDelta + (c as any).interactions_pct_change_7d || 0,
+    agentsDeployedDelta: acc.agentsDeployedDelta + (c as any).agents_deployed_change_7d || 0,
   }),
   { appsMonitoredDelta: 0, interactionsMonitoredDelta: 0, agentsDeployedDelta: 0 }
 );
-
 
   const handleClientClick = (clientId: string) => {
     navigate(`/client?id=${clientId}`);
@@ -130,9 +111,9 @@ const portfolioTrending = clients.reduce(
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-heading-text mb-2">Error Loading Dashboard</h3>
-            <p className="text-body-text mb-4">{error}</p>
+            <p className="text-body-text mb-4">{String((error as any)?.message || error)}</p>
             <button 
-              onClick={() => window.location.reload()} 
+              onClick={handleRetry} 
               className="px-4 py-2 bg-cybercept-blue text-white rounded-lg hover:bg-cybercept-blue/90"
             >
               Retry
@@ -251,8 +232,8 @@ const portfolioTrending = clients.reduce(
         {/* Recent Alerts */}
         <AlertsFeed 
           familyFilter={alertFamilyFilter}
-          alerts={alerts}
-          clients={clients}
+          alerts={alerts as Alert[]}
+          clients={clients as Client[]}
         />
 
         {/* Clients Table */}
@@ -280,7 +261,7 @@ const portfolioTrending = clients.reduce(
                 </TableHeader>
                 
                 <TableBody>
-                  {clients.map((client) => {
+                  {(clients as Client[]).map((client) => {
                     const clientFrameworks = getFrameworksForClient(client.id);
                     return (
                       <TableRow 

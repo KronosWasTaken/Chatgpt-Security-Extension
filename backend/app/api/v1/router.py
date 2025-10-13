@@ -8,7 +8,10 @@ from app.api.v1.endpoints import(
     ai_engagement,
     policies,
     reports,
-    alerts
+    alerts,
+    analyze,
+    scan,
+    audit
 )
 
 
@@ -30,6 +33,14 @@ api_router.include_router(policies.router,prefix="/policies",tags=["policies"])
 api_router.include_router(reports.router,prefix="/reports",tags=["reports"])
 
 api_router.include_router(alerts.router,prefix="/alerts",tags=["alerts"])
+
+# api_router.include_router(pattern_scan.router,prefix="/pattern",tags=["scan"])
+
+api_router.include_router(analyze.router,prefix="/analyze",tags=["analyze"])
+
+api_router.include_router(scan.router,prefix="/scan",tags=["scan"])
+
+api_router.include_router(audit.router,prefix="/audit",tags=["audit"])
 
 
 

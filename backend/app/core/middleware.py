@@ -17,7 +17,10 @@ class AuthMiddleWare(BaseHTTPMiddleware):
             "/metrics",
             "/api/v1/auth/login",
             "/api/v1/auth/refresh",
-            "/api/v1/auth/logout"
+            "/api/v1/auth/logout",
+            # "/api/v1/scan/file",  
+            # "/api/v1/scan/file/legacy",  
+            # "/api/v1/audit/events" 
         ]
         
         if request.method == "OPTIONS" or request.url.path in skip_auth_paths:
@@ -25,15 +28,15 @@ class AuthMiddleWare(BaseHTTPMiddleware):
         
         auth_header = request.headers.get("Authorization")
         if not auth_header or not auth_header.startswith("Bearer"):
-            raise HTTPException(status=401, detail="Missing token")
+            raise HTTPException(status_code=401, detail="Missing token")
         
         token = auth_header.split(" ")[1]
         
         token_data = JWTManager.verify_token(token)
        
-       
+        
         if not token_data:
-            raise HTTPException(status=401, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="Invalid token")
         
         
         

@@ -33,6 +33,9 @@ class User(Base):
     audit_logs: Mapped[List["ClientAuditLog"]] = relationship(
         "ClientAuditLog", back_populates="user", cascade="all, delete-orphan"
     )
+    file_scan_logs: Mapped[List["FileScanAuditLog"]] = relationship(
+        "FileScanAuditLog", back_populates="user", cascade="all, delete-orphan"
+    )
     usage_stats: Mapped[List["ClientAIServiceUsage"]] = relationship("ClientAIServiceUsage", back_populates="user")
     engagement_stats: Mapped[List["UserEngagement"]] = relationship("UserEngagement", back_populates="user", cascade="all, delete-orphan")
 

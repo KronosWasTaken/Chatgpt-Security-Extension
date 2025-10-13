@@ -52,9 +52,7 @@ class ClientAIServices(Base):
     # Frontend inventory fields
     users: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     avg_daily_interactions: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    
     integrations: Mapped[Optional[List[str]]] = mapped_column(JSONB, nullable=True, default=list)
-    
     ai_service_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("shared.ai_services.id"), nullable=False, index=True)
     risk_tolerance: Mapped[str] = mapped_column(String(20), nullable=False)
     department_restrictions: Mapped[Optional[dict]] = mapped_column(JSONB, nullable=True, default=list)
@@ -70,7 +68,6 @@ class ClientPolicy(Base):
     __tablename__ = "client_policies"
 
     client_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("clients.id"), nullable=False, index=True)
-    
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     rules: Mapped[Optional[list]] = mapped_column(JSONB, nullable=False, default=list)
@@ -85,6 +82,9 @@ class ClientPolicy(Base):
         back_populates="policy",
         cascade="all, delete-orphan"
     )
+
+
+
 
 
 

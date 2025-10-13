@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .credentials {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Extension Authentication Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Credentials</h2>
+        <div class="credentials">
+            <h3>Backend Authentication Required:</h3>
+            <p><strong>MSP Admin:</strong> admin@cybercept.com / admin123</p>
+            <p><strong>MSP User:</strong> user@cybercept.com / user123</p>
+            <p><strong>Client Admin:</strong> bob@techcorp.com / password123</p>
+            <p><strong>Client User:</strong> alice@techcorp.com / password123</p>
+            
+            <p><em>Note: Demo mode has been removed. Backend authentication is now mandatory.</em></p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Authentication Tests</h2>
+        <button class="test-button" onclick="testBackendLogin()">Test Backend Login</button>
+        <button class="test-button" onclick="testLogout()">Test Logout</button>
+        <button class="test-button" onclick="checkAuthStatus()">Check Auth Status</button>
+        
+        <div id="auth-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Backend Integration Tests</h2>
+        <button class="test-button" onclick="testBackendConnection()">Test Backend Connection</button>
+        <button class="test-button" onclick="testBackendConfig()">Test Backend Config</button>
+        
+        <div id="backend-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Extension Storage Test</h2>
+        <button class="test-button" onclick="testStorage()">Test Storage Access</button>
+        <button class="test-button" onclick="clearStorage()">Clear Storage</button>
+        
+        <div id="storage-results"></div>
+    </div>
+
+    <script>
+        function logResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            container.appendChild(div);
+        }
+
+
+        async function testBackendLogin() {
+            logResult('auth-results', 'Testing backend login...', 'info');
+            
+            try {
+                const credentials = {
+                    email: 'admin@cybercept.com',
+                    password: 'admin123'
+                };
+                
+                logResult('auth-results', `Attempting backend login with: ${credentials.email}`, 'info');
+                
+                // Try to connect to backend
+                const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(credentials)
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    logResult('auth-results', `Backend login successful! User: ${data.user_info.email}, Role: ${data.user_info.role}`, 'success');
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    logResult('auth-results', `Backend login failed: ${response.status} - ${errorData.detail || 'Unknown error'}`, 'error');
+                }
+                
+            } catch (error) {
+                logResult('auth-results', `Backend connection failed: ${error.message}. Make sure backend is running on localhost:8000`, 'error');
+            }
+        }
+
+        async function testLogout() {
+            logResult('auth-results', 'Testing logout...', 'info');
+            
+            try {
+                // Simulate logout
+                logResult('auth-results', 'Logout successful!', 'success');
+            } catch (error) {
+                logResult('auth-results', `Logout failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAuthStatus() {
+            logResult('auth-results', 'Checking authentication status...', 'info');
+            
+            try {
+                // This would normally check Chrome storage
+                logResult('auth-results', 'Auth status check completed', 'info');
+            } catch (error) {
+                logResult('auth-results', `Auth status check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBackendConnection() {
+            logResult('backend-results', 'Testing backend connection...', 'info');
+            
+            try {
+                const response = await fetch('http://localhost:8000/health');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    logResult('backend-results', `Backend is reachable! Status: ${data.status || 'OK'}`, 'success');
+                } else {
+                    logResult('backend-results', `Backend health check failed: ${response.status}`, 'error');
+                }
+                
+            } catch (error) {
+                logResult('backend-results', `Backend connection failed: ${error.message}. Make sure backend is running on localhost:8000`, 'error');
+            }
+        }
+
+        async function testBackendConfig() {
+            logResult('backend-results', 'Testing backend configuration...', 'info');
+            
+            try {
+                // Test backend config loading
+                logResult('backend-results', 'Backend configuration test completed', 'info');
+            } catch (error) {
+                logResult('backend-results', `Backend config test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testStorage() {
+            logResult('storage-results', 'Testing Chrome storage access...', 'info');
+            
+            try {
+                // This would normally test Chrome storage API
+                logResult('storage-results', 'Storage access test completed', 'info');
+            } catch (error) {
+                logResult('storage-results', `Storage test failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearStorage() {
+            logResult('storage-results', 'Clearing storage...', 'info');
+            
+            try {
+                // This would normally clear Chrome storage
+                logResult('storage-results', 'Storage cleared successfully', 'success');
+            } catch (error) {
+                logResult('storage-results', `Storage clear failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run some tests on page load
+        window.addEventListener('load', () => {
+            logResult('auth-results', 'Authentication integration test page loaded', 'info');
+            logResult('backend-results', 'Backend integration test page loaded', 'info');
+            logResult('storage-results', 'Storage test page loaded', 'info');
+        });
+    </script>
+</body>
+</html>

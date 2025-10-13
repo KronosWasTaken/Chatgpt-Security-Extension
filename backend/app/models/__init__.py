@@ -11,6 +11,7 @@ from .engagement import (
     ProductivityCorrelation
 )
 from .reports import ClientComplianceReport, PortfolioValueReport
+from .file_scan_audit import FileScanAuditLog
 
 __all__ = [
     "Base",
@@ -33,4 +34,5 @@ __all__ = [
     "ProductivityCorrelation",
     "ClientComplianceReport",
     "PortfolioValueReport",
+    "FileScanAuditLog",
 ]

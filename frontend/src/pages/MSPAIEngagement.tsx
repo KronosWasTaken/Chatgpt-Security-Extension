@@ -84,10 +84,10 @@ export default function MSPAIEngagement() {
           <AgentEngagementTable id="agents" days={days} />
 
           {/* Productivity Insights */}
-          <ProductivityInsights id="productivity" days={days} />
+          {/* <ProductivityInsights id="productivity" days={days} />
 
           {/* Recommendations */}
-          <RecommendationsPanel id="recommendations" days={days} />
+          {/* <RecommendationsPanel id="recommendations" days={days} /> */} 
         </div>
       </div>
     </AppLayout>

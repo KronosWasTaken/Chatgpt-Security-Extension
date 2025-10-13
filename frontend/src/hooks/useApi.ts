@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient, handleApiError } from "@/services/api";
+import { apiClient, handleApiError, TokenManager } from "@/services/api";
 import { toast } from "@/hooks/use-toast";
 
 // Query keys
@@ -20,7 +20,11 @@ export const useClients = () => {
   return useQuery({
     queryKey: queryKeys.clients,
     queryFn: () => apiClient.getClients(),
-    onError: handleApiError,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };
 
@@ -29,7 +33,11 @@ export const useClient = (clientId: string) => {
     queryKey: queryKeys.client(clientId),
     queryFn: () => apiClient.getClient(clientId),
     enabled: !!clientId,
-    onError: handleApiError,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };
 
@@ -38,7 +46,11 @@ export const useClientDashboard = (clientId: string) => {
     queryKey: queryKeys.clientDashboard(clientId),
     queryFn: () => apiClient.getClientDashboard(clientId),
     enabled: !!clientId,
-    onError: handleApiError,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };
 
@@ -47,7 +59,14 @@ export const useAIInventory = () => {
   return useQuery({
     queryKey: queryKeys.aiInventory,
     queryFn: () => apiClient.getAIInventory(),
-    onError: handleApiError,
+    // Avoid stale data when navigating back; refetch when window refocuses or remounts
+    refetchOnWindowFocus: true,
+    refetchOnMount: 'always',
+    enabled: !!TokenManager.getToken(),
+    refetchOnReconnect: true,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchInterval: 60_000,
   });
 };
 
@@ -56,7 +75,11 @@ export const useAIApplication = (appId: string) => {
     queryKey: queryKeys.aiApplication(appId),
     queryFn: () => apiClient.getAIApplication(appId),
     enabled: !!appId,
-    onError: handleApiError,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };
 
@@ -66,7 +89,9 @@ export const useCreateAIApplication = () => {
   return useMutation({
     mutationFn: (appData: any) => apiClient.createAIApplication(appData),
     onSuccess: () => {
+      // Invalidate and refetch the AI inventory
       queryClient.invalidateQueries({ queryKey: queryKeys.aiInventory });
+      queryClient.refetchQueries({ queryKey: queryKeys.aiInventory });
       toast({
         title: "Success",
         description: "AI application created successfully",
@@ -83,7 +108,9 @@ export const useUpdateAIApplication = () => {
     mutationFn: ({ appId, appData }: { appId: string; appData: any }) => 
       apiClient.updateAIApplication(appId, appData),
     onSuccess: (_, { appId }) => {
+      // Invalidate and refetch the AI inventory
       queryClient.invalidateQueries({ queryKey: queryKeys.aiInventory });
+      queryClient.refetchQueries({ queryKey: queryKeys.aiInventory });
       queryClient.invalidateQueries({ queryKey: queryKeys.aiApplication(appId) });
       toast({
         title: "Success",
@@ -100,7 +127,9 @@ export const useDeleteAIApplication = () => {
   return useMutation({
     mutationFn: (appId: string) => apiClient.deleteAIApplication(appId),
     onSuccess: () => {
+      // Invalidate and refetch the AI inventory
       queryClient.invalidateQueries({ queryKey: queryKeys.aiInventory });
+      queryClient.refetchQueries({ queryKey: queryKeys.aiInventory });
       toast({
         title: "Success",
         description: "AI application deleted successfully",
@@ -115,7 +144,11 @@ export const useAlerts = (params?: any) => {
   return useQuery({
     queryKey: queryKeys.alerts(params),
     queryFn: () => apiClient.getAlerts(params),
-    onError: handleApiError,
+    staleTime: 15_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };
 
@@ -124,7 +157,11 @@ export const useAlert = (alertId: string) => {
     queryKey: queryKeys.alert(alertId),
     queryFn: () => apiClient.getAlert(alertId),
     enabled: !!alertId,
-    onError: handleApiError,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };
 
@@ -174,7 +211,11 @@ export const useAlertsFeed = () => {
     queryKey: queryKeys.alertsFeed,
     queryFn: () => apiClient.getAlertsFeed(),
     refetchInterval: 30000, // Refetch every 30 seconds
-    onError: handleApiError,
+    staleTime: 5_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };
 
@@ -183,6 +224,10 @@ export const useCurrentUser = () => {
   return useQuery({
     queryKey: queryKeys.currentUser,
     queryFn: () => apiClient.getCurrentUser(),
-    onError: handleApiError,
+    staleTime: 5 * 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
   });
 };

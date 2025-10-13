@@ -3,13 +3,16 @@ import { BackendApiService } from '../services/BackendApiService'
 
 interface BackendConfigProps {
   onConfigChange?: (config: any) => void
+  isExtensionEnabled?: boolean
 }
 
-export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChange }) => {
+export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChange, isExtensionEnabled = true }) => {
   const [config, setConfig] = useState({
-    enabled: false,
+    enabled: isExtensionEnabled, // Follow extension status
     apiUrl: 'http://localhost:8000',
-    apiKey: ''
+    apiKey: '',
+    clientId: 'acme-health',
+    mspId: 'msp-001'
   })
   const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'disconnected'>('unknown')
   const [testing, setTesting] = useState(false)
@@ -20,21 +23,63 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
     loadConfig()
   }, [])
 
+  useEffect(() => {
+    // Backend automatically follows extension status
+    const newConfig = { ...config, enabled: isExtensionEnabled }
+    setConfig(newConfig)
+    saveConfig(newConfig)
+  }, [isExtensionEnabled])
+
+  useEffect(() => {
+    // Load auth token when user logs in
+    const loadAuthToken = async () => {
+      try {
+        const result = await chrome.storage.sync.get(['authUser'])
+        if (result.authUser && result.authUser.token) {
+          const newConfig = { ...config, apiKey: result.authUser.token }
+          setConfig(newConfig)
+        }
+      } catch (error) {
+        console.error('Failed to load auth token:', error)
+      }
+    }
+    
+    loadAuthToken()
+    
+    // Listen for auth changes
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (changes.authUser && changes.authUser.newValue) {
+        const authUser = changes.authUser.newValue
+        if (authUser.token) {
+          const newConfig = { ...config, apiKey: authUser.token }
+          setConfig(newConfig)
+        }
+      }
+    }
+    
+    chrome.storage.onChanged.addListener(handleStorageChange)
+    
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange)
+    }
+  }, [])
+
   const loadConfig = async () => {
     try {
-      const result = await chrome.storage.sync.get(['backendConfig'])
-      if (result.backendConfig) {
-        setConfig(result.backendConfig)
+      const result = await chrome.storage.sync.get(['config'])
+      if (result.config?.backendConfig) {
+        const backendConfig = result.config.backendConfig
+        setConfig({
+          enabled: isExtensionEnabled, // Always follow extension status
+          apiUrl: backendConfig.apiUrl || 'http://localhost:8000',
+          apiKey: backendConfig.apiKey || '',
+          clientId: backendConfig.clientId || 'acme-health',
+          mspId: backendConfig.mspId || 'msp-001'
+        })
       }
     } catch (error) {
       console.error('Failed to load backend config:', error)
     }
-  }
-
-  const handleToggle = async (enabled: boolean) => {
-    const newConfig = { ...config, enabled }
-    setConfig(newConfig)
-    await saveConfig(newConfig)
   }
 
   const handleApiUrlChange = (apiUrl: string) => {
@@ -47,8 +92,34 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
     setConfig(newConfig)
   }
 
+  const handleClientIdChange = (clientId: string) => {
+    const newConfig = { ...config, clientId }
+    setConfig(newConfig)
+  }
+
+  const handleMspIdChange = (mspId: string) => {
+    const newConfig = { ...config, mspId }
+    setConfig(newConfig)
+  }
+
   const saveConfig = async (newConfig = config) => {
     try {
+      // Save to the main config's backendConfig
+      const result = await chrome.storage.sync.get(['config'])
+      const mainConfig = result.config || {}
+      
+      const updatedConfig = {
+        ...mainConfig,
+        backendConfig: {
+          enabled: newConfig.enabled,
+          apiUrl: newConfig.apiUrl,
+          apiKey: newConfig.apiKey,
+          clientId: newConfig.clientId,
+          mspId: newConfig.mspId
+        }
+      }
+      
+      await chrome.storage.sync.set({ config: updatedConfig })
       await backendApi.updateConfig(newConfig)
       onConfigChange?.(newConfig)
       console.log('Backend configuration saved:', newConfig)
@@ -99,26 +170,22 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
   }
 
   return (
-    <div className="bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-6 bg-opacity-50 border bg-slate-800 backdrop-blur-sm rounded-2xl border-slate-700">
+      {/* <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-white">Backend Integration</h3>
-        <button
-          onClick={() => handleToggle(!config.enabled)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            config.enabled ? 'bg-green-600' : 'bg-slate-600'
-          }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              config.enabled ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
+        <div className="flex items-center space-x-2">
+          <span className={`text-sm font-medium ${isExtensionEnabled ? 'text-green-400' : 'text-red-400'}`}>
+            {isExtensionEnabled ? '🟢 Active' : '🔴 Inactive'}
+          </span>
+          <span className="text-xs text-slate-400">
+            (Follows Extension Status)
+          </span>
+        </div>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className="block mb-2 text-sm font-medium text-slate-300">
             Backend API URL
           </label>
           <input
@@ -126,22 +193,53 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
             value={config.apiUrl}
             onChange={(e) => handleApiUrlChange(e.target.value)}
             placeholder="http://localhost:8000"
-            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={!config.enabled}
+            className="w-full px-3 py-2 text-white border rounded-lg bg-slate-700 border-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!isExtensionEnabled}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
-            API Key (Optional - for authentication)
+          <label className="block mb-2 text-sm font-medium text-slate-300">
+            API Key (Auto-filled from login)
           </label>
           <input
             type="password"
             value={config.apiKey}
             onChange={(e) => handleApiKeyChange(e.target.value)}
-            placeholder="Enter JWT token if required"
-            className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={!config.enabled}
+            placeholder="JWT token from authentication"
+            className="w-full px-3 py-2 text-white border rounded-lg bg-slate-700 border-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!isExtensionEnabled}
+          />
+          <p className="mt-1 text-xs text-slate-400">
+            This is automatically filled when you log in with backend credentials
+          </p>
+        </div>
+
+        <div>
+          <label className="block mb-2 text-sm font-medium text-slate-300">
+            Client ID
+          </label>
+          <input
+            type="text"
+            value={config.clientId}
+            onChange={(e) => handleClientIdChange(e.target.value)}
+            placeholder="acme-health"
+            className="w-full px-3 py-2 text-white border rounded-lg bg-slate-700 border-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!isExtensionEnabled}
+          />
+        </div>
+
+        <div>
+          <label className="block mb-2 text-sm font-medium text-slate-300">
+            MSP ID
+          </label>
+          <input
+            type="text"
+            value={config.mspId}
+            onChange={(e) => handleMspIdChange(e.target.value)}
+            placeholder="msp-001"
+            className="w-full px-3 py-2 text-white border rounded-lg bg-slate-700 border-slate-600 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            disabled={!isExtensionEnabled}
           />
         </div>
 
@@ -154,26 +252,26 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
           <div className="flex space-x-2">
             <button
               onClick={testConnection}
-              disabled={!config.enabled || testing}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={!isExtensionEnabled || testing}
+              className="px-4 py-2 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {testing ? 'Testing...' : 'Test Connection'}
             </button>
             
             <button
               onClick={() => saveConfig()}
-              disabled={!config.enabled}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              disabled={!isExtensionEnabled}
+              className="px-4 py-2 text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Save
             </button>
           </div>
         </div>
 
-        {config.enabled && (
-          <div className="bg-blue-700 bg-opacity-30 rounded-xl border border-blue-600 p-4">
-            <h4 className="text-sm font-medium text-blue-200 mb-2">Integration Benefits</h4>
-            <ul className="text-xs text-slate-300 space-y-1">
+        {isExtensionEnabled && (
+          <div className="p-4 bg-blue-700 border border-blue-600 bg-opacity-30 rounded-xl">
+            <h4 className="mb-2 text-sm font-medium text-blue-200">Integration Benefits</h4>
+            <ul className="space-y-1 text-xs text-slate-300">
               <li>• Advanced PHI/PII detection using backend AI models</li>
               <li>• Centralized compliance logging and audit trails</li>
               <li>• Multi-tenant policy enforcement</li>
@@ -183,14 +281,14 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
           </div>
         )}
 
-        {!config.enabled && (
-          <div className="bg-yellow-700 bg-opacity-30 rounded-xl border border-yellow-600 p-4">
+        {!isExtensionEnabled && (
+          <div className="p-4 bg-yellow-700 border border-yellow-600 bg-opacity-30 rounded-xl">
             <p className="text-sm text-yellow-200">
-              Backend integration is disabled. The extension will use local VirusTotal and Gemini APIs only.
+              Backend integration is disabled because the extension is inactive. Enable the extension to activate backend integration.
             </p>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   )
 }

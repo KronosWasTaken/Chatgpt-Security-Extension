@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Auth Debug Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .test-section {
+            background-color: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        .test-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background-color: #45a049;
+        }
+        .test-button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        .result {
+            background-color: #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .error {
+            background-color: #4a1a1a;
+            border: 1px solid #ff4444;
+        }
+        .success {
+            background-color: #1a4a1a;
+            border: 1px solid #44ff44;
+        }
+        .info {
+            background-color: #1a1a4a;
+            border: 1px solid #4444ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Extension Authentication Debug Test</h1>
+    
+    <div class="test-section">
+        <h2>1. Check Chrome Storage</h2>
+        <button class="test-button" onclick="checkChromeStorage()">Check Chrome Storage</button>
+        <div id="storage-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Backend Connection</h2>
+        <button class="test-button" onclick="testBackendConnection()">Test Backend Connection</button>
+        <div id="connection-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Test Authentication Flow</h2>
+        <button class="test-button" onclick="testLogin()">Test Login</button>
+        <button class="test-button" onclick="testAuthenticatedRequest()">Test Authenticated Request</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Debug Headers</h2>
+        <button class="test-button" onclick="debugHeaders()">Debug Request Headers</button>
+        <div id="headers-result" class="result"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'http://localhost:8000';
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function checkChromeStorage() {
+            clearLog('storage-result');
+            log('storage-result', 'Checking Chrome storage...');
+            
+            try {
+                const result = await chrome.storage.sync.get(['authUser', 'backendConfig']);
+                log('storage-result', `Storage result: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.authUser) {
+                    log('storage-result', `✅ Auth user found: ${result.authUser.email}`, 'success');
+                    log('storage-result', `Token preview: ${result.authUser.token ? result.authUser.token.substring(0, 20) + '...' : 'null'}`, 'success');
+                } else {
+                    log('storage-result', '❌ No auth user found', 'error');
+                }
+                
+                if (result.backendConfig) {
+                    log('storage-result', `✅ Backend config found: ${JSON.stringify(result.backendConfig, null, 2)}`, 'success');
+                } else {
+                    log('storage-result', '❌ No backend config found', 'error');
+                }
+            } catch (error) {
+                log('storage-result', `❌ Error checking storage: ${error.message}`, 'error');
+            }
+        }
+
+        async function testBackendConnection() {
+            clearLog('connection-result');
+            log('connection-result', 'Testing backend connection...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    log('connection-result', `✅ Backend is reachable: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    log('connection-result', `❌ Backend health check failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                log('connection-result', `❌ Backend connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            clearLog('auth-result');
+            log('auth-result', 'Testing login...');
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@cybercept.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('auth-result', `✅ Login successful!`, 'success');
+                    log('auth-result', `Token preview: ${data.access_token.substring(0, 20)}...`, 'success');
+                    
+                    // Save token to Chrome storage
+                    const authUser = {
+                        email: data.user_info.email,
+                        token: data.access_token,
+                        loginTime: new Date().toISOString(),
+                        userInfo: data.user_info
+                    };
+                    
+                    await chrome.storage.sync.set({ authUser });
+                    log('auth-result', `✅ Token saved to Chrome storage`, 'success');
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    log('auth-result', `❌ Login failed: ${response.status} ${JSON.stringify(errorData)}`, 'error');
+                }
+            } catch (error) {
+                log('auth-result', `❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuthenticatedRequest() {
+            clearLog('auth-result');
+            log('auth-result', 'Testing authenticated request...');
+            
+            try {
+                // Get token from storage
+                const result = await chrome.storage.sync.get(['authUser']);
+                if (!result.authUser || !result.authUser.token) {
+                    log('auth-result', '❌ No token found in storage. Please login first.', 'error');
+                    return;
+                }
+                
+                const token = result.authUser.token;
+                log('auth-result', `Using token: ${token.substring(0, 20)}...`);
+                
+                const response = await fetch(`${BACKEND_URL}/api/v1/ai-inventory/`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('auth-result', `✅ Authenticated request successful!`, 'success');
+                    log('auth-result', `Response preview: ${JSON.stringify(data).substring(0, 200)}...`, 'success');
+                } else {
+                    const errorData = await response.text();
+                    log('auth-result', `❌ Authenticated request failed: ${response.status} ${errorData}`, 'error');
+                }
+            } catch (error) {
+                log('auth-result', `❌ Authenticated request error: ${error.message}`, 'error');
+            }
+        }
+
+        async function debugHeaders() {
+            clearLog('headers-result');
+            log('headers-result', 'Debugging request headers...');
+            
+            try {
+                // Get token from storage
+                const result = await chrome.storage.sync.get(['authUser']);
+                if (!result.authUser || !result.authUser.token) {
+                    log('headers-result', '❌ No token found in storage. Please login first.', 'error');
+                    return;
+                }
+                
+                const token = result.authUser.token;
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+                
+                log('headers-result', `Request headers: ${JSON.stringify(headers, null, 2)}`);
+                
+                // Make a test request and log what's actually sent
+                const response = await fetch(`${BACKEND_URL}/api/v1/ai-inventory/`, {
+                    method: 'GET',
+                    headers: headers
+                });
+                
+                log('headers-result', `Response status: ${response.status}`);
+                log('headers-result', `Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}`);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    log('headers-result', `Error response: ${errorText}`, 'error');
+                }
+                
+            } catch (error) {
+                log('headers-result', `❌ Debug error: ${error.message}`, 'error');
+            }
+        }
+    </script>
+</body>
+</html>

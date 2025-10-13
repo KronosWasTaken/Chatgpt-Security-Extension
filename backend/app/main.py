@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.core.middleware import (RateLimitMiddleWare,AuthMiddleWare)
 from app.core.monitoring import setup_monitoring
+from app.core.logging import configure_logging
+from app.services.gemini_client import GeminiClient
 from prometheus_client import make_asgi_app
 import logging
 
@@ -20,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI)->AsyncGenerator[None,None]:
+    configure_logging()
     logger.info("Starting AI Compliance Platform Backend...")
     
 
@@ -28,6 +31,12 @@ async def lifespan(app: FastAPI)->AsyncGenerator[None,None]:
     
     setup_monitoring()
     logger.info("Monitoring setup complete")
+
+    # Probe Gemini once on startup
+    try:
+        GeminiClient.self_test()
+    except Exception as _e:
+        logger.warning("Gemini self-test failed during startup")
     yield
     
 

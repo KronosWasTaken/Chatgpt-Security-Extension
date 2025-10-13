@@ -1,5 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
+import { auditLogService } from "./auditLogService";
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
@@ -154,12 +155,27 @@ class ApiClient {
       data: options.body,
     };
 
-    try {
+    const attempt = async (): Promise<T> => {
       const response = await axios.request<T>(axiosConfig);
       return response.data;
+    };
+
+    try {
+      return await attempt();
     } catch (err) {
       const error = err as AxiosError<any>;
       if (error.response) {
+        if (error.response.status === 429) {
+          // Simple backoff then one retry
+          await new Promise((r) => setTimeout(r, 1000));
+          try {
+            return await attempt();
+          } catch (retryErr) {
+            const re = retryErr as AxiosError<any>;
+            const detail2 = (re.response?.data as any)?.detail;
+            throw new Error(detail2 || `HTTP ${re.response?.status}`);
+          }
+        }
         if (error.response.status === 401) {
           TokenManager.removeToken();
           window.location.href = '/login';
@@ -177,15 +193,44 @@ class ApiClient {
 
   // Authentication endpoints
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    const response = await this.request<LoginResponse>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-    
-    TokenManager.setToken(response.access_token);
-    TokenManager.setUser(response.user_info);
-    
-    return response;
+    try {
+      const response = await this.request<LoginResponse>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(credentials),
+      });
+      
+      TokenManager.setToken(response.access_token);
+      TokenManager.setUser(response.user_info);
+      
+      // Log successful login
+      console.log('🔍 Attempting to log successful login...');
+      try {
+        await auditLogService.logAuthentication('login', {
+          user_email: credentials.email,
+          user_role: response.user_info.role,
+          login_time: new Date().toISOString(),
+        });
+        console.log('✅ Login audit log successful');
+      } catch (auditError) {
+        console.error('❌ Login audit log failed:', auditError);
+      }
+      
+      return response;
+    } catch (error) {
+      // Log failed login attempt
+      console.log('🔍 Attempting to log failed login...');
+      try {
+        await auditLogService.logAuthentication('login_failed', {
+          user_email: credentials.email,
+          error_message: error instanceof Error ? error.message : 'Unknown error',
+          attempt_time: new Date().toISOString(),
+        });
+        console.log('✅ Failed login audit log successful');
+      } catch (auditError) {
+        console.error('❌ Failed login audit log failed:', auditError);
+      }
+      throw error;
+    }
   }
 
   async getCurrentUser(): Promise<User> {
@@ -204,6 +249,21 @@ class ApiClient {
   }
 
   async logout(): Promise<void> {
+    const user = TokenManager.getUser();
+    
+    // Log logout before removing token
+    console.log('🔍 Attempting to log logout...');
+    try {
+      await auditLogService.logAuthentication('logout', {
+        user_email: user?.email,
+        user_role: user?.role,
+        logout_time: new Date().toISOString(),
+      });
+      console.log('✅ Logout audit log successful');
+    } catch (auditError) {
+      console.error('❌ Logout audit log failed:', auditError);
+    }
+    
     TokenManager.removeToken();
   }
 
@@ -222,7 +282,52 @@ class ApiClient {
 
   // AI Inventory endpoints
   async getAIInventory(): Promise<AIApplication[]> {
-    return this.request<AIApplication[]>('/ai-inventory/');
+    const raw = await this.request<any>('/ai-inventory/');
+    // Backend returns: [{ clientId, clientName, items: [...] }]
+    const entries: any[] = Array.isArray(raw) ? raw : [];
+    const flat: AIApplication[] = entries.flatMap((entry) => {
+      const items: any[] = Array.isArray(entry?.items) ? entry.items : [];
+      return items.map((it) => ({
+        id: String(it.id),
+        name: String(it.name),
+        vendor: String(it.vendor || ''),
+        type: it.type as AIApplication['type'],
+        status: it.status as AIApplication['status'],
+        risk_level: (it.risk_level || 'Low') as AIApplication['risk_level'],
+        risk_score: Number(it.risk_score || 0),
+        active_users: Number(it.active_users || it.users || 0),
+        avg_daily_interactions: Number(it.avgDailyInteractions || it.avg_daily_interactions || 0),
+        integrations: it.integrations,
+        approval_conditions: it.approval_conditions,
+        approved_by: it.approved_by,
+        approved_at: it.approved_at,
+        created_at: it.created_at || new Date().toISOString(),
+        updated_at: it.updated_at || new Date().toISOString(),
+      }));
+    });
+    return flat;
+  }
+
+  async getClientInventory(clientId: string): Promise<AIApplication[]> {
+    const data = await this.request<any>(`/clients/${clientId}/inventory`);
+    const items: any[] = Array.isArray(data?.items) ? data.items : [];
+    return items.map((it: any) => ({
+      id: String(it.id || it.name || Math.random()),
+      name: String(it.name || it.application || ''),
+      vendor: String(it.vendor || ''),
+      type: (it.type || 'Application') as AIApplication['type'],
+      status: (it.status || 'Permitted') as AIApplication['status'],
+      risk_level: (it.risk_level || 'Low') as AIApplication['risk_level'],
+      risk_score: Number(it.risk_score || 0),
+      active_users: Number(it.active_users || it.users || 0),
+      avg_daily_interactions: Number(it.avgDailyInteractions || it.avg_daily_interactions || 0),
+      integrations: it.integrations,
+      approval_conditions: it.approval_conditions,
+      approved_by: it.approved_by,
+      approved_at: it.approved_at,
+      created_at: it.created_at || new Date().toISOString(),
+      updated_at: it.updated_at || new Date().toISOString(),
+    }));
   }
 
   async getAIApplication(appId: string): Promise<AIApplication> {
@@ -230,25 +335,56 @@ class ApiClient {
   }
 
   async createAIApplication(appData: Partial<AIApplication>): Promise<AIApplication> {
-    return this.request<AIApplication>('/ai-inventory/', {
+    const response = await this.request<AIApplication>('/ai-inventory/', {
       method: 'POST',
       body: JSON.stringify(appData),
     });
+    
+    // Log AI application creation
+    await auditLogService.logAIInventory('create', {
+      application_id: response.id,
+      application_name: response.name,
+      application_type: response.type,
+      vendor: response.vendor,
+      risk_level: response.risk_level,
+    });
+    
+    return response;
   }
 
   async updateAIApplication(appId: string, appData: Partial<AIApplication>): Promise<AIApplication> {
-    return this.request<AIApplication>(`/ai-inventory/${appId}`, {
+    const response = await this.request<AIApplication>(`/ai-inventory/${appId}`, {
       method: 'PUT',
       body: JSON.stringify(appData),
     });
+    
+    // Log AI application update
+    await auditLogService.logAIInventory('update', {
+      application_id: appId,
+      application_name: response.name,
+      changes: appData,
+      previous_status: appData.status,
+    });
+    
+    return response;
   }
 
   async deleteAIApplication(appId: string): Promise<void> {
-    return this.request<void>(`/ai-inventory/${appId}`, {
+    // Get application details before deletion for logging
+    const app = await this.getAIApplication(appId);
+    
+    await this.request<void>(`/ai-inventory/${appId}`, {
       method: 'DELETE',
     });
-
     
+    // Log AI application deletion
+    await auditLogService.logAIInventory('delete', {
+      application_id: appId,
+      application_name: app.name,
+      application_type: app.type,
+      vendor: app.vendor,
+      risk_level: app.risk_level,
+    });
   }
 
   // Alert endpoints
@@ -269,16 +405,33 @@ class ApiClient {
   }
 
   async updateAlertStatus(alertId: string, status: string, assignedTo?: string): Promise<Alert> {
-    return this.request<Alert>(`/alerts/${alertId}/status`, {
+    const response = await this.request<Alert>(`/alerts/${alertId}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status, assigned_to: assignedTo }),
     });
+    
+    // Log alert status update
+    await auditLogService.logAlert('resolve', {
+      alert_id: alertId,
+      alert_title: response.title,
+      alert_severity: response.severity,
+      new_status: status,
+      assigned_to: assignedTo,
+    });
+    
+    return response;
   }
 
   async assignAlert(alertId: string, assignedTo: string): Promise<void> {
-    return this.request<void>(`/alerts/${alertId}/assign`, {
+    await this.request<void>(`/alerts/${alertId}/assign`, {
       method: 'POST',
       body: JSON.stringify({ assigned_to: assignedTo }),
+    });
+    
+    // Log alert assignment
+    await auditLogService.logAlert('assign', {
+      alert_id: alertId,
+      assigned_to: assignedTo,
     });
 
 

@@ -4,37 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { apiClient, AIApplication } from "@/services/api";
-import { useEffect, useState } from "react";
+import { AIApplication } from "@/services/api";
+import { useMemo } from "react";
+import { useAIInventory } from "@/hooks/useApi";
 import {Eye, Edit, Trash2 } from "lucide-react";
 
 import AddApplicationDialog from "@/components/ai-inventory/AddApplicationDialog";
 import UpdateAiDialog from "@/components/ai-inventory/UpdateAIDialog";
 
 export default function MSPAIInventory() {
-  const [applications, setApplications] = useState<AIApplication[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadApplications = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await apiClient.getAIInventory();
-     const allItems = data.flatMap(obj => obj?.items);
-setApplications(allItems);
-
-      } catch (err) {
-        console.error('Failed to load AI applications:', err);
-        setError('Failed to load AI applications');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadApplications();
-  }, []);
+  const { data, isLoading, error, refetch } = useAIInventory();
+  const applications = useMemo<AIApplication[]>(() => Array.isArray(data) ? data : [], [data]);
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -72,9 +52,9 @@ setApplications(allItems);
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <h3 className="text-lg font-semibold text-heading-text mb-2">Error Loading AI Inventory</h3>
-            <p className="text-body-text mb-4">{error}</p>
+            <p className="text-body-text mb-4">{String((error as any)?.message || error)}</p>
             <button 
-              onClick={() => window.location.reload()} 
+              onClick={() => refetch()} 
               className="px-4 py-2 bg-cybercept-blue text-white rounded-lg hover:bg-cybercept-blue/90"
             >
               Retry

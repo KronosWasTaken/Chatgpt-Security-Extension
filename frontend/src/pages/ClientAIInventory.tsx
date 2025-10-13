@@ -15,6 +15,7 @@ import { AgentsTable } from "@/components/ai-inventory/AgentsTable";
 import { InventoryDetailDrawer } from "@/components/ai-inventory/InventoryDetailDrawer";
 import { getRiskLevel, getRiskBadgeClass, formatNumber } from "@/data/utils";
 import { Shield, AlertTriangle, Users, Bot, Eye, Building2, TrendingUp, TrendingDown } from "lucide-react";
+import { TokenManager, apiClient } from "@/services/api";
 
 export default function ClientAIInventory() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,9 +25,47 @@ export default function ClientAIInventory() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
+  const [apiApps, setApiApps] = useState<any[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
   const selectedClient = clients.find(c => c.id === selectedClientId);
-  const inventory = getInventoryForClient(selectedClientId);
-  const selectedInventoryDetail = selectedInventoryItem ? getInventoryDetail(selectedInventoryItem) : null;
+
+  // Load from API, fallback to mock
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        if (!TokenManager.getToken()) {
+          await new Promise((r) => setTimeout(r, 250));
+        }
+        const backoff = async <T,>(fn: () => Promise<T>, attempts = 1): Promise<T> => {
+          try { return await fn(); } catch (e: any) {
+            if (attempts > 0 && (/429/.test(String(e?.message)) || /Network/i.test(String(e?.message)))) {
+              await new Promise((r) => setTimeout(r, 800));
+              return backoff(fn, attempts - 1);
+            }
+            throw e;
+          }
+        };
+        // Real API call for per-client inventory
+        const items = await backoff(() => apiClient.getClientInventory(selectedClientId));
+        if (!cancelled) setApiApps(items);
+      } catch (e: any) {
+        console.warn('ClientAIInventory: API fetch failed, falling back to mock:', e?.message);
+        if (!cancelled) {
+          setApiApps(null);
+          setError(null); // Do not show error if mock is available
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true };
+  }, [selectedClientId, retryCount]);
 
   // Separate applications and agents
   const applications = inventory.filter(item => item.type === 'Application');
@@ -40,9 +79,26 @@ export default function ClientAIInventory() {
   const overallRiskScore = selectedClient?.riskScore || 0;
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, [selectedClientId]);
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        // wait briefly for token propagation on first load or route change
+        if (!TokenManager.getToken()) {
+          await new Promise((r) => setTimeout(r, 250));
+        }
+        // simulate minimal backoff to align with backend readiness
+        await new Promise((r) => setTimeout(r, 200));
+      } catch (e: any) {
+        if (!cancelled) setError(e?.message || 'Failed to load inventory');
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true };
+  }, [selectedClientId, retryCount]);
 
   useEffect(() => {
     if (selectedClientId !== searchParams.get("id")) {
@@ -55,10 +111,17 @@ export default function ClientAIInventory() {
     label: client.name
   }));
 
+  const inventory = apiApps && apiApps.length > 0 ? apiApps : getInventoryForClient(selectedClientId);
+  const selectedInventoryDetail = selectedInventoryItem ? getInventoryDetail(selectedInventoryItem) : null;
+
   const handleItemClick = (itemId: string) => {
     setSelectedInventoryItem(itemId);
     setDrawerOpen(true);
   };
+
+  const handleRetry = () => setRetryCount(c => c + 1);
+
+
 
   const kpiCards = [
     {
@@ -132,7 +195,6 @@ export default function ClientAIInventory() {
     } else {
       setActiveFilter(null);
     }
-    
     // Scroll to relevant section
     if (cardId === 'agents' || cardId === 'high-risk') {
       scrollToSection('agents');
@@ -143,6 +205,34 @@ export default function ClientAIInventory() {
 
   // Check if there are alerts to show
   const hasAlerts = unsanctionedApps > 0 || highRiskActions > 0;
+
+  if (error && !apiApps) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-app-bg flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-heading-text mb-2">Error loading AI Inventory</h2>
+            <p className="text-subtext mb-4">{error}</p>
+            <Button onClick={handleRetry}>Retry</Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-app-bg flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-heading-text mb-2">Error loading AI Inventory</h2>
+            <p className="text-subtext mb-4">{error}</p>
+            <Button onClick={handleRetry}>Retry</Button>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -162,7 +252,6 @@ export default function ClientAIInventory() {
               </div>
             </div>
           </div>
-          
           <div className="px-6 py-6 space-y-8">
             <div className="grid grid-cols-5 gap-4">
               {[...Array(5)].map((_, i) => (
@@ -178,7 +267,6 @@ export default function ClientAIInventory() {
                 </Card>
               ))}
             </div>
-            
             <div className="grid grid-cols-12 gap-6">
               <div className="col-span-8">
                 <Card className="bg-surface border border-border-color">

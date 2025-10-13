@@ -20,7 +20,29 @@ export interface Config {
   advancedSettings: AdvancedSettings
 }
 
+export interface AuthUser {
+  email: string
+  token: string
+  loginTime: string
+  userInfo?: {
+    user_id: string
+    email: string
+    name: string
+    role: string
+    msp_id?: string
+    client_id?: string
+    department?: string
+    permissions: string[]
+  }
+}
+
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
 export interface StorageData {
   config: Config
   logs: LogEntry[]
+  authUser?: AuthUser
 }

@@ -7,6 +7,7 @@ export class SecurityManager {
   private fileUploadMonitor: FileUploadMonitor
   private notificationManager: NotificationManager
   private isInitialized = false
+  private isEnabled = true
 
   constructor() {
     try {
@@ -20,6 +21,27 @@ export class SecurityManager {
     } catch (error) {
       console.error('🚨 SecurityManager constructor failed:', error)
       throw error
+    }
+  }
+
+  setEnabled(enabled: boolean): void {
+    console.log(`🔄 SecurityManager: Setting enabled to ${enabled}`)
+    this.isEnabled = enabled
+    
+    // Enable/disable all security components
+    this.promptGuard.setEnabled(enabled)
+    this.fileUploadMonitor.setEnabled(enabled)
+    
+    if (enabled) {
+      this.notificationManager.show(
+        '🛡️ Security scanner activated - uploads are being monitored',
+        'success'
+      )
+    } else {
+      this.notificationManager.show(
+        '⚪ Security scanner deactivated - uploads are not monitored',
+        'info'
+      )
     }
   }
 

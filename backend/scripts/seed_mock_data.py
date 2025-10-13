@@ -900,8 +900,10 @@ async def seed_compliance_frameworks(session: AsyncSession):
 async def seed_detection_patterns(session: AsyncSession, frameworks):
     """Seed detection patterns"""
     print("🔍 Seeding detection patterns...")
-    
+
+    # Include both compliance regexes and operational pattern types used by the loader
     patterns_data = [
+        # Compliance-oriented regex patterns
         {
             "framework_name": "HIPAA",
             "pattern_type": "regex",
@@ -944,6 +946,66 @@ async def seed_detection_patterns(session: AsyncSession, frameworks):
             "severity": "critical",
             "confidence_threshold": 0.98,
             "context_rules": {"context_keywords": ["credit card", "payment", "card number"]},
+            "is_active": True
+        },
+
+        # Operational patterns consumed by DetectionPatternService
+        {
+            "framework_name": "Internal",
+            "pattern_type": "dangerous_text",
+            "pattern_name": "Prompt Injection Phrases",
+            "description": "List of common injection phrases",
+            "pattern_data": {
+                "phrases": [
+                    "ignore previous instructions",
+                    "from now on",
+                    "you are now",
+                    "jailbreak",
+                    "dan mode",
+                    "developer mode",
+                    "bypass restrictions",
+                    "override system"
+                ]
+            },
+            "severity": "high",
+            "confidence_threshold": 0.9,
+            "context_rules": {},
+            "is_active": True
+        },
+        {
+            "framework_name": "Internal",
+            "pattern_type": "quick_text",
+            "pattern_name": "Quick Prompt Phrases",
+            "description": "Short, high-signal phrases",
+            "pattern_data": {"phrases": ["ignore previous instructions", "from now on", "jailbreak"]},
+            "severity": "medium",
+            "confidence_threshold": 0.8,
+            "context_rules": {},
+            "is_active": True
+        },
+        {
+            "framework_name": "Internal",
+            "pattern_type": "sensitive_file_regex",
+            "pattern_name": "Sensitive Filenames",
+            "description": "Regexes for sensitive filenames",
+            "pattern_data": {
+                "regex": r"(\\.key$|\\.pem$|config\\.(json|ya?ml|ini|toml)$|secrets?\\.(json|ya?ml)$|id_rsa$|authorized_keys$|database\\.(ya?ml|json)$|dump\\.sql$|wp-config\\.php$|settings\\.py$)",
+                "flags": "i"
+            },
+            "severity": "high",
+            "confidence_threshold": 0.9,
+            "context_rules": {},
+            "is_active": True
+        },
+        {
+            "framework_name": "Internal",
+            "pattern_type": "malicious_extension",
+            "pattern_name": "Executable Extensions",
+            "description": "List of potentially dangerous executable extensions",
+            "pattern_data": {"extensions": [".exe", ".bat", ".cmd", ".com", ".pif", ".scr", ".vbs", ".js", ".jar", ".ps1", ".sh", ".deb", ".rpm", ".dmg", ".pkg", ".msi", ".app"]},
+            "severity": "high",
+            "confidence_threshold": 0.8,
+            "context_rules": {},
             "is_active": True
         }
     ]

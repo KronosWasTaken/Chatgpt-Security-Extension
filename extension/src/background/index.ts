@@ -1,4 +1,4 @@
-export {}
+
 
 import { FastThreatDetector } from '../utils/threatDetector'
 
@@ -7,6 +7,10 @@ const VIRUSTOTAL_API_BASE = 'https://www.virustotal.com/api/v3'
 chrome.runtime.onInstalled.addListener(async () => {
   console.log('File Upload Scanner extension installed');
   
+  // Clear any existing auth state on fresh install
+  await chrome.storage.sync.remove(['authUser']);
+  console.log('🔐 BACKGROUND: Cleared any existing auth state');
+  
   chrome.storage.sync.set({
     config: {
       isEnabled: true,
@@ -14,7 +18,7 @@ chrome.runtime.onInstalled.addListener(async () => {
       geminiApiKey: '',
       backendConfig: {
         apiUrl: 'http://localhost:8000',
-        enabled: false,
+        enabled: true,
         clientId: 'acme-health',
         mspId: 'msp-001'
       },
@@ -46,6 +50,30 @@ chrome.action.onClicked.addListener(() => {
   chrome.tabs.create({
     url: chrome.runtime.getURL('tabs/options.html')
   });
+});
+
+// Handle side panel opening (if available)
+if (chrome.sidePanel && 'onOpened' in chrome.sidePanel) {
+  (chrome.sidePanel as any).onOpened.addListener(() => {
+    console.log('Side panel opened');
+  });
+}
+
+// Set up side panel for all tabs
+chrome.tabs.onUpdated.addListener(async (tabId, info, tab) => {
+  if (info.status === 'complete' && tab.url) {
+    try {
+      if (chrome.sidePanel && 'setOptions' in chrome.sidePanel) {
+        await (chrome.sidePanel as any).setOptions({
+          tabId,
+          path: 'sidepanel.html',
+          enabled: true
+        });
+      }
+    } catch (error) {
+      console.log('Could not set side panel for tab:', tab.url, error);
+    }
+  }
 });
 
 async function getUploadUrl(apiKey: string): Promise<string | null> {
@@ -181,36 +209,48 @@ async function scanFileWithVirusTotal(fileData: ArrayBuffer, fileName: string, a
   scanId?: string
 }> {
   try {
+    console.log('🛡️ VirusTotal: Starting file scan...', {
+      fileName,
+      fileSize: fileData.byteLength,
+      apiKeyLength: apiKey.length
+    })
+    
     const fileHash = await calculateFileHash(fileData)
-    console.log(`Calculated file hash: ${fileHash}`)
+    console.log(`🛡️ VirusTotal: Calculated file hash: ${fileHash}`)
 
+    console.log('🛡️ VirusTotal: Checking for existing report...')
     const existingReport = await getFileReport(fileHash, apiKey)
     
     if (existingReport && existingReport.last_analysis_stats) {
-      console.log('Found existing VirusTotal report')
+      console.log('🛡️ VirusTotal: Found existing report:', existingReport.last_analysis_stats)
       const stats = existingReport.last_analysis_stats
       const detectionCount = (stats.malicious || 0) + (stats.suspicious || 0)
       const totalEngines = Object.values(stats).reduce((sum: number, count: unknown) => sum + (Number(count) || 0), 0) as number
       
-      return {
+      const result = {
         isMalicious: detectionCount > 0,
         detectionCount,
         totalEngines,
         success: true,
         scanId: fileHash
       }
+      
+      console.log('🛡️ VirusTotal: Existing report result:', result)
+      return result
     }
     
-    console.log('No existing report found, uploading file for analysis...')
+    console.log('🛡️ VirusTotal: No existing report found, uploading file for analysis...')
     
     const analysisId = await uploadFileToVirusTotal(fileData, fileName, apiKey)
     
     if (!analysisId) {
+      console.error('❌ VirusTotal: Failed to upload file to VirusTotal')
       throw new Error('Failed to upload file to VirusTotal')
     }
     
-    console.log(`File uploaded, analysis ID: ${analysisId}`)
+    console.log(`🛡️ VirusTotal: File uploaded, analysis ID: ${analysisId}`)
     
+    console.log('🛡️ VirusTotal: Getting analysis result...')
     const analysisResult = await getFileAnalysis(analysisId, apiKey)
     
     if (analysisResult.stats) {
@@ -218,19 +258,29 @@ async function scanFileWithVirusTotal(fileData: ArrayBuffer, fileName: string, a
       const detectionCount = (stats.malicious || 0) + (stats.suspicious || 0)
       const totalEngines = Object.values(stats).reduce((sum: number, count: unknown) => sum + (Number(count) || 0), 0) as number
       
-      return {
+      const result = {
         isMalicious: detectionCount > 0,
         detectionCount,
         totalEngines,
         success: true,
         scanId: analysisId
       }
+      
+      console.log('🛡️ VirusTotal: Analysis result:', result)
+      return result
     }
     
+    console.error('❌ VirusTotal: Invalid analysis result format:', analysisResult)
     throw new Error('Invalid analysis result format')
     
   } catch (error) {
-    console.error('VirusTotal scan error:', error)
+    console.error('❌ VirusTotal: Scan error:', error)
+    console.error('❌ VirusTotal: Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    })
+    
     return {
       isMalicious: false,
       detectionCount: 0,
@@ -264,9 +314,62 @@ async function broadcastStatusChange(isEnabled: boolean) {
   }
 }
 
+async function broadcastAuthStatusChange(isAuthenticated: boolean) {
+  try {
+    console.log('🔐 BACKGROUND: Broadcasting auth status change:', isAuthenticated)
+    const tabs = await chrome.tabs.query({
+      url: ['https://chatgpt.com/*', 'https://chat.openai.com/*', 'http://127.0.0.1:*/*', 'http://localhost:*/*']
+    });
+    
+    for (const tab of tabs) {
+      if (tab.id) {
+        try {
+          await chrome.tabs.sendMessage(tab.id, {
+            type: 'AUTH_STATUS_CHANGED',
+            isAuthenticated
+          });
+        } catch (error) {
+          console.log('Could not send auth status to tab:', tab.id, error)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error broadcasting auth status change:', error);
+  }
+}
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('Background: Received message:', request.type, 'from', sender.tab?.url || 'extension')
   
+  // Authentication check for sensitive operations
+  const requiresAuth = ['SCAN_FILE', 'TEST_PROMPT_INJECTION', 'ADD_LOG'].includes(request.type)
+  
+  if (requiresAuth) {
+    chrome.storage.sync.get(['authUser'], (result) => {
+      const isAuthenticated = result.authUser && result.authUser.token
+      
+      if (!isAuthenticated) {
+        console.log('🔐 BACKGROUND: Authentication required for', request.type)
+        sendResponse({ 
+          success: false, 
+          error: 'Authentication required. Please log in to use this feature.',
+          requiresAuth: true
+        })
+        return
+      }
+      
+      // Continue with the original request handling
+      handleAuthenticatedRequest(request, sender, sendResponse)
+    })
+    return true
+  }
+  
+  // Handle non-authenticated requests
+  handleNonAuthenticatedRequest(request, sender, sendResponse)
+  return true
+})
+
+async function handleNonAuthenticatedRequest(request: any, sender: any, sendResponse: any) {
   switch (request.type) {
     case 'TEST_CONNECTION':
       console.log('Background: Test connection successful')
@@ -291,21 +394,76 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break
       
     case 'SAVE_CONFIG':
+      console.log('🔄 Background: SAVE_CONFIG received with isEnabled:', request.config.isEnabled)
       chrome.storage.sync.set({ config: request.config }, async () => {
+        console.log('🔄 Background: Config saved, broadcasting status change')
         await broadcastStatusChange(request.config.isEnabled);
+        
+        // Auto-enable/disable backend integration based on extension status
+        const updatedConfig = {
+          ...request.config,
+          backendConfig: {
+            ...request.config.backendConfig,
+            enabled: request.config.isEnabled
+          }
+        };
+        
+        console.log('🔄 Background: Updated config with backend enabled:', updatedConfig.backendConfig.enabled)
+        
+        // Save the updated config with backend status
+        chrome.storage.sync.set({ config: updatedConfig });
+        
         sendResponse({ success: true });
       });
       break;
       
+    case 'CLEAR_LOGS':
+      chrome.storage.sync.set({ logs: [] }, () => {
+        sendResponse({ success: true });
+      });
+      break;
+      
+    default:
+      sendResponse({ error: 'Unknown message type' });
+  }
+}
+
+async function handleAuthenticatedRequest(request: any, sender: any, sendResponse: any) {
+  switch (request.type) {
     case 'SCAN_FILE':
       (async () => {
         try {
+          console.log('🔍 SCAN_FILE: Starting file scan process...')
+          console.log('🔍 SCAN_FILE: Request details:', {
+            fileName: request.fileName,
+            fileSize: request.fileData ? (Array.isArray(request.fileData) ? request.fileData.length : request.fileData.byteLength) : 'unknown',
+            fileDataType: Array.isArray(request.fileData) ? 'array' : typeof request.fileData
+          })
+          
           const { config } = await chrome.storage.sync.get(['config'])
+          console.log('🔍 SCAN_FILE: Config loaded:', {
+            isEnabled: config?.isEnabled,
+            backendEnabled: config?.backendConfig?.enabled,
+            backendUrl: config?.backendConfig?.apiUrl
+          })
           
           if (!config || !config.isEnabled) {
+            console.log('⏸️ SCAN_FILE: Scanner is disabled, skipping scan')
             sendResponse({ 
               success: false, 
               error: 'Scanner is disabled',
+              isMalicious: false,
+              detectionCount: 0,
+              totalEngines: 0
+            })
+            return
+          }
+
+          if (!config.backendConfig?.enabled) {
+            console.log('⏸️ SCAN_FILE: Backend is disabled, skipping scan')
+            sendResponse({ 
+              success: false, 
+              error: 'Backend scanning is disabled',
               isMalicious: false,
               detectionCount: 0,
               totalEngines: 0
@@ -316,93 +474,79 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           let fileData: ArrayBuffer
           if (Array.isArray(request.fileData)) {
             fileData = new Uint8Array(request.fileData).buffer
+            console.log('🔍 SCAN_FILE: Converted array to ArrayBuffer, size:', fileData.byteLength)
           } else if (request.fileData instanceof ArrayBuffer) {
             fileData = request.fileData
+            console.log('🔍 SCAN_FILE: Using ArrayBuffer directly, size:', fileData.byteLength)
           } else {
+            console.error('❌ SCAN_FILE: Invalid file data format:', typeof request.fileData)
             throw new Error('Invalid file data format')
           }
           
+          console.log('🔍 SCAN_FILE: Sending file to backend for scanning...')
           
-          let virusTotalResult = null
-          let promptInjectionResult = null
-          let usedFallback = false
+          // Send file to backend for scanning
+          const formData = new FormData()
+          const blob = new Blob([fileData], { type: 'text/plain' }) // Add MIME type
+          formData.append('file', blob, request.fileName)
           
-          if (config.apiKey) {
-            console.log('🛡️ Running VirusTotal PRIMARY malware scan...')
-            virusTotalResult = await scanFileWithVirusTotal(
-              fileData,
-              request.fileName,
-              config.apiKey
-            )
-          }
-          
-          // Gemini is reserved for prompt injection protection only
-          console.log('🚫 Local LLM: Skipping file analysis - LLM is reserved for prompt injection protection only')
-          
-          if (!virusTotalResult?.success) {
-            console.log('⚠️ VirusTotal failed - No fallback available (LLM reserved for prompt injection only)')
-          }
-          
-          const virusTotalThreat = virusTotalResult?.success && virusTotalResult?.isMalicious
-          
-          const isMalicious = virusTotalThreat
-          
-          let scanDetails = []
-          if (virusTotalResult?.success) {
-            scanDetails.push(`VirusTotal: ${virusTotalResult.isMalicious ? 'THREAT' : 'CLEAN'} (${virusTotalResult.detectionCount}/${virusTotalResult.totalEngines})`)
-          } else if (virusTotalResult) {
-            scanDetails.push(`VirusTotal: FAILED - ${virusTotalResult.error}`)
-          }
-          
-          if (config.geminiApiKey) {
-            scanDetails.push('Gemini API: RESERVED for prompt injection protection (not file scanning)')
-          } else {
-            scanDetails.push('Gemini API: DISABLED (No API key)')
-          }
-          
-          if (!config.apiKey) {
-            scanDetails.push('VirusTotal: DISABLED (No API key)')
-          }
-          
-          sendResponse({
-            success: true,
-            isMalicious,
-            detectionCount: virusTotalResult?.detectionCount || 0,
-            totalEngines: virusTotalResult?.totalEngines || 0,
-            scanType: 'virustotal-only',
-            virusTotalResult: virusTotalResult || null,
-            promptInjectionResult: null,
-            scanDetails: scanDetails.join(' | '),
-            threats: [],
-            riskLevel: 'safe'
+          // Debug FormData contents
+          console.log('🔍 SCAN_FILE: FormData details:', {
+            fileName: request.fileName,
+            blobSize: blob.size,
+            blobType: blob.type,
+            formDataEntries: Array.from(formData.entries()).map(([key, value]) => ({
+              key,
+              valueType: typeof value,
+              valueSize: value instanceof Blob ? value.size : 'N/A',
+              valueName: value instanceof File ? value.name : 'N/A'
+            }))
           })
+          
+          const headers: Record<string, string> = {}
+          
+          // Get auth token from authUser storage
+          const authResult = await chrome.storage.sync.get(['authUser'])
+          if (authResult.authUser && authResult.authUser.token) {
+            headers['Authorization'] = `Bearer ${authResult.authUser.token}`
+            console.log('🔐 SCAN_FILE: Using auth token for request')
+          } else {
+            console.log('❌ SCAN_FILE: No auth token found, request will fail authentication')
+          }
+          
+          console.log('🚀 SCAN_FILE: Sending to backend:', {
+            url: `${config.backendConfig.apiUrl}/api/v1/scan/file`,
+            fileName: request.fileName,
+            fileSize: fileData.byteLength,
+            hasAuthToken: !!(authResult.authUser && authResult.authUser.token),
+            headers: headers
+          })
+
+          const response = await fetch(`${config.backendConfig.apiUrl}/api/v1/scan/file`, {
+            method: 'POST',
+            headers: headers,
+            body: formData
+          })
+          
+          console.log('📡 SCAN_FILE: Backend response status:', response.status)
+          console.log('📡 SCAN_FILE: Backend response headers:', Object.fromEntries(response.headers.entries()))
+          
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('❌ SCAN_FILE: Backend scan failed:', response.status, errorText)
+            throw new Error(`Backend scan failed: ${response.status} ${response.statusText}`)
+          }
+          
+          const scanResult = await response.json()
+          console.log('✅ SCAN_FILE: Backend scan completed:', scanResult)
+          
+        
+          
+          sendResponse(scanResult)
           return
           
-          if (!virusTotalResult && config.apiKey) {
-            console.log('🛡️ Fallback: Using VirusTotal only for threat detection...')
-            
-            const result = await scanFileWithVirusTotal(
-              fileData,
-              request.fileName,
-              config.apiKey
-            )
-            
-            sendResponse({ ...result, scanType: 'virustotal-fallback' })
-            return
-          }
-          
-          if (!virusTotalResult && !promptInjectionResult) {
-            sendResponse({ 
-              success: false, 
-              error: 'No scanning methods available (VirusTotal API key missing and Gemini API not ready)',
-              isMalicious: false,
-              detectionCount: 0,
-              totalEngines: 0
-            })
-            return
-          }
-          
         } catch (error) {
+          console.error('❌ SCAN_FILE: Error during backend scan:', error)
           sendResponse({ 
             success: false, 
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -519,7 +663,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       break;
       
     case 'ADD_LOG':
-      chrome.storage.sync.get(['logs', 'config'], (result) => {
+      chrome.storage.sync.get(['logs', 'config'], async (result) => {
         const logs = result.logs || [];
         const newLog = {
           id: Date.now().toString(),
@@ -536,25 +680,81 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         });
         
         // Send to backend if enabled
+        console.log('🔄 ADD_LOG: Checking backend config:', result.config?.backendConfig)
+        console.log('🔄 ADD_LOG: Backend enabled?', result.config?.backendConfig?.enabled)
+        console.log('🔄 ADD_LOG: Extension enabled?', result.config?.isEnabled)
+        
         if (result.config?.backendConfig?.enabled) {
+          // Hourly throttle by category+message
+          const throttleKey = `audit_throttle_${(request.category || 'system')}_${request.message}`
+          const nowTs = Date.now()
+          const lastSentStr = localStorage.getItem(throttleKey)
+          const lastSent = lastSentStr ? parseInt(lastSentStr, 10) : 0
+          const oneHourMs = 3600000
+          if (lastSent && nowTs - lastSent < oneHourMs) {
+            console.log('⏸️ ADD_LOG: Skipping backend audit due to hourly throttle:', throttleKey)
+            return
+          }
+          localStorage.setItem(throttleKey, String(nowTs))
+
+          const payload = {
+            event_type: request.category || 'system',
+            event_category: request.category || 'system',
+            message: request.message,
+            severity: request.logType || 'info',
+            details: { source: 'chrome_extension' },
+            timestamp: new Date().toISOString(),
+            source: 'chrome_extension',
+            client_id: result.config.backendConfig.clientId,
+            msp_id: result.config.backendConfig.mspId,
+            user_id: result.config.backendConfig.userId || null
+          }
+          
+          // Get auth token for audit logging
+          const authResult = await chrome.storage.sync.get(['authUser'])
+          const authHeaders: Record<string, string> = {
+            'Content-Type': 'application/json'
+          }
+          
+          if (authResult.authUser && authResult.authUser.token) {
+            authHeaders['Authorization'] = `Bearer ${authResult.authUser.token}`
+            console.log('🔐 ADD_LOG: Using auth token for audit logging')
+          } else {
+            console.log('❌ ADD_LOG: No auth token found, audit logging will fail authentication')
+          }
+
+          console.log('🚀 Sending log to backend:', {
+            url: `${result.config.backendConfig.apiUrl}/api/v1/audit/events`,
+            payload: payload,
+            headers: authHeaders
+          });
+
           fetch(`${result.config.backendConfig.apiUrl}/api/v1/audit/events`, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(result.config.backendConfig.apiKey && { 'Authorization': `Bearer ${result.config.backendConfig.apiKey}` })
-            },
-            body: JSON.stringify({
-              eventType: request.category || 'system',
-              message: request.message,
-              severity: request.logType || 'info',
-              metadata: { source: 'chrome_extension' },
-              timestamp: new Date().toISOString(),
-              clientId: result.config.backendConfig.clientId,
-              mspId: result.config.backendConfig.mspId
-            })
-          }).catch(error => {
-            console.warn('Failed to send log to backend:', error);
+            headers: authHeaders,
+            body: JSON.stringify(payload)
+          })
+          .then(response => {
+            console.log('📡 Backend response status:', response.status);
+            console.log('📡 Backend response headers:', Object.fromEntries(response.headers.entries()));
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('✅ Backend log successful:', data);
+          })
+          .catch(error => {
+            console.error('❌ Failed to send log to backend:', error);
+            console.error('❌ Error details:', {
+              message: error.message,
+              stack: error.stack,
+              name: error.name
+            });
           });
+        } else {
+          console.log('⏸️ Backend logging skipped - backend not enabled');
         }
       });
       break;
@@ -568,6 +768,4 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     default:
       sendResponse({ error: 'Unknown message type' });
   }
-  
-  return true;
-});
+}

@@ -42,10 +42,10 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
 
   return (
     <div className="space-y-6">
-      <div className="bg-slate-800 bg-opacity-50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700">
+      {/* <div className="p-6 bg-opacity-50 border bg-slate-800 backdrop-blur-sm rounded-2xl border-slate-700">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-white">Configuration</h2>
-          <button className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors">
+          <button className="p-2 transition-colors rounded-lg bg-slate-700 hover:bg-slate-600">
             <svg className="w-5 h-5 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
               <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" />
             </svg>
@@ -54,28 +54,28 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block mb-2 text-sm font-medium text-slate-300">
               🛡️ Threat Detection Configuration
             </label>
             <div className="space-y-3">
-              <div className="p-4 bg-blue-700 bg-opacity-30 rounded-xl border border-blue-600">
+              <div className="p-4 bg-blue-700 border border-blue-600 bg-opacity-30 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 mr-3">
                     <span className="text-sm font-medium text-blue-200">VirusTotal API (Primary Malware Scanner) 🛡️</span>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="mt-1 text-xs text-slate-400">
                       Always-on cloud malware detection - Primary scanner (requires API key)
                     </p>
                   </div>
-                  <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                  <div className="px-3 py-1 text-xs font-medium text-white bg-blue-600 rounded-full">
                     PRIMARY
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-slate-700 bg-opacity-50 rounded-xl border border-slate-600">
+              <div className="flex items-center justify-between p-4 bg-opacity-50 border bg-slate-700 rounded-xl border-slate-600">
                 <div className="flex-1 mr-3">
                   <span className="text-sm font-medium text-slate-200">Gemini 2.0 Flash (Prompt Injection Protection) 🤖</span>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="mt-1 text-xs text-slate-400">
                     Ultra-fast AI detection of prompt injection attacks in real-time (requires API key)
                   </p>
                 </div>
@@ -89,7 +89,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block mb-2 text-sm font-medium text-slate-300">
               🤖 Gemini API Key (Prompt Injection Detection)
             </label>
             <input
@@ -97,15 +97,15 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
               value={config.geminiApiKey || ''}
               onChange={(e) => updateConfig({ geminiApiKey: e.target.value })}
               placeholder="Enter your Gemini API key"
-              className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 text-white transition-colors border bg-slate-700 border-slate-600 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="mt-2 text-xs text-slate-400">
               Get your free API key from{' '}
               <a 
                 href="https://aistudio.google.com/app/apikey" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-green-400 hover:text-green-300 underline"
+                className="text-green-400 underline hover:text-green-300"
               >
                 Google AI Studio
               </a>
@@ -114,7 +114,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
+            <label className="block mb-2 text-sm font-medium text-slate-300">
               🛡️ VirusTotal API Key (File Malware Scanning)
             </label>
             <input
@@ -122,15 +122,15 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
               value={config.apiKey}
               onChange={(e) => updateConfig({ apiKey: e.target.value })}
               placeholder="Enter your VirusTotal API key"
-              className="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+              className="w-full px-4 py-3 text-white transition-colors border bg-slate-700 border-slate-600 rounded-xl placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             />
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="mt-2 text-xs text-slate-400">
               Get your free API key from{' '}
               <a 
                 href="https://www.virustotal.com/gui/my-apikey" 
                 target="_blank" 
                 rel="noopener noreferrer" 
-                className="text-purple-400 hover:text-purple-300 underline"
+                className="text-purple-400 underline hover:text-purple-300"
               >
                 VirusTotal
               </a>
@@ -140,7 +140,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
 
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center text-slate-400 hover:text-white transition-colors"
+            className="flex items-center transition-colors text-slate-400 hover:text-white"
           >
             <svg
               className={`w-4 h-4 mr-2 transform transition-transform ${
@@ -155,7 +155,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
           </button>
 
           {showAdvanced && (
-            <div className="space-y-3 pl-6 border-l border-slate-600 ml-2">
+            <div className="pl-6 ml-2 space-y-3 border-l border-slate-600">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-300">Block .env files</span>
                 <button
@@ -207,7 +207,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
               <div className="flex items-center justify-between">
                 <div className="flex-1 mr-3">
                   <span className="text-sm text-slate-300">Scan executable files with VirusTotal</span>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="mt-1 text-xs text-slate-400">
                     ⚠️ Allows .exe, .msi files to be scanned instead of immediately blocked
                   </p>
                 </div>
@@ -232,12 +232,12 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
       <button
         onClick={handleSave}
         disabled={isSaving}
-        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-6 rounded-2xl font-semibold text-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="w-full px-6 py-4 text-lg font-semibold text-white transition-all duration-200 transform shadow-lg bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl hover:from-purple-700 hover:to-blue-700 hover:shadow-xl hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
         <div className="flex items-center justify-center">
           {isSaving ? (
             <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-3 -ml-1 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -252,7 +252,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
             </>
           )}
         </div>
-      </button>
+      </button> */}
     </div>
   )
 }

@@ -8,59 +8,84 @@ import { useState } from "react";
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/hooks/use-toast";
 import { apiClient } from "@/services/api";
-export default function AddApplication() {
+import { useCreateAIApplication } from "@/hooks/useApi";
 
-const [formData, setFormData] = useState({
+export default function AddApplicationDialog() {
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
     name: "",
     vendor: "",
     type: "",
-    // status: "",
-    // riskTolerance: "",
+    status: "Under_Review", // Default status for new applications
+    risk_level: "Medium", // Default risk level
   });
- const { toast } = useToast();
+
+  const { toast } = useToast();
+  const createMutation = useCreateAIApplication();
+
   const handleChange = (key: string, value: string) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
- const handleSubmit =async () => {
-const emptyField = Object.entries(formData).find(([_, value]) => !value || value.trim() === "");
-  if (emptyField) {
-    toast({
-     description: `Please fill in the ${emptyField[0]} field.`
-    });
-    return;
-  }
- const data=await apiClient.addAiApp(formData);
-console.log(data);
- }
 
+  const handleSubmit = async () => {
+    const emptyField = Object.entries(formData).find(([_, value]) => !value || value.trim() === "");
+    if (emptyField) {
+      toast({
+        title: "Validation Error",
+        description: `Please fill in the ${emptyField[0]} field.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      await createMutation.mutateAsync(formData);
+      // Success toast is handled by the React Query hook
+      setFormData({
+        name: "",
+        vendor: "",
+        type: "",
+        status: "Under_Review",
+        risk_level: "Medium",
+      });
+      setOpen(false);
+    } catch (error) {
+      // Error toast is handled by the React Query hook
+      // Just close the dialog on error
+    }
+  };
 
   return (
-   <Dialog>
-          <DialogTrigger  >
-            <div className=" flex text-white p-2 rounded-full bg-cybercept-blue hover:bg-cybercept-blue/90">
-            <Plus className="w-4 h-4 mr-2 mt-1" />
-            Add Application
-            </div>
-          </DialogTrigger>
-<DialogContent>
-  <DialogHeader>
-    <DialogTitle>Add a clients application</DialogTitle>
-  </DialogHeader>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-cybercept-blue hover:bg-cybercept-blue/90 text-white">
+          <Plus className="w-4 h-4 mr-2" />
+          Add Application
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Add New AI Application</DialogTitle>
+          <DialogDescription>
+            Add a new AI application to your inventory. All fields are required.
+          </DialogDescription>
+        </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="flex items-center gap-4">
-            <Label>Name:</Label>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="name" className="text-right">Name</Label>
             <Input
               id="name"
-              className="col-span-3 bg-muted"
+              className="col-span-3"
               value={formData.name}
               onChange={e => handleChange("name", e.target.value)}
+              placeholder="Enter application name"
             />
           </div>
 
-          <div className="flex items-center gap-4">
-            <Label>Vendor:</Label>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="vendor" className="text-right">Vendor</Label>
             <Select value={formData.vendor} onValueChange={v => handleChange("vendor", v)}>
-              <SelectTrigger>
+              <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select Vendor" />
               </SelectTrigger>
               <SelectContent>
@@ -68,66 +93,79 @@ console.log(data);
                   <SelectItem value="Microsoft">Microsoft</SelectItem>
                   <SelectItem value="OpenAI">OpenAI</SelectItem>
                   <SelectItem value="Anthropic">Anthropic</SelectItem>
+                  <SelectItem value="Google">Google</SelectItem>
+                  <SelectItem value="Meta">Meta</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Label>Type:</Label>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="type" className="text-right">Type</Label>
             <Select value={formData.type} onValueChange={v => handleChange("type", v)}>
-              <SelectTrigger>
+              <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select App type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="Application">Application</SelectItem>
-                  <SelectItem value="Api">Api</SelectItem>
+                  <SelectItem value="API">API</SelectItem>
                   <SelectItem value="Plugin">Plugin</SelectItem>
                   <SelectItem value="Agent">Agent</SelectItem>
+                  <SelectItem value="Model">Model</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
 
-          {/* <div className="flex items-center gap-4">
-            <Label>Status:</Label>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="status" className="text-right">Status</Label>
             <Select value={formData.status} onValueChange={v => handleChange("status", v)}>
-              <SelectTrigger>
+              <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
                   <SelectItem value="Permitted">Permitted</SelectItem>
                   <SelectItem value="Unsanctioned">Unsanctioned</SelectItem>
-                  <SelectItem value="Under_Review">Under_Review</SelectItem>
+                  <SelectItem value="Under_Review">Under Review</SelectItem>
                   <SelectItem value="Blocked">Blocked</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Label>Risk Tolerance:</Label>
-            <Select value={formData.riskTolerance} onValueChange={v => handleChange("riskTolerance", v)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select Risk Tolerance" />
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="risk_level" className="text-right">Risk Level</Label>
+            <Select value={formData.risk_level} onValueChange={v => handleChange("risk_level", v)}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select Risk Level" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="High">High</SelectItem>
-                  <SelectItem value="Medium">Medium</SelectItem>
                   <SelectItem value="Low">Low</SelectItem>
+                  <SelectItem value="Medium">Medium</SelectItem>
+                  <SelectItem value="High">High</SelectItem>
+                  <SelectItem value="Critical">Critical</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
-          </div> */}
+          </div>
 
-          <Button onClick={handleSubmit}>Create</Button>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={createMutation.isPending}
+            >
+              {createMutation.isPending ? "Creating..." : "Create Application"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
-
-     
-  )
+  );
 }
