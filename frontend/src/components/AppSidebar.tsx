@@ -2,6 +2,7 @@ import { LayoutDashboard, Building2, Shield, FileText, ChevronDown, GraduationCa
 import { NavLink, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useAuditLog } from "@/services/auditLogService";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -58,6 +59,54 @@ export function AppSidebar() {
   const [openSections, setOpenSections] = useState<string[]>([]);
   const location = useLocation();
   const auditLog = useAuditLog();
+  const { user } = useAuth();
+
+  // Filter navigation based on user role
+  const getFilteredNavigation = () => {
+    if (!user) return [];
+
+    const isMSPUser = user.role === 'msp_admin' || user.role === 'msp_user';
+    const isClientUser = user.role === 'client_admin' || user.role === 'end_user';
+
+    if (isMSPUser) {
+      // MSP users see all sections
+      return [...navigationStructure, ...separatedSections];
+    } else if (isClientUser) {
+      // Client users see only client-related sections
+      return [
+        {
+          title: "Client Dashboard",
+          url: "/client",
+          icon: Building2,
+          items: [
+            { title: "AI Control Center", url: "/client/ai-control", icon: ShieldCheck },
+            { title: "AI Inventory", url: "/client/ai-inventory", icon: List },
+            { title: "AI Compliance", url: "/client/compliance", icon: ClipboardCheck },
+            { title: "AI Engagement", url: "/client/ai-engagement", icon: TrendingUp },
+            { title: "Client-Facing Dashboard", url: "/client/client-facing" },
+          ],
+        },
+        {
+          title: "Reports",
+          url: "/reports/client",
+          icon: BarChart3,
+          items: [
+            { title: "Client Reports", url: "/reports/client" },
+          ],
+        },
+        {
+          title: "Education Hub",
+          url: "/education",
+          icon: GraduationCap,
+          items: [],
+        },
+      ];
+    }
+
+    return [];
+  };
+
+  const filteredNavigation = getFilteredNavigation();
 
   // Keep parent sections open based on current route
   useEffect(() => {
@@ -65,7 +114,7 @@ export function AppSidebar() {
     const sectionsToOpen: string[] = [];
 
     // Check which sections should be open based on current route
-    [...navigationStructure, ...separatedSections].forEach((section) => {
+    filteredNavigation.forEach((section) => {
       if (section.items) {
         const hasActiveItem = section.items.some(item => item.url === currentPath);
         if (hasActiveItem) {
@@ -128,7 +177,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2">
-              {navigationStructure.map((section) => (
+              {filteredNavigation.map((section) => (
                 <SidebarMenuItem key={section.title}>
                   <Collapsible 
                     open={openSections.includes(section.title)} 

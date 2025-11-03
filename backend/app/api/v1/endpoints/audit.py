@@ -1,37 +1,90 @@
-from typing import Optional, List
-from fastapi import APIRouter, Request, Depends, HTTPException
-from pydantic import BaseModel
+from typing import Optional, List, Dict, Any
+from fastapi import APIRouter, Request, Depends, HTTPException, status
+from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_, or_, desc, func
 from datetime import datetime
 import json
+import logging
 
-from app.core.database import get_async_session
+from app.core.database import get_async_session, get_sync_session
 from app.models.file_scan_audit import FileScanAuditLog
+from app.models.extension_logs import ExtensionLog, ensure_table_exists
+from app.core.correlation import get_correlation_id
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-# Audit Log Models
-class AuditLogEntry(BaseModel):
+# Request/Response Models
+class AuditLogEntryRequest(BaseModel):
+    """Request model for creating audit log"""
     user_id: Optional[str] = None
     client_id: Optional[str] = None
     msp_id: Optional[str] = None
-    event_type: str
-    event_category: str
-    severity: str
-    message: str
-    details: Optional[dict] = None
+    event_type: str = Field(..., min_length=1, max_length=100)
+    event_category: str = Field(..., min_length=1, max_length=100)
+    severity: str = Field(..., min_length=1, max_length=20)
+    message: str = Field(..., min_length=1, max_length=1000)
+    details: Optional[Dict[str, Any]] = None
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
     timestamp: Optional[str] = None
-    source: str
+    source: str = Field(..., min_length=1, max_length=50)
     session_id: Optional[str] = None
 
+class AuditLogSearchRequest(BaseModel):
+    """Request model for searching audit logs"""
+    event_type: Optional[str] = None
+    event_category: Optional[str] = None
+    severity: Optional[str] = None
+    level: Optional[str] = None
+    user_id: Optional[str] = None
+    client_id: Optional[str] = None
+    msp_id: Optional[str] = None
+    component: Optional[str] = None
+    correlation_id: Optional[str] = None
+    session_id: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    search_text: Optional[str] = None
+    limit: int = Field(default=50, ge=1, le=1000)
+    offset: int = Field(default=0, ge=0)
+
 class AuditLogResponse(BaseModel):
+    """Response model for audit log creation"""
     success: bool
     message: str
     log_id: Optional[str] = None
+    correlation_id: Optional[str] = None
+
+class AuditLogEntryResponse(BaseModel):
+    """Response model for audit log entry"""
+    id: str
+    level: str
+    component: str
+    event_type: str
+    message: str
+    details: Optional[str] = None
+    url: Optional[str] = None
+    extension_version: Optional[str] = None
+    session_id: Optional[str] = None
+    correlation_id: Optional[str] = None
+    response_status: Optional[int] = None
+    response_time_ms: Optional[int] = None
+    created_at: str
+
+class AuditLogSearchResponse(BaseModel):
+    """Response model for audit log search"""
+    logs: List[AuditLogEntryResponse]
+    total: int
+    limit: int
+    offset: int
+    has_more: bool
 
 class AuditLogFilter(BaseModel):
+    """Legacy filter model kept for backward compatibility with older endpoints.
+    Note: New integrations should use POST /api/v1/audit/events/search with AuditLogSearchRequest.
+    """
     event_type: Optional[str] = None
     event_category: Optional[str] = None
     severity: Optional[str] = None
@@ -44,68 +97,187 @@ class AuditLogFilter(BaseModel):
     offset: Optional[int] = 0
 
 @router.post("/events", response_model=AuditLogResponse)
-async def log_audit_event(
-    audit_entry: AuditLogEntry,
-    request: Request
+async def create_audit_event(
+    audit_entry: AuditLogEntryRequest,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session)
 ):
     """
-    Log an audit event (simplified version with file-based logging)
+    Create an audit log event - stores in SQLite
+    Returns 200 with well-formed JSON, never 400 for normal inputs
     """
+    corr_id = get_correlation_id(request)
+    body_length = request.headers.get('content-length', 'unknown')
+    
     try:
-        print(f"🔍 Received audit log entry: {audit_entry}")
-        print(f"🔍 Request headers: {dict(request.headers)}")
-        print(f"🔍 Request method: {request.method}")
-        print(f"🔍 Request URL: {request.url}")
+        # Ensure table exists
+        from app.core.database import sync_engine
+        ensure_table_exists(sync_engine)
         
-        # Create a simple audit log entry
-        import os
-        import json
-        from datetime import datetime
-        
-        # Create audit logs directory if it doesn't exist
-        audit_dir = "audit_logs"
-        if not os.path.exists(audit_dir):
-            os.makedirs(audit_dir)
+        # Prepare details JSON (truncate if needed to stay < 32KB)
+        details_str = None
+        if audit_entry.details:
+            details_json = json.dumps(audit_entry.details)
+            # Truncate to ~30KB to leave room for other fields
+            if len(details_json) > 30000:
+                details_json = details_json[:30000] + "...(truncated)"
+            details_str = details_json
         
         # Create log entry
-        log_entry = {
-            "id": f"audit_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{audit_entry.event_type}",
-            "timestamp": audit_entry.timestamp or datetime.utcnow().isoformat(),
-            "event_type": audit_entry.event_type,
-            "event_category": audit_entry.event_category,
-            "severity": audit_entry.severity,
-            "message": audit_entry.message,
-            "details": audit_entry.details,
-            "source": audit_entry.source,
-            "session_id": audit_entry.session_id,
-            "user_agent": audit_entry.user_agent,
-            "ip_address": audit_entry.ip_address,
-            "user_id": audit_entry.user_id,
-            "client_id": audit_entry.client_id,
-            "msp_id": audit_entry.msp_id,
-        }
+        from app.models.extension_logs import ExtensionLog
+        log_entry = ExtensionLog(
+            level=audit_entry.severity,
+            component="extension",
+            event_type=audit_entry.event_type,
+            message=audit_entry.message[:32768],  # Ensure < 32KB
+            details=details_str,
+            url=request.headers.get("referer", "")[:500] if request.headers.get("referer") else None,
+            extension_version=request.headers.get("user-agent", "")[:20],
+            browser_type="chrome",
+            session_id=audit_entry.session_id,
+            correlation_id=corr_id,
+            request_method=request.method,
+            request_path=str(request.url.path)[:200],
+            body_length=int(body_length) if body_length != 'unknown' else 0
+        )
         
-        # Save to file
-        log_filename = f"{audit_dir}/audit_{datetime.utcnow().strftime('%Y%m%d')}.jsonl"
-        with open(log_filename, "a", encoding="utf-8") as f:
-            f.write(json.dumps(log_entry) + "\n")
+        # Save using sync session for SQLite
+        from app.core.database import SessionLocal
+        db = SessionLocal()
+        try:
+            db.add(log_entry)
+            db.commit()
+            log_id = log_entry.id
+        finally:
+            db.close()
         
-        print(f"✅ Audit log saved to file: {log_filename}")
+        logger.info(f"audit_event_created corrId={corr_id} logId={log_id} eventType={audit_entry.event_type} level={audit_entry.severity}")
         
         return AuditLogResponse(
             success=True,
             message="Audit event logged successfully",
-            log_id=log_entry["id"]
+            log_id=log_id,
+            correlation_id=corr_id
         )
         
     except Exception as e:
-        print(f"❌ Failed to log audit event: {e}")
+        logger.error(f"audit_event_create_error corrId={corr_id} error={str(e)} errorType={type(e).__name__}")
+        # Return 500, not 400 - we've already validated input
         raise HTTPException(
-            status_code=500,
-            detail=f"Failed to log audit event: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create audit event: {str(e)}"
         )
 
-@router.get("/logs")
+@router.post("/events/search", response_model=AuditLogSearchResponse)
+async def search_audit_events(
+    search_request: AuditLogSearchRequest,
+    request: Request
+):
+    """
+    Search audit events with filters and pagination
+    Returns 200 with well-formed JSON, never 400 for normal inputs
+    """
+    corr_id = get_correlation_id(request)
+    
+    try:
+        # Use sync session for SQLite
+        from app.core.database import SessionLocal, sync_engine
+        ensure_table_exists(sync_engine)
+        db = SessionLocal()
+        
+        try:
+            # Build query
+            query = db.query(ExtensionLog)
+            
+            # Apply filters
+            if search_request.event_type:
+                query = query.filter(ExtensionLog.event_type == search_request.event_type)
+            
+            if search_request.event_category:
+                query = query.filter(ExtensionLog.event_category == search_request.event_category)
+            
+            if search_request.severity:
+                query = query.filter(ExtensionLog.level == search_request.severity)
+            
+            if search_request.level:
+                query = query.filter(ExtensionLog.level == search_request.level)
+            
+            if search_request.component:
+                query = query.filter(ExtensionLog.component == search_request.component)
+            
+            if search_request.session_id:
+                query = query.filter(ExtensionLog.session_id == search_request.session_id)
+            
+            if search_request.correlation_id:
+                query = query.filter(ExtensionLog.correlation_id == search_request.correlation_id)
+            
+            if search_request.start_date:
+                start_dt = datetime.fromisoformat(search_request.start_date)
+                query = query.filter(ExtensionLog.created_at >= start_dt)
+            
+            if search_request.end_date:
+                end_dt = datetime.fromisoformat(search_request.end_date)
+                query = query.filter(ExtensionLog.created_at <= end_dt)
+            
+            if search_request.search_text:
+                search_term = f"%{search_request.search_text}%"
+                query = query.filter(
+                    or_(
+                        ExtensionLog.message.like(search_term),
+                        ExtensionLog.details.like(search_term)
+                    )
+                )
+            
+            # Get total count
+            total_count = query.count()
+            
+            # Apply pagination
+            logs = query.order_by(desc(ExtensionLog.created_at))\
+                       .limit(search_request.limit)\
+                       .offset(search_request.offset)\
+                       .all()
+            
+            # Convert to response format
+            log_entries = []
+            for log in logs:
+                log_entries.append(AuditLogEntryResponse(
+                    id=log.id,
+                    level=log.level,
+                    component=log.component,
+                    event_type=log.event_type,
+                    message=log.message,
+                    details=log.details,
+                    url=log.url,
+                    extension_version=log.extension_version,
+                    session_id=log.session_id,
+                    correlation_id=log.correlation_id,
+                    response_status=log.response_status,
+                    response_time_ms=log.response_time_ms,
+                    created_at=log.created_at.isoformat()
+                ))
+            
+            has_more = (search_request.offset + search_request.limit) < total_count
+            
+            logger.info(f"audit_event_search corrId={corr_id} filters={len([x for x in search_request.dict().values() if x])} results={len(log_entries)} total={total_count}")
+            
+            return AuditLogSearchResponse(
+                logs=log_entries,
+                total=total_count,
+                limit=search_request.limit,
+                offset=search_request.offset,
+                has_more=has_more
+            )
+        
+        finally:
+            db.close()
+        
+    except Exception as e:
+        logger.error(f"audit_event_search_error corrId={corr_id} error={str(e)} errorType={type(e).__name__}")
+        # Return 500, not 400 - we've already validated input
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to search audit events: {str(e)}"
+        )
 async def get_audit_logs(
     filter_params: AuditLogFilter = Depends(),
     session: AsyncSession = Depends(get_async_session)

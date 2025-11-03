@@ -5,6 +5,37 @@ import { useAIEngagementData } from "@/hooks/useAIEngagementData";
 
 export const DepartmentUsage = ({ id, days }: { id?: string; days?: number }) => {
   const { data: engagementData, isLoading } = useAIEngagementData(days);
+  
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Department Usage</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!engagementData || !engagementData.departments) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Department Usage</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <p className="text-muted-foreground">No department data available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const data = engagementData.departments.map(dept => ({
     ...dept,
     interactions_per_user: dept.active_users > 0 ? Math.round(dept.interactions / dept.active_users) : 0

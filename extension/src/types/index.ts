@@ -3,7 +3,16 @@ export interface LogEntry {
   timestamp: string
   message: string
   type: 'success' | 'error' | 'info' | 'warning'
-  category?: 'prompt_injection' | 'pii' | 'file_scan' | 'system'
+  category?: 'prompt_injection' | 'pii' | 'file_scan' | 'system' | 'api'
+}
+
+export interface PromptLog {
+  id: string
+  timestamp: string // ISO format
+  type: 'SUCCESS' | 'FAILURE'
+  prompt: string
+  summary: string
+  reason: string // Required for FAILURE, optional/empty for SUCCESS
 }
 
 export interface AdvancedSettings {

@@ -1,24 +1,19 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowRight, Eye, EyeOff, Lock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 
-// Demo credentials - for development only
-const DEMO_CREDENTIALS = {
-  email: "admin@demo.com",
-  password: "demo123"
-};
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
-  const { login } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading, user } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -27,33 +22,29 @@ const Login = () => {
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
 
+  // Redirect if already authenticated
+  if (user) {
+    if (user.role === 'msp_admin' || user.role === 'msp_user') {
+      navigate("/dashboard", { replace: true });
+    } else {
+      navigate("/client", { replace: true });
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
 
     try {
       await login(formData);
-      // Navigate based on user role
-      const user = JSON.parse(localStorage.getItem('user_info') || '{}');
-      if (user.role === 'msp_admin' || user.role === 'msp_user') {
-        navigate("/dashboard");
-      } else {
-        navigate("/client");
-      }
+      // Navigation will be handled by the redirect logic above
     } catch (error: any) {
       setError(error.message || "Invalid credentials");
       setShake(true);
       setTimeout(() => setShake(false), 500);
     }
-    
-    setIsLoading(false);
   };
 
-  const handleDemoFill = () => {
-    setFormData(DEMO_CREDENTIALS);
-    setError("");
-  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -139,16 +130,6 @@ const Login = () => {
               </div>
             )}
 
-            {/* Demo Credentials Link */}
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={handleDemoFill}
-                className="text-xs text-slate-500 hover:text-primary underline-offset-4 hover:underline"
-              >
-                Use demo credentials
-              </button>
-            </div>
 
             {/* Submit Button */}
             <Button 

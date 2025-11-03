@@ -19,6 +19,7 @@ class AlertFamily(str, Enum):
     AGENT_RISK = "Agent Risk"
     POLICY_VIOLATION = "Policy Violation"
     USAGE_ANOMALY = "Usage Anomaly"
+    COMPLIANCE = "Compliance"
     COMPLIANCE_GAP = "Compliance Gap"
     CONFIG_DRIFT = "Config Drift"
     ENFORCEMENT = "Enforcement"
@@ -84,8 +85,6 @@ async def get_alerts(
     alerts = []
     
     if user['role'] in ["msp_admin", "msp_user"]:
-      
-    
      msp_id = user['msp_id']
       
       # Get all clients for this MSP
@@ -95,6 +94,11 @@ async def get_alerts(
      
      if not client_ids:
          return []
+    
+    elif user['role'] in ["client_admin","client_user"]:
+        client_ids=[user['client_id']]
+     
+
      
     alerts_query = select(Alert).options(
         selectinload(Alert.ai_service)
@@ -146,10 +150,10 @@ async def get_alerts(
             application_id=alert.app, 
             ai_application=ai_application,
             user_id=user['id'], 
-            alert_family=AlertFamily(alert.family),
+            alert_family=AlertFamily(alert.family) if alert.family in [e.value for e in AlertFamily] else AlertFamily.UNSANCTIONED_USE,
             subtype=alert.subtype,
-            severity=Severity(alert.severity),
-            status=AlertStatus(alert.status),
+            severity=Severity(alert.severity) if alert.severity in [e.value for e in Severity] else Severity.LOW,
+            status=AlertStatus(alert.status) if alert.status in [e.value for e in AlertStatus] else AlertStatus.UNASSIGNED,
             title=f"{alert.family} - {alert.subtype or 'Alert'}",  # Generate title from family and subtype
             description=alert.details,
             users_affected=alert.users_affected or 0,

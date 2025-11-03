@@ -31,6 +31,9 @@ export interface Client {
   compliance_coverage: number;
   created_at: string;
   updated_at: string;
+  apps_added_7d?: number;
+  interactions_pct_change_7d?: number;
+  agents_deployed_change_7d?: number;
 }
 
 export interface AIApplication {
@@ -43,6 +46,7 @@ export interface AIApplication {
   risk_score: number;
   active_users: number;
   avg_daily_interactions: number;
+  avgDailyInteractions?: number; // Backend sometimes returns this format
   integrations?: any;
   approval_conditions?: any;
   approved_by?: string;
@@ -269,7 +273,7 @@ class ApiClient {
 
   // Client endpoints
   async getClients(): Promise<Client[]> {
-    return this.request<Client[]>('/clients/');
+    return await this.request<Client[]>('/clients/');
   }
 
   async getClient(clientId: string): Promise<Client> {
@@ -281,22 +285,22 @@ class ApiClient {
   }
 
   // AI Inventory endpoints
-  async getAIInventory(): Promise<AIApplication[]> {
+  async getAIInventory(): Promise<Array<{ clientId: string; clientName?: string; items: AIApplication[] }>> {
     const raw = await this.request<any>('/ai-inventory/');
     // Backend returns: [{ clientId, clientName, items: [...] }]
     const entries: any[] = Array.isArray(raw) ? raw : [];
-    const flat: AIApplication[] = entries.flatMap((entry) => {
+    return entries.map((entry) => {
       const items: any[] = Array.isArray(entry?.items) ? entry.items : [];
-      return items.map((it) => ({
-        id: String(it.id),
-        name: String(it.name),
-        vendor: String(it.vendor || ''),
-        type: it.type as AIApplication['type'],
-        status: it.status as AIApplication['status'],
-        risk_level: (it.risk_level || 'Low') as AIApplication['risk_level'],
-        risk_score: Number(it.risk_score || 0),
-        active_users: Number(it.active_users || it.users || 0),
-        avg_daily_interactions: Number(it.avgDailyInteractions || it.avg_daily_interactions || 0),
+      const mappedItems: AIApplication[] = items.map((it) => ({
+        id: String(it.id ?? it.name ?? Math.random()),
+        name: String(it.name ?? ''),
+        vendor: String(it.vendor ?? ''),
+        type: (it.type ?? 'Application') as AIApplication['type'],
+        status: (it.status ?? 'Permitted') as AIApplication['status'],
+        risk_level: (it.risk_level ?? 'Low') as AIApplication['risk_level'],
+        risk_score: Number(it.risk_score ?? 0),
+        active_users: Number(it.active_users ?? it.users ?? 0),
+        avg_daily_interactions: Number(it.avgDailyInteractions ?? it.avg_daily_interactions ?? 0),
         integrations: it.integrations,
         approval_conditions: it.approval_conditions,
         approved_by: it.approved_by,
@@ -304,8 +308,12 @@ class ApiClient {
         created_at: it.created_at || new Date().toISOString(),
         updated_at: it.updated_at || new Date().toISOString(),
       }));
+      return {
+        clientId: String(entry?.clientId ?? ''),
+        clientName: entry?.clientName ? String(entry.clientName) : undefined,
+        items: mappedItems,
+      };
     });
-    return flat;
   }
 
   async getClientInventory(clientId: string): Promise<AIApplication[]> {
@@ -394,7 +402,7 @@ class ApiClient {
     limit?: number;
     offset?: number;
   }): Promise<Alert[]> {
-    return this.request<Alert[]>('/alerts/', {
+    return await this.request<Alert[]>('/alerts/', {
       method: 'GET',
       params
     });
@@ -443,11 +451,18 @@ class ApiClient {
 
   
  async GetAIEngagement(days?: number): Promise<any> {
-    return this.request<any>(`/ai-engagement/msp/clients`, {
+    return this.request<any>(`/ai-engagement/clients`, {
       method: 'GET',
       params: days ? { days } : undefined
     });
-  } 
+  }
+
+  async getClientAIEngagement(clientId: string, days?: number): Promise<any> {
+    return this.request<any>(`/ai-engagement/clients/${clientId}`, {
+      method: 'GET',
+      params: days ? { days } : undefined
+    });
+  }
  
   
 
@@ -457,6 +472,48 @@ class ApiClient {
 
   async getAlertsFeed(): Promise<{ alerts: Alert[] }> {
     return this.request<{ alerts: Alert[] }>('/alerts/feed/real-time');
+  }
+
+  // Client interaction endpoints
+  async getClientInteractions(clientId: string): Promise<any> {
+    return this.request<any>(`/clients/${clientId}/interactions`);
+  }
+
+  async getApplicationInteractions(clientId: string, appId: string): Promise<any> {
+    return this.request<any>(`/clients/${clientId}/applications/${appId}/interactions`);
+  }
+
+  async incrementInteractionCount(clientId: string, appId: string, count: number = 1): Promise<any> {
+    return this.request<any>(`/clients/${clientId}/interactions/increment`, {
+      method: 'POST',
+      body: JSON.stringify({ app_id: appId, interaction_count: count }),
+    });
+  }
+
+  // Action Queue endpoints
+  async getClientActionQueue(clientId: string): Promise<any> {
+    return this.request<any>(`/action-queue/clients/${clientId}/action-queue`);
+  }
+
+  async resolveAction(clientId: string, actionId: string, actionType: string, resolution: string): Promise<any> {
+    return this.request<any>(`/action-queue/clients/${clientId}/actions/${actionId}/resolve`, {
+      method: 'POST',
+      params: { action_type: actionType, resolution }
+    });
+  }
+
+  async getClientComplianceSummary(clientId: string): Promise<any> {
+    return this.request<any>(`/action-queue/clients/${clientId}/compliance-summary`);
+  }
+
+  // Compliance endpoints
+  async getClientComplianceReport(clientId: string): Promise<any> {
+    return this.request<any>(`/reports/clients/${clientId}/compliance`);
+  }
+
+  // Policies endpoints
+  async getClientPolicies(clientId: string): Promise<any> {
+    return this.request<any>(`/policies/clients/${clientId}/policies`);
   }
 }
 

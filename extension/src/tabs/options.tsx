@@ -2,44 +2,24 @@ import { useState, useEffect } from "react"
 import Header from "~components/Header"
 import StatusToggle from "~components/StatusToggle"
 import ConfigPanel from "~components/ConfigPanel"
-import { BackendConfigPanel } from "~components/BackendConfigPanel"
-import LogsPanel from "~components/LogsPanel"
+import AnalysisLogsPanel from "~components/AnalysisLogsPanel"
+// Unified Logs panel only; removed other logging surfaces
 import LoginPage from "~components/LoginPage"
-import { useConfig, useLogs } from "~hooks/useStorage"
+import { useConfig } from "~hooks/useStorage"
 import { useAuth } from "~hooks/useAuth"
-import type { LogEntry } from "~types"
-import "~style.css"
+import "../style.css"
 
 export default function OptionsPage() {
   console.log('OptionsPage component rendering')
   
   const { user, loading: authLoading, login, logout, isAuthenticated } = useAuth()
   const [config, updateConfig, configLoading] = useConfig()
-  const [logs, updateLogs, logsLoading] = useLogs()
   
-  console.log('🔐 OPTIONS: Loading states:', { authLoading, configLoading, logsLoading })
+  console.log('🔐 OPTIONS: Loading states:', { authLoading, configLoading })
   console.log('🔐 OPTIONS: Auth user:', user)
   console.log('🔐 OPTIONS: Is authenticated:', isAuthenticated())
   console.log('🔐 OPTIONS: Config:', config)
-  console.log('🔐 OPTIONS: Logs:', logs)
 
-  const refreshLogsFromStorage = async () => {
-    try {
-      const result = await chrome.storage.sync.get(['logs'])
-      console.log('Manual refresh: Found', result.logs?.length || 0, 'logs in storage')
-      if (result.logs) {
-        updateLogs(result.logs)
-      }
-    } catch (error) {
-      console.error('Error refreshing logs:', error)
-    }
-  }
-
-  useEffect(() => {
-    const interval = setInterval(refreshLogsFromStorage, 2000)
-    refreshLogsFromStorage()
-    return () => clearInterval(interval)
-  }, [])
 
   // Show loading state while checking authentication
   if (authLoading) {
@@ -66,8 +46,8 @@ export default function OptionsPage() {
     return <LoginPage onLogin={login} loading={authLoading} />
   }
 
-  // Show loading state for config/logs if authenticated
-  if (configLoading || logsLoading) {
+  // Show loading state for config if authenticated
+  if (configLoading) {
     console.log('🔐 OPTIONS: Showing loading state...')
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900">
@@ -145,15 +125,6 @@ export default function OptionsPage() {
     })
   }
 
-  const handleClearLogs = async () => {
-    try {
-      await chrome.runtime.sendMessage({ type: 'CLEAR_LOGS' })
-      updateLogs([])
-    } catch (error) {
-      console.error('Error clearing logs:', error)
-      updateLogs([])
-    }
-  }
 
   return (
     <div className="min-h-screen text-white bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900">
@@ -194,20 +165,10 @@ export default function OptionsPage() {
             onSave={handleConfigSave}
           />
           
-          <BackendConfigPanel
-            isExtensionEnabled={config.isEnabled}
-            onConfigChange={(backendConfig) => {
-              console.log('Backend config updated:', backendConfig)
-            }}
-          />
         </div>
 
         <div className="h-full">
-          <LogsPanel 
-            logs={logs}
-            onClearLogs={handleClearLogs}
-            onRefreshLogs={refreshLogsFromStorage}
-          />
+          <AnalysisLogsPanel />
         </div>
       </div>
 
@@ -215,7 +176,7 @@ export default function OptionsPage() {
         <div className="p-4 border bg-slate-800 bg-opacity-30 backdrop-blur-sm rounded-xl border-slate-700">
           <div className="flex items-center justify-between text-sm text-slate-400">
             <div className="flex items-center space-x-4">
-              <span>© 2025 File Upload Scanner by Aaditya Raj</span>
+              <span>© 2025 Owlnox </span>
               <span>•</span>
               <a href="#" className="transition-colors hover:text-white">Privacy Policy</a>
               <span>•</span>
@@ -230,6 +191,8 @@ export default function OptionsPage() {
           </div>
         </div>
       </footer>
+
+      {/* All logs unified in the LogsPanel above */}
     </div>
   )
 }

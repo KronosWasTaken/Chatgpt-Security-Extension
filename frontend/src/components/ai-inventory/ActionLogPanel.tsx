@@ -11,6 +11,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Shield, CheckCircle, XCircle, AlertTriangle, User, Clock, UserCheck, Filter, Calendar, Target, Users, ChevronDown } from "lucide-react";
 import { useState } from "react";
 
+// Mock data - will be replaced with API call
 const mockActionLog = [
   {
     id: "1",

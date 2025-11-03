@@ -14,7 +14,7 @@ export default function StatusToggle({ isEnabled, onToggle }: StatusToggleProps)
           <p className="text-sm text-slate-400">
             {isEnabled 
               ? "🟢 Security scanning is active and protecting your uploads" 
-              : "🔴 Security scanning is disabled - uploads are not being monitored"
+              : "🔴 Scanner inactive — all uploads and prompts are allowed without scanning"
             }
           </p>
         </div>

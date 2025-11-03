@@ -17,6 +17,13 @@ from sqlalchemy.orm import aliased
 from app.core.utils import *
 from app.services.metrics_calculator import MetricsCalculator
 from app.services.engagement_service import EngagementService
+from app.core.client_context import (
+    get_client_context, 
+    get_client_by_context, 
+    get_client_by_id,
+    require_client_access,
+    ClientContext
+)
 from datetime import date
 
 def get_risk_score_for_service(service: ClientAIServices) -> int:
@@ -220,17 +227,124 @@ router = APIRouter()
 
 
 
-@router.get("/", response_model=List[ClientResponse])
-async def get_clients(
-    request: Request,
+@router.get("/{client_id}/dashboard")
+async def get_client_dashboard(
+    client_id: str,
+    client_context: ClientContext = Depends(get_client_context),
     session: AsyncSession = Depends(get_async_session)
 ):
-    user = request.state.user  
-    print(user)
+    """Get dashboard data for a specific client - accessible by both MSP and client users"""
+    client = await get_client_by_id(client_id, client_context, session)
+    
+    # Calculate metrics for this client
+    calculator = MetricsCalculator(session)
+    metrics = await calculator.calculate_client_metrics(str(client.id))
+    
+    # Update metrics in database
+    await update_client_metrics_in_db(session, str(client.id), metrics)
+    
+    return {
+        "client_id": str(client.id),
+        "client_name": client.name,
+        "apps_monitored": metrics.get('apps_monitored', 0),
+        "interactions_monitored": metrics.get('interactions_monitored', 0),
+        "agents_deployed": metrics.get('agents_deployed', 0),
+        "risk_score": metrics.get('risk_score', 0),
+        "compliance_coverage": int(round(metrics.get('compliance_coverage', 0))),
+        "status": client.status,
+        "subscription_tier": client.subscription_tier,
+        "industry": client.industry,
+        "company_size": client.company_size
+    }
+
+@router.get("/{client_id}", response_model=ClientResponse)
+async def get_client(
+    client_id: str,
+    client_context: ClientContext = Depends(get_client_context),
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Get a specific client by ID - accessible by both MSP and client users"""
+    client = await get_client_by_id(client_id, client_context, session)
+    
+    # Calculate metrics for this client
+    calculator = MetricsCalculator(session)
+    metrics = await calculator.calculate_client_metrics(str(client.id))
+    
+    # Update metrics in database
+    await update_client_metrics_in_db(session, str(client.id), metrics)
+    
+    # Calculate additional metrics
+    seven_days_ago = date.today() - timedelta(days=7)
+    
+    # Apps added in last 7 days
+    apps_added_query = select(func.count()).where(
+        and_(
+            ClientAIServices.client_id == client.id,
+            ClientAIServices.created_at >= seven_days_ago
+        )
+    )
+    apps_added_result = await session.execute(apps_added_query)
+    apps_added_7d = int(apps_added_result.scalar() or 0)
+    
+    # Interactions percentage change
+    current_start = seven_days_ago
+    prev_start = seven_days_ago - timedelta(days=7)
+    
+    interactions_current_query = select(func.sum(ClientAIServiceUsage.daily_interactions)).where(
+        and_(
+            ClientAIServiceUsage.client_id == client.id,
+            ClientAIServiceUsage.created_at >= current_start
+        )
+    )
+    interactions_current_result = await session.execute(interactions_current_query)
+    interactions_current_7d = int(interactions_current_result.scalar() or 0)
+    
+    interactions_prev_query = select(func.sum(ClientAIServiceUsage.daily_interactions)).where(
+        and_(
+            ClientAIServiceUsage.client_id == client.id,
+            ClientAIServiceUsage.created_at >= prev_start,
+            ClientAIServiceUsage.created_at < current_start
+        )
+    )
+    interactions_prev_result = await session.execute(interactions_prev_query)
+    interactions_prev_7d = int(interactions_prev_result.scalar() or 0)
+    
+    # Calculate percentage change
+    if interactions_prev_7d > 0:
+        interactions_change_pct = ((interactions_current_7d - interactions_prev_7d) / interactions_prev_7d) * 100
+    else:
+        interactions_change_pct = 0 if interactions_current_7d == 0 else 100
+    
+    return ClientResponse(
+        id=str(client.id),
+        name=client.name,
+        industry=client.industry,
+        company_size=client.company_size,
+        status=client.status,
+        subscription_tier=client.subscription_tier,
+        apps_monitored=metrics.get('apps_monitored', 0),
+        interactions_monitored=metrics.get('interactions_monitored', 0),
+        agents_deployed=metrics.get('agents_deployed', 0),
+        risk_score=metrics.get('risk_score', 0),
+        compliance_coverage=int(round(metrics.get('compliance_coverage', 0))),
+        created_at=client.created_at,
+        updated_at=client.updated_at,
+        apps_added_7d=apps_added_7d,
+        interactions_pct_change_7d=interactions_change_pct,
+        agents_deployed_change_7d=0
+    )
+
+@router.get("/", response_model=List[ClientResponse])
+async def get_clients(
+    client_context: ClientContext = Depends(get_client_context),
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Get clients based on user role and permissions"""
     clients = []
     
-    if user['role'] in ["msp_admin", "msp_user"]:
-        msp_id = UUID(user['msp_id'])
+    if client_context.is_msp_user():
+        # MSP users can see all clients under their MSP
+        msp_id = UUID(client_context.msp_id)
        
         
         # Get basic client data
@@ -241,7 +355,6 @@ async def get_clients(
         # Initialize metrics calculator
         calculator = MetricsCalculator(session)
         
-        print("hmm")
         for client in client_rows:
           
             # Calculate and update metrics in real-time
@@ -323,7 +436,76 @@ async def get_clients(
                 interactions_pct_change_7d=interactions_pct_change_7d,
                 agents_deployed_change_7d=agents_deployed_change_7d
             ))
-      
+    
+    elif client_context.is_client_user():
+        # Client users can only see their own client
+        client = await get_client_by_context(client_context, session)
+        
+        if client:
+            # Calculate metrics for this client
+            calculator = MetricsCalculator(session)
+            metrics = await calculator.calculate_client_metrics(str(client.id))
+            
+            # Update metrics in database
+            await update_client_metrics_in_db(session, str(client.id), metrics)
+            
+            # 7-day comparisons
+            seven_days_ago = date.today() - timedelta(days=7)
+
+            # Apps added in last 7 days
+            apps_added_query = select(func.count()).where(
+                and_(
+                    ClientAIServices.client_id == client.id,
+                    ClientAIServices.created_at >= seven_days_ago
+                )
+            )
+            apps_added_result = await session.execute(apps_added_query)
+            apps_added_7d = int(apps_added_result.scalar() or 0)
+
+            # Interactions percentage change
+            current_start = seven_days_ago
+            prev_start = seven_days_ago - timedelta(days=7)
+
+            interactions_current_query = select(func.sum(ClientAIServiceUsage.daily_interactions)).where(
+                and_(
+                    ClientAIServiceUsage.client_id == client.id,
+                    ClientAIServiceUsage.created_at >= current_start,
+                    ClientAIServiceUsage.created_at < date.today() + timedelta(days=1)
+                )
+            )
+            interactions_prev_query = select(func.sum(ClientAIServiceUsage.daily_interactions)).where(
+                and_(
+                    ClientAIServiceUsage.client_id == client.id,
+                    ClientAIServiceUsage.created_at >= prev_start,
+                    ClientAIServiceUsage.created_at < current_start
+                )
+            )
+            interactions_current = (await session.execute(interactions_current_query)).scalar() or 0
+            interactions_prev = (await session.execute(interactions_prev_query)).scalar() or 0
+            if interactions_prev == 0:
+                interactions_pct_change_7d = 0.0
+            else:
+                interactions_pct_change_7d = round(((interactions_current - interactions_prev) / interactions_prev) * 100, 2)
+
+            clients.append(ClientResponse(
+                id=str(client.id),
+                name=client.name,
+                industry=client.industry,
+                company_size=client.company_size,
+                status=client.status,
+                subscription_tier=client.subscription_tier,
+                apps_monitored=metrics["apps_monitored"],
+                interactions_monitored=metrics["interactions_monitored"],
+                agents_deployed=metrics["agents_deployed"],
+                risk_score=int(metrics["risk_score"]),
+                compliance_coverage=int(metrics["compliance_coverage"]),
+                created_at=client.created_at,
+                updated_at=client.updated_at,
+                apps_added_7d=apps_added_7d,
+                interactions_pct_change_7d=interactions_pct_change_7d,
+                agents_deployed_change_7d=0  # Set to 0 for client users
+            ))
+    
     return clients
 
 
@@ -545,51 +727,62 @@ async def get_portfolio_totals(
 ):
     """Get portfolio totals for MSP dashboard - calculated in real-time"""
     user = request.state.user
-    
-    if user['role'] not in ["msp_admin", "msp_user"]:
-        return {
-            "apps_monitored": 0,
-            "interactions_monitored": 0,
-            "agents_deployed": 0,
-            "avg_risk_score": 0
-        }
-    
-    msp_id = UUID(user['msp_id'])
-    
-    # Get all clients for this MSP
-    client_query = select(Client).where(Client.msp_id == msp_id)
-    client_result = await session.execute(client_query)
-    clients = client_result.scalars().all()
-    
-    # Initialize metrics calculator
-    calculator = MetricsCalculator(session)
-    
-    # Calculate and update metrics for all clients
-    total_apps = 0
-    total_interactions = 0
-    total_agents = 0
-    risk_scores = []
-    
-    for client in clients:
-        metrics = await calculator.calculate_client_metrics(str(client.id))
-        
-        # Update metrics in database
-        await update_client_metrics_in_db(session, str(client.id), metrics)
-        
-        total_apps += metrics["apps_monitored"]
-        total_interactions += metrics["interactions_monitored"]
-        total_agents += metrics["agents_deployed"]
-        risk_scores.append(metrics["risk_score"])
-    
-    # Calculate average risk score
-    avg_risk_score = sum(risk_scores) / len(risk_scores) if risk_scores else 0
-    
-    return {
-        "apps_monitored": total_apps,
-        "interactions_monitored": total_interactions,
-        "agents_deployed": total_agents,
-        "avg_risk_score": round(avg_risk_score, 1)
+
+    safe_default = {
+        "apps_monitored": 0,
+        "interactions_monitored": 0,
+        "agents_deployed": 0,
+        "avg_risk_score": 0.0,
     }
+
+    if user.get('role') not in ["msp_admin", "msp_user"]:
+        return safe_default
+
+    try:
+        msp_id = UUID(user['msp_id'])
+
+        # Get all clients for this MSP
+        client_query = select(Client).where(Client.msp_id == msp_id)
+        client_result = await session.execute(client_query)
+        clients = client_result.scalars().all()
+
+        # Initialize metrics calculator
+        calculator = MetricsCalculator(session)
+
+        # Calculate and update metrics for all clients
+        total_apps = 0
+        total_interactions = 0
+        total_agents = 0
+        risk_scores: List[float] = []
+
+        for client in clients:
+            metrics = await calculator.calculate_client_metrics(str(client.id))
+
+            # Update metrics in database (best-effort)
+            try:
+                await update_client_metrics_in_db(session, str(client.id), metrics)
+            except Exception:
+                pass
+
+            # Accumulate with safe casting
+            total_apps += int(metrics.get("apps_monitored", 0) or 0)
+            total_interactions += int(metrics.get("interactions_monitored", 0) or 0)
+            total_agents += int(metrics.get("agents_deployed", 0) or 0)
+            try:
+                risk_scores.append(float(metrics.get("risk_score", 0) or 0))
+            except Exception:
+                continue
+
+        avg_risk_score = float(sum(risk_scores) / len(risk_scores)) if risk_scores else 0.0
+
+        return {
+            "apps_monitored": int(total_apps),
+            "interactions_monitored": int(total_interactions),
+            "agents_deployed": int(total_agents),
+            "avg_risk_score": round(avg_risk_score, 1),
+        }
+    except Exception:
+        return safe_default
 
 
 # Request/Response models for adding client AI applications

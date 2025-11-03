@@ -5,6 +5,37 @@ import { getRecommendations} from "@/data/aiEngagement";
 import { useAIEngagementData } from "@/hooks/useAIEngagementData";
 export const RecommendationsPanel = ({ id, days }: { id?: string; days?: number }) => {
  const { data: engagementData, isLoading } = useAIEngagementData(days);
+  
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Recommendations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!engagementData) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Recommendations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <p className="text-muted-foreground">No engagement data available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const recommendations = getRecommendations(engagementData);
 
   const sections = [
@@ -67,7 +98,7 @@ export const RecommendationsPanel = ({ id, days }: { id?: string; days?: number 
 
   return (
     <Card id={id} className="scroll-mt-20">
-      <CardHeader>
+      {/* <CardHeader>
         <CardTitle>Recommendations Panel</CardTitle>
       </CardHeader>
       <CardContent>
@@ -96,7 +127,7 @@ export const RecommendationsPanel = ({ id, days }: { id?: string; days?: number 
             </div>
           ))}
         </div>
-      </CardContent>
+      </CardContent> */}
     </Card>
   );
 };

@@ -66,6 +66,117 @@ class ClientAIEngagementResponse(BaseModel):
     engagement: AIEngagementDataResponse
 
 # Endpoints
+@router.get("/clients", response_model=List[ClientAIEngagementResponse])
+async def get_all_clients_engagement(
+    request: Request,
+    department: Optional[str] = Query(None, description="Filter by department"),
+    target_date: Optional[date] = Query(None, description="Target date (defaults to today)"),
+    session: AsyncSession = Depends(get_async_session)
+):
+    """Get AI engagement data for all clients in the MSP"""
+    user = request.state.user
+    
+    # if user['role'] not in ["msp_admin", "msp_user"]:
+    #     raise HTTPException(status_code=403, detail="Access denied")
+    
+    if user['role'] in  ["msp_admin", "msp_user"]:
+     clients_query = select(Client).where(Client.msp_id == UUID(user['msp_id']))
+     clients_result = await session.execute(clients_query)
+     clients = clients_result.scalars().all()
+    elif user['role'] in ["client_admin","client_user"]:
+        clients_query=select(Client).where(Client.id==UUID(user['client_id']))
+        clients_result=await session.execute(clients_query)
+        clients=clients_result.scalars().all()
+    
+    if not clients:
+        return []
+    
+    # Use new engagement service
+    engagement_service = EngagementService(session)
+    target_date = target_date or date.today()-timedelta(days=30)
+    
+    results = []
+    for client in clients:
+        try:
+            # Get engagement data calculated at runtime
+            engagement_data = await engagement_service.get_engagement_summary(
+                str(client.id), target_date, department
+            )
+            
+            # Convert to response format
+            departments = [
+                DepartmentEngagementResponse(
+                    department=dept['department'],
+                    interactions=dept['interactions'],
+                    active_users=dept['active_users'],
+                    pct_change_vs_prev_7d=dept['pct_change_vs_prev_7d']
+                )
+                for dept in engagement_data['departments']
+            ]
+            
+            applications = [
+                ApplicationEngagementResponse(
+                    application=app['application'],
+                    vendor=app['vendor'],
+                    icon=app['icon'] or "default",
+                    active_users=app['active_users'],
+                    interactions_per_day=app['interactions_per_day'],
+                    trend_pct_7d=app['trend_pct_7d'],
+                    utilization=app['utilization'],
+                    recommendation=app['recommendation']
+                )
+                for app in engagement_data['applications']
+            ]
+            
+            # Get data from kept tables (agents and productivity correlations)
+            agents_data = await engagement_service.get_agent_engagement_from_table(str(client.id), target_date)
+            productivity_data = await engagement_service.get_productivity_correlations_from_table(str(client.id), target_date)
+            
+            # Convert agents to response format
+            agents = [
+                AgentEngagementResponse(
+                    agent=agent['agent'],
+                    vendor=agent['vendor'],
+                    icon=agent['icon'],
+                    deployed=agent['deployed'],
+                    avg_prompts_per_day=agent['avg_prompts_per_day'],
+                    flagged_actions=agent['flagged_actions'],
+                    trend_pct_7d=agent['trend_pct_7d'],
+                    status=agent['status'],
+                    last_activity_iso=agent['last_activity_iso'],
+                    associated_apps=agent['associated_apps']
+                )
+                for agent in agents_data
+            ]
+            
+            # Convert productivity correlations to response format
+            productivity_correlations = {
+                dept: ProductivityCorrelationResponse(
+                    ai_interactions_7d=corr['ai_interactions_7d'],
+                    output_metric_7d=corr['output_metric_7d'],
+                    note=corr['note']
+                )
+                for dept, corr in productivity_data.items()
+            }
+            
+            engagement_response = AIEngagementDataResponse(
+                departments=departments,
+                applications=applications,
+                agents=agents,
+                productivity_correlations=productivity_correlations
+            )
+            
+            results.append(ClientAIEngagementResponse(
+                client_id=str(client.id),
+                client_name=client.name,
+                engagement=engagement_response
+            ))
+        except Exception as e:
+            # Skip clients with errors, continue with others
+            continue
+    
+    return results
+
 @router.get("/clients/{client_id}", response_model=AIEngagementDataResponse)
 async def get_client_engagement(
     client_id: str,

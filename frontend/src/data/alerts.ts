@@ -43,7 +43,7 @@ export type Alert = {
 
 // 50 realistic alerts spanning ~last 30 days (2025-08-12 .. 2025-09-10)
 export const alerts: Alert[] = [
-  // --- recent seeds (mapped to your clients) ---
+
   { id:'a-001', ts:'2025-09-09T14:12:00Z', clientId:'acme-health', app:'Perplexity', assetKind:'Application',
     family:'UNSANCTIONED_USE', subtype:'NewApp', severity:'High',
     details:'First seen across 42 users (↑24% 7d). Not on allowlist.',

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Test</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result { 
+            margin: 10px 0; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border-left: 4px solid;
+        }
+        .success { 
+            background-color: #d4edda; 
+            border-left-color: #28a745; 
+            color: #155724; 
+        }
+        .error { 
+            background-color: #f8d7da; 
+            border-left-color: #dc3545; 
+            color: #721c24; 
+        }
+        .info { 
+            background-color: #d1ecf1; 
+            border-left-color: #17a2b8; 
+            color: #0c5460; 
+        }
+        button { 
+            padding: 12px 24px; 
+            margin: 8px; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .json-display {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Authentication & Role-Based Routing Test</h1>
+        <p>Test the authentication system and role-based routing functionality...</p>
+        
+        <div class="test-result info">
+            <strong>Test Instructions:</strong><br>
+            1. Click "Test Login" to authenticate with demo credentials<br>
+            2. Check the user info and role-based redirects<br>
+            3. Test protected routes and unauthorized access<br>
+            4. Verify role-based navigation works correctly
+        </div>
+
+        <div>
+            <button class="btn-primary" onclick="testLogin()">Test Login</button>
+            <button class="btn-success" onclick="testUserInfo()">Check User Info</button>
+            <button class="btn-warning" onclick="testProtectedRoutes()">Test Protected Routes</button>
+            <button class="btn-danger" onclick="testLogout()">Test Logout</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000/api/v1';
+        const resultsDiv = document.getElementById('results');
+        let authToken = null;
+        let userInfo = null;
+
+        function addResult(message, type = 'info', data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            
+            div.innerHTML = `
+                <strong>[${timestamp}]</strong> ${message}
+                ${data ? `<div class="json-display">${JSON.stringify(data, null, 2)}</div>` : ''}
+            `;
+            resultsDiv.appendChild(div);
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        async function testLogin() {
+            addResult('🔍 Testing login with demo credentials...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    userInfo = data.user_info;
+                    
+                    // Store in localStorage like the frontend would
+                    localStorage.setItem('auth_token', authToken);
+                    localStorage.setItem('user_info', JSON.stringify(userInfo));
+                    
+                    addResult(`✅ Login successful!`, 'success', {
+                        user: userInfo,
+                        token: authToken.substring(0, 20) + '...'
+                    });
+                    
+                    // Test role-based redirect
+                    testRoleBasedRedirect();
+                } else {
+                    const errorData = await response.json();
+                    addResult(`❌ Login failed: ${response.status}`, 'error', errorData);
+                }
+            } catch (error) {
+                addResult(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        function testRoleBasedRedirect() {
+            addResult('🔍 Testing role-based redirect logic...', 'info');
+            
+            if (!userInfo) {
+                addResult('❌ No user info available for redirect test', 'error');
+                return;
+            }
+
+            const role = userInfo.role;
+            let expectedRedirect = '';
+            
+            if (role === 'msp_admin' || role === 'msp_user') {
+                expectedRedirect = '/dashboard';
+            } else if (role === 'client_admin' || role === 'end_user') {
+                expectedRedirect = '/client';
+            } else {
+                expectedRedirect = '/unauthorized';
+            }
+
+            addResult(`✅ Role-based redirect test: ${role} → ${expectedRedirect}`, 'success', {
+                role: role,
+                expectedRedirect: expectedRedirect,
+                isValidRole: ['msp_admin', 'msp_user', 'client_admin', 'end_user'].includes(role)
+            });
+        }
+
+        async function testUserInfo() {
+            addResult('🔍 Testing user info retrieval...', 'info');
+            
+            if (!authToken) {
+                addResult('❌ No auth token available. Please login first.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    addResult(`✅ User info retrieved successfully`, 'success', userData);
+                } else {
+                    const errorData = await response.json();
+                    addResult(`❌ Failed to get user info: ${response.status}`, 'error', errorData);
+                }
+            } catch (error) {
+                addResult(`❌ User info error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProtectedRoutes() {
+            addResult('🔍 Testing protected routes access...', 'info');
+            
+            if (!authToken) {
+                addResult('❌ No auth token available. Please login first.', 'error');
+                return;
+            }
+
+            const testRoutes = [
+                '/test/test',
+                '/test/mock-clients',
+                '/test/mock-ai-inventory',
+                '/test/mock-alerts'
+            ];
+
+            for (const route of testRoutes) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}${route}`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        addResult(`✅ ${route} - Access granted`, 'success', {
+                            route: route,
+                            dataType: Array.isArray(data) ? 'array' : 'object',
+                            dataLength: Array.isArray(data) ? data.length : 'N/A'
+                        });
+                    } else {
+                        addResult(`❌ ${route} - Access denied: ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    addResult(`❌ ${route} - Error: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        function testLogout() {
+            addResult('🔍 Testing logout functionality...', 'info');
+            
+            // Clear localStorage
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_info');
+            authToken = null;
+            userInfo = null;
+            
+            addResult(`✅ Logout successful - tokens cleared`, 'success');
+            
+            // Test that protected routes are now inaccessible
+            addResult('🔍 Testing that protected routes are now inaccessible...', 'info');
+            addResult(`✅ User should now be redirected to login page`, 'success');
+        }
+
+        // Auto-run basic tests on page load
+        window.onload = function() {
+            addResult('🚀 Authentication test page loaded. Click buttons to test functionality.', 'info');
+            
+            // Check if already logged in
+            const storedToken = localStorage.getItem('auth_token');
+            const storedUser = localStorage.getItem('user_info');
+            
+            if (storedToken && storedUser) {
+                authToken = storedToken;
+                userInfo = JSON.parse(storedUser);
+                addResult('✅ Found existing authentication - user is already logged in', 'success', {
+                    user: userInfo
+                });
+            } else {
+                addResult('ℹ️ No existing authentication found - ready for login test', 'info');
+            }
+        };
+    </script>
+</body>
+</html>

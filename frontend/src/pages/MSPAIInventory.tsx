@@ -14,7 +14,11 @@ import UpdateAiDialog from "@/components/ai-inventory/UpdateAIDialog";
 
 export default function MSPAIInventory() {
   const { data, isLoading, error, refetch } = useAIInventory();
-  const applications = useMemo<AIApplication[]>(() => Array.isArray(data) ? data : [], [data]);
+  const applications = useMemo<AIApplication[]>(() => {
+    if (!Array.isArray(data)) return [];
+    // Flatten all applications from all clients
+    return data.flatMap(client => client.items || []);
+  }, [data]);
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -98,7 +102,7 @@ export default function MSPAIInventory() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : applications.filter(app => app.status === 'Permitted').length}
+                {isLoading ? <Skeleton className="h-8 w-16" /> : applications.filter(app => (app.status || '') === 'Permitted').length}
               </div>
             </CardContent>
           </Card>
@@ -109,7 +113,7 @@ export default function MSPAIInventory() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-yellow-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : applications.filter(app => app.status === 'Under_Review').length}
+                {isLoading ? <Skeleton className="h-8 w-16" /> : applications.filter(app => (app.status || '') === 'Under_Review').length}
               </div>
             </CardContent>
           </Card>
@@ -120,7 +124,7 @@ export default function MSPAIInventory() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-red-600">
-                {isLoading ? <Skeleton className="h-8 w-16" /> : applications.filter(app => app.status === 'Blocked').length}
+                {isLoading ? <Skeleton className="h-8 w-16" /> : applications.filter(app => (app.status || '') === 'Blocked').length}
               </div>
             </CardContent>
           </Card>
@@ -170,8 +174,8 @@ export default function MSPAIInventory() {
                           {app.type}
                         </TableCell>
                         <TableCell className="text-center">
-                          <Badge className={getStatusBadgeClass(app.status)}>
-                            {app.status.replace('_', ' ')}
+                          <Badge className={getStatusBadgeClass(app.status || 'Unknown')}>
+                            {(app.status || 'Unknown').replace('_', ' ')}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-center">

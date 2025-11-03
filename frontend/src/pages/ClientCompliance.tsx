@@ -97,7 +97,7 @@ export default function ClientCompliance() {
                     <SelectItem value="90">Last 90 days</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                {/* <Select value={selectedClientId} onValueChange={setSelectedClientId}>
                   <SelectTrigger className="w-48">
                     <SelectValue />
                   </SelectTrigger>
@@ -108,7 +108,7 @@ export default function ClientCompliance() {
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+                </Select> */}
               </div>
             </div>
           </div>

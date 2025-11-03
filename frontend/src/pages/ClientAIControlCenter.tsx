@@ -8,17 +8,27 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, ShieldAlert, Users, Clock, ChevronDown, CheckCircle, XCircle, Eye, UserCheck, Ban, AlertCircle, Calendar } from "lucide-react";
-import { actionQueue, unsanctionedApps, flaggedAgents, archivedActions } from "@/data/actionQueue";
-import { alerts } from "@/data/alerts";
-import { clients } from "@/data/clients";
+import { AlertTriangle, ShieldAlert, Users, Clock, ChevronDown, CheckCircle, XCircle, Eye, UserCheck, Ban, AlertCircle, Calendar, RefreshCw } from "lucide-react";
+import { useClients, useClient, useClientActionQueue, useResolveAction } from "@/hooks/useApi";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ClientAIControlCenter() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedClientId, setSelectedClientId] = useState(searchParams.get("client") || "1");
+  const [selectedClientId, setSelectedClientId] = useState(searchParams.get("client") || "");
   const [dateRange, setDateRange] = useState("30");
   const [expandedAgent, setExpandedAgent] = useState<string | null>(null);
   const [expandedArchive, setExpandedArchive] = useState<string | null>(null);
+
+  // API hooks
+  const { data: clients, isLoading: clientsLoading, error: clientsError, refetch: refetchClients } = useClients();
+  const { data: selectedClient, isLoading: clientLoading, error: clientError, refetch: refetchClient } = useClient(selectedClientId);
+  const { data: actionQueueData, isLoading: actionQueueLoading, error: actionQueueError, refetch: refetchActionQueue } = useClientActionQueue(selectedClientId);
+  const resolveActionMutation = useResolveAction();
+
+  // Error states
+  const hasError = clientsError || clientError || actionQueueError;
+  const isLoading = clientsLoading || clientLoading || actionQueueLoading;
 
   useEffect(() => {
     if (selectedClientId !== searchParams.get("client")) {
@@ -26,13 +36,31 @@ export default function ClientAIControlCenter() {
     }
   }, [selectedClientId, searchParams, setSearchParams]);
 
-  const selectedClient = clients.find(client => client.id === selectedClientId);
+  // Auto-select first client if no client ID is provided
+  useEffect(() => {
+    if (!selectedClientId && clients && clients.length > 0) {
+      setSelectedClientId(clients[0].id);
+    }
+  }, [selectedClientId, clients]);
 
-  // Filter alerts for current client (assuming acme-health for demo)
-  const clientAlerts = alerts.filter(alert => alert.clientId === 'acme-health');
-  const highSeverityAlerts = clientAlerts.filter(alert => alert.severity === 'High' || alert.severity === 'Critical');
-  const unsanctionedCount = unsanctionedApps.length;
-  const flaggedAgentCount = flaggedAgents.reduce((sum, agent) => sum + agent.flaggedActions, 0);
+  const handleRetry = () => {
+    refetchClients();
+    refetchClient();
+    refetchActionQueue();
+  };
+
+  const handleResolveAction = async (actionId: string, actionType: string, resolution: string) => {
+    try {
+      await resolveActionMutation.mutateAsync({
+        clientId: selectedClientId,
+        actionId,
+        actionType,
+        resolution
+      });
+    } catch (error) {
+      console.error('Failed to resolve action:', error);
+    }
+  };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -53,355 +81,410 @@ export default function ClientAIControlCenter() {
     }
   };
 
+  const clientOptions = clients?.map(client => ({
+    value: client.id,
+    label: client.name
+  })) || [];
+
+  // Error state
+  if (hasError) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Alert className="max-w-md">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load control center data. 
+              <Button variant="link" onClick={handleRetry} className="p-0 h-auto ml-1">
+                Try again
+              </Button>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="space-y-6 p-6">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-64" />
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-40" />
+              <Skeleton className="h-10 w-48" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
+          <Skeleton className="h-96" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  const unsanctionedApps = actionQueueData?.unsanctioned_apps || [];
+  const flaggedAgents = actionQueueData?.flagged_agents || [];
+  const policyViolations = actionQueueData?.policy_violations || [];
+  const highPriorityAlerts = actionQueueData?.high_priority_alerts || [];
+  const totalActions = actionQueueData?.total_actions || 0;
+  const urgentCount = actionQueueData?.urgent_count || 0;
+
   return (
     <AppLayout>
-      <div className="min-h-screen bg-app-bg">
-        {/* Header Section */}
-        <div className="bg-surface border-b border-border-color sticky top-0 z-40">
-          <div className="px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-semibold text-heading-text">AI Control Center</h1>
-                <p className="text-subtext text-sm mt-1">
-                  {selectedClient?.name || "Select a client"}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <Select value={dateRange} onValueChange={setDateRange}>
-                  <SelectTrigger className="w-40">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">Last 7 days</SelectItem>
-                    <SelectItem value="30">Last 30 days</SelectItem>
-                    <SelectItem value="90">Last 90 days</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={selectedClientId} onValueChange={setSelectedClientId}>
-                  <SelectTrigger className="w-48">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {clients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Header Section */}
+      <div className="bg-surface border-b border-border-color sticky top-0 z-40">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-semibold text-heading-text">AI Control Center</h1>
+              <p className="text-subtext text-sm mt-1">
+                {selectedClient?.name || "Select a client"}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select value={dateRange} onValueChange={setDateRange}>
+                <SelectTrigger className="w-40">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={selectedClientId} onValueChange={setSelectedClientId}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientOptions.map(client => (
+                    <SelectItem key={client.value} value={client.value}>
+                      {client.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="sm" onClick={handleRetry}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </Button>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Content */}
-        <div className="space-y-6 p-6">
+      {/* Content */}
+      <div className="space-y-6 p-6">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="border-l-4 border-l-red-500">
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-subtext">Urgent Actions</p>
+                  <p className="text-2xl font-bold text-heading-text">{urgentCount}</p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
 
-          {/* Alerts Overview Banner */}
-          <Card className="border-l-4 border-l-destructive bg-destructive/5">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <span className="text-sm font-medium">
-                  ⚠ {unsanctionedCount} unsanctioned applications require review · {flaggedAgentCount} agent actions flagged high-risk
-                </span>
+          <Card className="border-l-4 border-l-orange-500">
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-subtext">Unsanctioned Apps</p>
+                  <p className="text-2xl font-bold text-heading-text">{unsanctionedApps.length}</p>
+                </div>
+                <ShieldAlert className="h-8 w-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-yellow-500">
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-subtext">Flagged Agents</p>
+                  <p className="text-2xl font-bold text-heading-text">{flaggedAgents.length}</p>
+                </div>
+                <Users className="h-8 w-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-blue-500">
+            <CardContent className="pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-subtext">Total Actions</p>
+                  <p className="text-2xl font-bold text-heading-text">{totalActions}</p>
+                </div>
+                <Clock className="h-8 w-8 text-blue-500" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Alerts Panel */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5" />
-              Recent Alerts
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {highSeverityAlerts.slice(0, 5).map((alert) => (
-                <div key={alert.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Badge variant={getSeverityColor(alert.severity)}>
-                      {alert.severity}
-                    </Badge>
-                    <div>
-                      <p className="font-medium text-sm">{alert.app} - {alert.family.replace('_', ' ')}</p>
-                      <p className="text-sm text-muted-foreground">{alert.details}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {alert.status}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(alert.ts).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Action Queue */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Action Queue
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Action</TableHead>
-                  <TableHead>App/Agent</TableHead>
-                  <TableHead>Risk</TableHead>
-                  <TableHead>Assigned To</TableHead>
-                  <TableHead>Date Created</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {actionQueue.map((item) => (
-                  <TableRow key={item.id} className={item.status === 'Outstanding' ? 'bg-destructive/5' : ''}>
-                    <TableCell className="font-medium">{item.action}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{item.appOrAgent}</p>
-                        <p className="text-xs text-muted-foreground">{item.vendor}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={getSeverityColor(item.riskLevel)}>
-                        {item.riskLevel}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{item.assignedTo || 'Unassigned'}</TableCell>
-                    <TableCell>{item.dateCreated}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusColor(item.status)}>
-                        {item.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button size="sm" variant="outline">
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <CheckCircle className="h-3 w-3" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <XCircle className="h-3 w-3" />
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <UserCheck className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
-        {/* Tabs for Applications and Agents */}
-        <Tabs defaultValue="applications" className="space-y-6">
+        {/* Action Queue Tabs */}
+        <Tabs defaultValue="unsanctioned" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="applications">Unsanctioned Applications</TabsTrigger>
-            <TabsTrigger value="agents">Flagged Agent Actions</TabsTrigger>
-            <TabsTrigger value="archive">Governance Archive</TabsTrigger>
+            <TabsTrigger value="unsanctioned">Unsanctioned Apps ({unsanctionedApps.length})</TabsTrigger>
+            <TabsTrigger value="flagged">Flagged Agents ({flaggedAgents.length})</TabsTrigger>
+            <TabsTrigger value="violations">Policy Violations ({policyViolations.length})</TabsTrigger>
+            <TabsTrigger value="alerts">High Priority Alerts ({highPriorityAlerts.length})</TabsTrigger>
           </TabsList>
 
-          {/* Unsanctioned Applications */}
-          <TabsContent value="applications">
+          <TabsContent value="unsanctioned">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5" />
-                  Unsanctioned Applications Review
+                  <ShieldAlert className="w-5 h-5" />
+                  Unsanctioned Applications
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {unsanctionedApps.map((app) => (
-                    <div key={app.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <div className="text-2xl">{app.icon}</div>
-                        <div>
-                          <h3 className="font-semibold">{app.name}</h3>
-                          <p className="text-sm text-muted-foreground">{app.vendor}</p>
-                          <p className="text-xs text-muted-foreground">{app.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <Badge variant={getSeverityColor(app.riskAssessment)} className="mb-2">
-                            {app.riskAssessment} Risk
-                          </Badge>
-                          <div className="space-y-1 text-xs text-muted-foreground">
-                            <p>{app.users} users</p>
-                            <p>{app.interactions} interactions</p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="default">
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Approve
-                          </Button>
-                          <Button size="sm" variant="destructive">
-                            <Ban className="h-3 w-3 mr-1" />
-                            Block
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-3 w-3 mr-1" />
-                            Review
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Flagged Agent Actions */}
-          <TabsContent value="agents">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Flagged Agent Actions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {flaggedAgents.map((agent) => (
-                    <Collapsible
-                      key={agent.id}
-                      open={expandedAgent === agent.id}
-                      onOpenChange={(open) => setExpandedAgent(open ? agent.id : null)}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <div className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-accent">
-                          <div className="flex items-center gap-4">
-                            <div>
-                              <h3 className="font-semibold">{agent.name}</h3>
-                              <p className="text-sm text-muted-foreground">{agent.vendor}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right text-sm">
-                              <p>{agent.deployed} deployed</p>
-                              <p className="text-muted-foreground">
-                                {agent.flaggedActions} flagged actions
-                              </p>
-                            </div>
-                            <Badge variant={getSeverityColor(agent.riskLevel)}>
-                              {agent.riskLevel}
-                            </Badge>
-                            <ChevronDown className="h-4 w-4" />
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className="px-4 pb-4">
-                        <div className="space-y-4 mt-4 border-t pt-4">
-                          <div>
-                            <h4 className="font-medium mb-2">Flagged Prompts:</h4>
-                            <ul className="space-y-1">
-                              {agent.flaggedPrompts.map((prompt, idx) => (
-                                <li key={idx} className="text-sm bg-destructive/10 p-2 rounded">
-                                  "{prompt}"
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          <div>
-                            <h4 className="font-medium mb-2">Departments Affected:</h4>
-                            <div className="flex gap-2">
-                              {agent.departmentsAffected.map((dept) => (
-                                <Badge key={dept} variant="secondary">
-                                  {dept}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex gap-2 mt-4">
-                            <Button size="sm" variant="destructive">
-                              <Ban className="h-3 w-3 mr-1" />
-                              Quarantine
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <Eye className="h-3 w-3 mr-1" />
-                              Review Logs
-                            </Button>
-                            <Button size="sm" variant="outline">
-                              <UserCheck className="h-3 w-3 mr-1" />
-                              Assign Owner
-                            </Button>
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Governance Archive */}
-          <TabsContent value="archive">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Blocked Applications & Agents</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {archivedActions.map((action) => (
-                      <Collapsible
-                        key={action.id}
-                        open={expandedArchive === action.id}
-                        onOpenChange={(open) => setExpandedArchive(open ? action.id : null)}
-                      >
-                        <CollapsibleTrigger asChild>
-                          <div className="flex items-center justify-between p-4 border rounded-lg cursor-pointer hover:bg-accent">
-                            <div className="flex items-center gap-4">
-                              <Badge variant="outline">{action.type}</Badge>
-                              <div>
-                                <h3 className="font-semibold">{action.name}</h3>
-                                <p className="text-sm text-muted-foreground">{action.vendor}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              <div className="text-right text-sm">
-                                <p>Blocked: {action.dateBlocked}</p>
-                                <p className="text-muted-foreground">{action.actionTaken}</p>
-                              </div>
-                              <ChevronDown className="h-4 w-4" />
-                            </div>
-                          </div>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="px-4 pb-4">
-                          <div className="mt-4 border-t pt-4">
-                            <h4 className="font-medium mb-2">Notes:</h4>
-                            <p className="text-sm text-muted-foreground">{action.notes}</p>
-                          </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ))}
+                {unsanctionedApps.length === 0 ? (
+                  <div className="text-center py-8 text-subtext">
+                    No unsanctioned applications found
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Application</TableHead>
+                        <TableHead>Users</TableHead>
+                        <TableHead>Interactions/Day</TableHead>
+                        <TableHead>Risk Score</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {unsanctionedApps.map((app) => (
+                        <TableRow key={app.id}>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{app.name}</div>
+                              <div className="text-sm text-subtext">{app.vendor}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell>{app.users}</TableCell>
+                          <TableCell>{app.interactions_per_day}</TableCell>
+                          <TableCell>
+                            <Badge variant={app.risk_score > 70 ? "destructive" : "secondary"}>
+                              {app.risk_score}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleResolveAction(app.id, "unsanctioned_app", "approve")}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleResolveAction(app.id, "unsanctioned_app", "block")}
+                              >
+                                <Ban className="w-4 h-4 mr-1" />
+                                Block
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="flagged">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Flagged Agents
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {flaggedAgents.length === 0 ? (
+                  <div className="text-center py-8 text-subtext">
+                    No flagged agents found
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Agent</TableHead>
+                        <TableHead>Vendor</TableHead>
+                        <TableHead>Flagged Actions</TableHead>
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Last Flagged</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {flaggedAgents.map((agent) => (
+                        <TableRow key={agent.id}>
+                          <TableCell className="font-medium">{agent.agent_name}</TableCell>
+                          <TableCell>{agent.vendor}</TableCell>
+                          <TableCell>{agent.flagged_actions}</TableCell>
+                          <TableCell>
+                            <Badge variant={getSeverityColor(agent.severity)}>
+                              {agent.severity}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(agent.last_flagged).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleResolveAction(agent.id, "flagged_agent", "review")}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Review
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="violations">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5" />
+                  Policy Violations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {policyViolations.length === 0 ? (
+                  <div className="text-center py-8 text-subtext">
+                    No policy violations found
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Violation Type</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>AI Service</TableHead>
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {policyViolations.map((violation) => (
+                        <TableRow key={violation.id}>
+                          <TableCell className="font-medium">{violation.violation_type}</TableCell>
+                          <TableCell>{violation.user_name}</TableCell>
+                          <TableCell>{violation.ai_service}</TableCell>
+                          <TableCell>
+                            <Badge variant={getSeverityColor(violation.severity)}>
+                              {violation.severity}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={violation.is_resolved ? "default" : "destructive"}>
+                              {violation.is_resolved ? "Resolved" : "Outstanding"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            {!violation.is_resolved && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleResolveAction(violation.id, "policy_violation", "resolve")}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Resolve
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="alerts">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5" />
+                  High Priority Alerts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {highPriorityAlerts.length === 0 ? (
+                  <div className="text-center py-8 text-subtext">
+                    No high priority alerts found
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Title</TableHead>
+                        <TableHead>Severity</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Created</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {highPriorityAlerts.map((alert) => (
+                        <TableRow key={alert.id}>
+                          <TableCell className="font-medium">{alert.title}</TableCell>
+                          <TableCell>
+                            <Badge variant={getSeverityColor(alert.severity)}>
+                              {alert.severity}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusColor(alert.status)}>
+                              {alert.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{new Date(alert.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleResolveAction(alert.id, "alert", "complete")}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Complete
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

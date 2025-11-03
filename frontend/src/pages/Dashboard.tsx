@@ -2,13 +2,14 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Client, Alert } from "@/services/api";
-import { getFrameworksForClient } from "@/data/frameworks";
+// Removed mock data imports - using API data instead
 import { getRiskLevel, getRiskBadgeClass, formatNumber } from "@/data/utils";
-import { TrendingUp, Users, Shield, Activity } from "lucide-react";
+import { TrendingUp, Users, Shield, Activity, RefreshCw } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { AlertsRibbon } from "@/components/alerts-ribbon";
 import { AlertsFeed } from "@/components/alerts-feed";
@@ -161,6 +162,35 @@ const portfolioTrending = (clients as Client[]).reduce(
     );
   }
 
+  // Show no data state if no clients
+  if (!clients || clients.length === 0) {
+    return (
+      <AppLayout headerTitle="MSP Portfolio">
+        <div className="space-y-6">
+          <Card className="border-0 shadow-elegant">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">No clients found</h3>
+                  <p className="text-muted-foreground">
+                    No client data is available. Please check your connection or contact support.
+                  </p>
+                </div>
+                <Button onClick={handleRetry} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout headerTitle="MSP Portfolio">
       <div className="space-y-6">
@@ -262,7 +292,8 @@ const portfolioTrending = (clients as Client[]).reduce(
                 
                 <TableBody>
                   {(clients as Client[]).map((client) => {
-                    const clientFrameworks = getFrameworksForClient(client.id);
+                    // TODO: Replace with API call for frameworks
+                    const clientFrameworks = [];
                     return (
                       <TableRow 
                         key={client.id}

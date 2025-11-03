@@ -23,10 +23,10 @@ export default function Header({ onLogout, userEmail }: HeaderProps) {
         
         <div>
           <h1 className="mb-1 text-3xl font-bold text-white">
-            File Upload Scanner
+            Owlnox
           </h1>
           <p className="text-lg text-slate-400">
-            By Aaditya Raj • v1.0.0
+             • v1.0.0
           </p>
         </div>
       </div>

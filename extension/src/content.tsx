@@ -4,7 +4,8 @@ import { SecurityManager } from './SecurityManager'
 export const config: PlasmoCSConfig = {
   matches: [
     "https://chatgpt.com/*", 
-"https://gemini.google.com//*", 
+"https://gemini.google.com/*", 
+"https://claude.ai/*",
     "https://chat.openai.com/*", 
     "http://127.0.0.1:*/*", 
     "http://localhost:*/*", 
@@ -14,7 +15,11 @@ export const config: PlasmoCSConfig = {
   run_at: "document_start"
 }
 
-export default null
+// Export a null component since this content script only runs side effects
+// Plasmo requires a default export, but we return null to avoid rendering anything
+export default function ContentScriptUI() {
+  return null
+}
 
 class ContentScript {
   private securityManager: SecurityManager

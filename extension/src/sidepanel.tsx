@@ -7,7 +7,7 @@ import LoginPage from "~components/LoginPage"
 import { useConfig, useLogs } from "~hooks/useStorage"
 import { useAuth } from "~hooks/useAuth"
 import type { LogEntry } from "~types"
-import "~style.css"
+import "./style.css"
 
 export default function SidePanel() {
   console.log('SidePanel component rendering')
@@ -130,7 +130,7 @@ export default function SidePanel() {
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-white">Security Scanner</h1>
+              <h1 className="text-lg font-semibold text-white">Owlnox</h1>
               <p className="text-xs text-slate-400">File Upload Protection</p>
             </div>
           </div>

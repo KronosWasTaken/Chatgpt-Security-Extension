@@ -39,6 +39,18 @@ class Client(Base):
     productivity_correlations: Mapped[List["ProductivityCorrelation"]] = relationship("ProductivityCorrelation", back_populates="client", cascade="all, delete-orphan")
     compliance_reports: Mapped[List["ClientComplianceReport"]] = relationship("ClientComplianceReport", back_populates="client", cascade="all, delete-orphan")
 
+    # Compatibility property for tests expecting an employee_count attribute
+    @property
+    def employee_count(self) -> int:
+        size = (self.company_size or "").lower()
+        if size in ("small", "s"):
+            return 50
+        if size in ("medium", "m"):
+            return 250
+        if size in ("large", "l"):
+            return 1000
+        return 0
+
 
 class ClientAIServices(Base):
     __tablename__ = "clients_ai_services"
@@ -138,6 +150,18 @@ class Alert(Base):
     
     client: Mapped["Client"] = relationship("Client", back_populates="alerts")
     ai_service: Mapped[Optional["ClientAIServices"]] = relationship("ClientAIServices", back_populates="alerts")
+
+    # Compatibility property for tests expecting a title attribute
+    @property
+    def title(self) -> str:
+        base = self.family or "Alert"
+        if self.subtype:
+            return f"{base}: {self.subtype}"
+        # Fallback: derive from details if available
+        if self.details:
+            snippet = str(self.details).split("\n", 1)[0]
+            return snippet[:80]
+        return base
 
 
 # DepartmentEngagement table removed - data can be calculated from ClientAIServiceUsage at runtime

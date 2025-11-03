@@ -1,5 +1,6 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TrendingUp, TrendingDown, Users, Building, Zap, AlertTriangle, Loader2 } from "lucide-react";
 import { getTotalInteractions, getTotalActiveUsers, getMostActiveDepartment, getTopApplication, getUnderutilizedAppsCount } from "@/data/aiEngagement";
 import { useAIEngagementData } from "@/hooks/useAIEngagementData";
@@ -70,6 +71,24 @@ export const KPITiles = ({
   days?: number;
 }) => {
   const { data, isLoading } = useAIEngagementData(days);
+  
+  if (isLoading || !data) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {[...Array(5)].map((_, i) => (
+          <Card key={i} className="border-0 shadow-elegant">
+            <CardHeader className="pb-3">
+              <Skeleton className="h-4 w-32" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-20 mb-2" />
+              <Skeleton className="h-4 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
   
   const totalInteractions = getTotalInteractions(data);
   const totalUsers = getTotalActiveUsers(data);

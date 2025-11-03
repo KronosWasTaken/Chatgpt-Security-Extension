@@ -170,7 +170,7 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
   }
 
   return (
-    <div className="p-6 bg-opacity-50 border bg-slate-800 backdrop-blur-sm rounded-2xl border-slate-700">
+    <div >
       {/* <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-white">Backend Integration</h3>
         <div className="flex items-center space-x-2">
@@ -181,8 +181,8 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
             (Follows Extension Status)
           </span>
         </div>
-      </div>
-
+      </div> */}
+{/* 
       <div className="space-y-4">
         <div>
           <label className="block mb-2 text-sm font-medium text-slate-300">

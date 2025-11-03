@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Extraction Verification Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 { color: #333; border-bottom: 3px solid #4CAF50; padding-bottom: 10px; }
+        textarea { 
+            width: 100%; 
+            min-height: 150px; 
+            padding: 10px; 
+            border: 2px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 14px; 
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #45a049; }
+        #logs {
+            background: #1e1e1e;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Text Extraction & Backend Verification Test</h1>
+        <p>This page tests that prompts are properly extracted and sent to backend.</p>
+        
+        <h2>Test Text Input</h2>
+        <textarea id="testInput" placeholder="Type your test prompt here...">This is my test prompt to verify extraction and backend API call</textarea>
+        <br><br>
+        <button onclick="testExtraction()">🔍 Test Extraction</button>
+        <button onclick="testSendButton()">🚀 Test Send Button Click</button>
+        <button onclick="clearLogs()">🗑️ Clear Logs</button>
+        
+        <h2>Console Logs</h2>
+        <div id="logs">Open Chrome DevTools (F12) to see detailed logs...</div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logsEl = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logsEl.textContent += `[${timestamp}] ${message}\n`;
+            logsEl.scrollTop = logsEl.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').textContent = 'Logs cleared...\n';
+        }
+
+        function testExtraction() {
+            log('\n' + '='.repeat(60));
+            log('🧪 TEST: Text Extraction');
+            log('='.repeat(60));
+            
+            const textarea = document.getElementById('testInput');
+            const text = textarea.value || textarea.textContent || '';
+            
+            log(`\n📝 Extracted text: "${text}"`);
+            log(`📏 Text length: ${text.length} characters`);
+            log(`✅ Text extraction working: ${text.length > 0}`);
+            
+            // Check if extension would get this
+            log(`\n🔍 Extension should extract:`);
+            log(`   Element type: ${textarea.tagName}`);
+            log(`   Element selector: textarea`);
+            log(`   Content: "${text}"`);
+            log(`   Length: ${text.length}`);
+            
+            console.log('🧪 MANUAL EXTRACTION TEST');
+            console.log('   Textarea value:', text);
+            console.log('   Textarea textContent:', textarea.textContent);
+            console.log('   Full text:', text);
+        }
+
+        function testSendButton() {
+            log('\n' + '='.repeat(60));
+            log('🧪 TEST: Send Button Click');
+            log('='.repeat(60));
+            
+            log('Creating a test send button...');
+            
+            // Create a button that would be detected as send button
+            const btn = document.createElement('button');
+            btn.textContent = 'Send';
+            btn.setAttribute('data-testid', 'send-button');
+            btn.id = 'testSendBtn';
+            btn.onclick = () => {
+                log('✅ Send button clicked!');
+                console.log('✅ Send button was clicked');
+            };
+            
+            // Add to DOM
+            document.body.appendChild(btn);
+            log('✅ Test send button created with data-testid="send-button"');
+            log('   Click the button to trigger click event');
+            
+            // Simulate click
+            setTimeout(() => {
+                log('\n🖱️  Simulating button click...');
+                btn.click();
+            }, 1000);
+        }
+
+        // Log initialization
+        window.addEventListener('load', () => {
+            log('✅ Test page loaded');
+            log('📝 Extension should be monitoring this page');
+            log('\nInstructions:');
+            log('1. Open Chrome DevTools (F12)');
+            log('2. Go to Console tab');
+            log('3. Type in the textarea above');
+            log('4. Click "Test Extraction" to verify text extraction');
+            log('5. Watch for PromptGuard logs in console');
+            log('\nLook for these logs:');
+            log('- "🔍 PromptGuard: Detected send button click"');
+            log('- "🔍 PromptGuard.checkPromptSafety: ENTRY"');
+            log('- "📥 REQUEST DETAILS" (in background script)');
+            log('- "📡 SENDING FETCH REQUEST TO BACKEND"');
+            log('- "✅ BACKEND RESPONSE RECEIVED"');
+        });
+
+        // Log every keystroke
+        document.getElementById('testInput').addEventListener('input', () => {
+            console.log('🔍 Keystroke detected in textarea');
+            log('🔍 User typing in textarea...');
+        });
+
+        // Add test send button to page
+        setTimeout(() => {
+            const sendBtn = document.createElement('button');
+            sendBtn.textContent = '📤 Send';
+            sendBtn.className = 'test-send-btn';
+            sendBtn.setAttribute('data-testid', 'send-button');
+            sendBtn.style.marginTop = '10px';
+            sendBtn.onclick = () => {
+                const text = document.getElementById('testInput').value;
+                log(`\n🚀 Send button clicked!`);
+                log(`📝 Text to send: "${text}"`);
+                console.log('🚀 Send button clicked with text:', text);
+            };
+            
+            const textarea = document.getElementById('testInput');
+            textarea.parentNode.insertBefore(sendBtn, textarea.nextSibling);
+            log('✅ Test send button added to page');
+        }, 1000);
+    </script>
+</body>
+</html>

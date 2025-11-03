@@ -27,15 +27,45 @@ const notifyDataUpdate = () => {
   });
 };
 
+// Helper function to ensure data structure integrity
+const ensureDataStructure = (data: any): AIEngagementData => {
+  // If data is wrapped in a 'data' property, unwrap it
+  const unwrapped = data?.data || data;
+  
+  return {
+    departments: Array.isArray(unwrapped?.departments) ? unwrapped.departments : [],
+    applications: Array.isArray(unwrapped?.applications) ? unwrapped.applications : [],
+    agents: Array.isArray(unwrapped?.agents) ? unwrapped.agents : [],
+    productivity_correlations: unwrapped?.productivity_correlations || {}
+  };
+};
+
 // Function to fetch AI engagement data from API
-export const fetchAIEngagementData = async (days?: number): Promise<AIEngagementData> => {
+export const fetchAIEngagementData = async (
+  days?: number,
+  clientId?: string
+): Promise<AIEngagementData> => {
   try {
+    // Try MSP-wide endpoint first (works for MSP roles)
     const data = await apiClient.GetAIEngagement(days);
-    cachedData = data as AIEngagementData;
+    cachedData = ensureDataStructure(data);
     isInitialized = true;
     notifyDataUpdate(); // Notify all components that data is ready
     return cachedData;
   } catch (error) {
+    // If MSP endpoint fails (e.g., client users with 403), try client-scoped endpoint
+    if (clientId) {
+      try {
+        const clientData = await apiClient.getClientAIEngagement(clientId, days);
+        cachedData = ensureDataStructure(clientData);
+        isInitialized = true;
+        notifyDataUpdate();
+        return cachedData;
+      } catch (innerError) {
+        console.error('Failed to fetch client AI engagement data:', innerError);
+      }
+    }
+    
     console.error('Failed to fetch AI engagement data:', error);
     // Use fallback data if API fails
     cachedData = fallbackData;
@@ -51,9 +81,12 @@ export const getCachedAIEngagementData = (): AIEngagementData | null => {
 };
 
 // Function to initialize data (call this in your app startup)
-export const initializeAIEngagementData = async (days?: number): Promise<void> => {
+export const initializeAIEngagementData = async (
+  days?: number,
+  clientId?: string
+): Promise<void> => {
   try {
-    await fetchAIEngagementData(days);
+    await fetchAIEngagementData(days, clientId);
   } catch (error) {
     console.error('Failed to initialize AI engagement data:', error);
   }
@@ -93,11 +126,6 @@ export interface DepartmentEngagement {
   active_users: number;
   pct_change_vs_prev_7d: number;
 }
-
-
-
-
-
 
 export interface ApplicationEngagement {
   application: string;
@@ -150,23 +178,30 @@ export const getAIEngagementData = (): AIEngagementData => {
 export const aiEngagementData = new Proxy({} as AIEngagementData, {
   get(target, prop) {
     const data = getAIEngagementData();
+    if (!data) return fallbackData[prop as keyof AIEngagementData];
     return data[prop as keyof AIEngagementData];
   }
 });
 
 export const getTotalInteractions = (data?: AIEngagementData) => {
   const dataToUse = data || getAIEngagementData();
+  if (!dataToUse || !dataToUse.departments || !Array.isArray(dataToUse.departments)) {
+    return 0;
+  }
   return dataToUse.departments.reduce((sum, dept) => sum + dept.interactions, 0);
 };
 
 export const getTotalActiveUsers = (data?: AIEngagementData) => {
   const dataToUse = data || getAIEngagementData();
+  if (!dataToUse || !dataToUse.departments || !Array.isArray(dataToUse.departments)) {
+    return 0;
+  }
   return dataToUse.departments.reduce((sum, dept) => sum + dept.active_users, 0);
 };
 
 export const getMostActiveDepartment = (data?: AIEngagementData) => {
   const dataToUse = data || getAIEngagementData();
-  if (dataToUse.departments.length === 0) {
+  if (!dataToUse || !dataToUse.departments || !Array.isArray(dataToUse.departments) || dataToUse.departments.length === 0) {
     return { department: "No Data", interactions: 0, active_users: 0, pct_change_vs_prev_7d: 0 };
   }
   return dataToUse.departments.reduce((max, dept) => 
@@ -176,7 +211,7 @@ export const getMostActiveDepartment = (data?: AIEngagementData) => {
 
 export const getTopApplication = (data?: AIEngagementData) => {
   const dataToUse = data || getAIEngagementData();
-  if (dataToUse.applications.length === 0) {
+  if (!dataToUse || !dataToUse.applications || !Array.isArray(dataToUse.applications) || dataToUse.applications.length === 0) {
     return { 
       application: "No Data", 
       vendor: "", 
@@ -195,6 +230,9 @@ export const getTopApplication = (data?: AIEngagementData) => {
 
 export const getUnderutilizedAppsCount = (data?: AIEngagementData) => {
   const dataToUse = data || getAIEngagementData();
+  if (!dataToUse || !dataToUse.applications || !Array.isArray(dataToUse.applications)) {
+    return 0;
+  }
   return dataToUse.applications.filter(app => app.utilization === "Low").length;
 };
 
@@ -202,7 +240,11 @@ export const getRecommendations = (data?: AIEngagementData) => {
   const dataToUse = data || getAIEngagementData();
   
   // Return default recommendations if no data
-  if (dataToUse.departments.length === 0 || dataToUse.applications.length === 0) {
+  if (!dataToUse || 
+      !dataToUse.departments || !Array.isArray(dataToUse.departments) || 
+      !dataToUse.applications || !Array.isArray(dataToUse.applications) ||
+      dataToUse.departments.length === 0 || 
+      dataToUse.applications.length === 0) {
     return {
       pushAdoption: [
         "No data available for adoption recommendations",
@@ -230,7 +272,9 @@ export const getRecommendations = (data?: AIEngagementData) => {
   
   const jasperApp = dataToUse.applications.find(app => app.application === "Jasper");
   const perplexityApp = dataToUse.applications.find(app => app.application === "Perplexity Teams");
-  const marketingAgent = dataToUse.agents.find(agent => agent.agent === "Marketing Brief Generator");
+  const marketingAgent = Array.isArray(dataToUse.agents) 
+    ? dataToUse.agents.find(agent => agent.agent === "Marketing Brief Generator")
+    : undefined;
   
   return {
     pushAdoption: [

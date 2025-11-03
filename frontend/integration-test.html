@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend-Backend Integration Test</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result { 
+            margin: 10px 0; 
+            padding: 15px; 
+            border-radius: 8px; 
+            border-left: 4px solid;
+        }
+        .success { 
+            background-color: #d4edda; 
+            border-left-color: #28a745; 
+            color: #155724; 
+        }
+        .error { 
+            background-color: #f8d7da; 
+            border-left-color: #dc3545; 
+            color: #721c24; 
+        }
+        .info { 
+            background-color: #d1ecf1; 
+            border-left-color: #17a2b8; 
+            color: #0c5460; 
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        button { 
+            padding: 12px 24px; 
+            margin: 8px; 
+            cursor: pointer; 
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        button:hover { opacity: 0.8; transform: translateY(-2px); }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background-color: #28a745; }
+        .status-error { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .status-info { background-color: #17a2b8; }
+        .json-display {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Frontend-Backend Integration Test</h1>
+        <p>Testing the complete integration between the React frontend and FastAPI backend...</p>
+        
+        <div class="test-section">
+            <h3>🔧 Backend Health & Connectivity</h3>
+            <button class="btn-primary" onclick="testBackendHealth()">Test Backend Health</button>
+            <button class="btn-primary" onclick="testAPIDocs()">Test API Documentation</button>
+            <button class="btn-primary" onclick="testTestEndpoint()">Test Test Endpoint</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Mock Data Endpoints</h3>
+            <button class="btn-success" onclick="testMockClients()">Test Mock Clients</button>
+            <button class="btn-success" onclick="testMockAIInventory()">Test Mock AI Inventory</button>
+            <button class="btn-success" onclick="testMockAlerts()">Test Mock Alerts</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Frontend API Integration</h3>
+            <button class="btn-warning" onclick="testFrontendAPI()">Test Frontend API Service</button>
+            <button class="btn-warning" onclick="testFileScan()">Test File Scan Endpoint</button>
+            <button class="btn-warning" onclick="runAllTests()">Run All Integration Tests</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📈 Test Results</h3>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+        const resultsDiv = document.getElementById('results');
+        let testResults = [];
+
+        function addResult(message, type = 'info', data = null) {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            
+            const statusClass = type === 'success' ? 'status-success' : 
+                              type === 'error' ? 'status-error' : 
+                              type === 'warning' ? 'status-warning' : 'status-info';
+            
+            div.innerHTML = `
+                <span class="status-indicator ${statusClass}"></span>
+                <strong>[${timestamp}]</strong> ${message}
+                ${data ? `<div class="json-display">${JSON.stringify(data, null, 2)}</div>` : ''}
+            `;
+            resultsDiv.appendChild(div);
+            
+            testResults.push({ timestamp, message, type, data });
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+
+        async function testBackendHealth() {
+            addResult('🔍 Testing backend health endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                if (response.ok) {
+                    addResult(`✅ Backend health check passed`, 'success', data);
+                } else {
+                    addResult(`❌ Backend health check failed: ${response.status}`, 'error', data);
+                }
+            } catch (error) {
+                addResult(`❌ Backend health check error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIDocs() {
+            addResult('🔍 Testing API documentation access...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/docs`);
+                if (response.ok) {
+                    addResult(`✅ API documentation accessible`, 'success');
+                } else {
+                    addResult(`❌ API documentation failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ API documentation error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testTestEndpoint() {
+            addResult('🔍 Testing test endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/test/test`);
+                const data = await response.json();
+                if (response.ok) {
+                    addResult(`✅ Test endpoint working`, 'success', data);
+                } else {
+                    addResult(`❌ Test endpoint failed: ${response.status}`, 'error', data);
+                }
+            } catch (error) {
+                addResult(`❌ Test endpoint error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMockClients() {
+            addResult('🔍 Testing mock clients endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/test/mock-clients`);
+                const data = await response.json();
+                if (response.ok) {
+                    addResult(`✅ Mock clients endpoint working (${data.length} clients)`, 'success', data);
+                } else {
+                    addResult(`❌ Mock clients failed: ${response.status}`, 'error', data);
+                }
+            } catch (error) {
+                addResult(`❌ Mock clients error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMockAIInventory() {
+            addResult('🔍 Testing mock AI inventory endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/test/mock-ai-inventory`);
+                const data = await response.json();
+                if (response.ok) {
+                    addResult(`✅ Mock AI inventory endpoint working (${data.length} applications)`, 'success', data);
+                } else {
+                    addResult(`❌ Mock AI inventory failed: ${response.status}`, 'error', data);
+                }
+            } catch (error) {
+                addResult(`❌ Mock AI inventory error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMockAlerts() {
+            addResult('🔍 Testing mock alerts endpoint...', 'info');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/v1/test/mock-alerts`);
+                const data = await response.json();
+                if (response.ok) {
+                    addResult(`✅ Mock alerts endpoint working (${data.length} alerts)`, 'success', data);
+                } else {
+                    addResult(`❌ Mock alerts failed: ${response.status}`, 'error', data);
+                }
+            } catch (error) {
+                addResult(`❌ Mock alerts error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFrontendAPI() {
+            addResult('🔍 Testing frontend API service integration...', 'info');
+            try {
+                // Test the same endpoints that the frontend would call
+                const [clientsResponse, inventoryResponse, alertsResponse] = await Promise.allSettled([
+                    fetch(`${API_BASE_URL}/api/v1/test/mock-clients`),
+                    fetch(`${API_BASE_URL}/api/v1/test/mock-ai-inventory`),
+                    fetch(`${API_BASE_URL}/api/v1/test/mock-alerts`)
+                ]);
+
+                let successCount = 0;
+                let totalCount = 3;
+
+                if (clientsResponse.status === 'fulfilled' && clientsResponse.value.ok) {
+                    const clients = await clientsResponse.value.json();
+                    addResult(`✅ Frontend clients API working (${clients.length} clients)`, 'success');
+                    successCount++;
+                } else {
+                    addResult(`❌ Frontend clients API failed`, 'error');
+                }
+
+                if (inventoryResponse.status === 'fulfilled' && inventoryResponse.value.ok) {
+                    const inventory = await inventoryResponse.value.json();
+                    addResult(`✅ Frontend AI inventory API working (${inventory.length} applications)`, 'success');
+                    successCount++;
+                } else {
+                    addResult(`❌ Frontend AI inventory API failed`, 'error');
+                }
+
+                if (alertsResponse.status === 'fulfilled' && alertsResponse.value.ok) {
+                    const alerts = await alertsResponse.value.json();
+                    addResult(`✅ Frontend alerts API working (${alerts.length} alerts)`, 'success');
+                    successCount++;
+                } else {
+                    addResult(`❌ Frontend alerts API failed`, 'error');
+                }
+
+                if (successCount === totalCount) {
+                    addResult(`🎉 All frontend API integrations working! (${successCount}/${totalCount})`, 'success');
+                } else {
+                    addResult(`⚠️ Partial frontend API integration (${successCount}/${totalCount})`, 'warning');
+                }
+
+            } catch (error) {
+                addResult(`❌ Frontend API integration error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testFileScan() {
+            addResult('🔍 Testing file scan endpoint...', 'info');
+            try {
+                const formData = new FormData();
+                const testFile = new Blob(['This is a test file with some content for scanning.'], { type: 'text/plain' });
+                formData.append('file', testFile, 'test.txt');
+                formData.append('text', 'This is a test file with some content for scanning.');
+
+                const response = await fetch(`${API_BASE_URL}/api/v1/scan/file`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addResult(`✅ File scan endpoint working`, 'success', data);
+                } else {
+                    const errorText = await response.text();
+                    addResult(`❌ File scan failed: ${response.status} - ${errorText}`, 'error');
+                }
+            } catch (error) {
+                addResult(`❌ File scan error: ${error.message}`, 'error');
+            }
+        }
+
+        async function runAllTests() {
+            addResult('🚀 Running all integration tests...', 'info');
+            
+            await testBackendHealth();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testAPIDocs();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testTestEndpoint();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testMockClients();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testMockAIInventory();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testMockAlerts();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testFrontendAPI();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testFileScan();
+            
+            // Summary
+            const successCount = testResults.filter(r => r.type === 'success').length;
+            const errorCount = testResults.filter(r => r.type === 'error').length;
+            const warningCount = testResults.filter(r => r.type === 'warning').length;
+            
+            addResult(`📊 Test Summary: ${successCount} passed, ${errorCount} failed, ${warningCount} warnings`, 
+                     errorCount === 0 ? 'success' : 'warning');
+        }
+
+        // Auto-run basic tests on page load
+        window.onload = function() {
+            addResult('🚀 Integration test page loaded. Click buttons to run tests.', 'info');
+            testBackendHealth();
+        };
+    </script>
+</body>
+</html>

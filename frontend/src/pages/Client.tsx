@@ -10,25 +10,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Combobox } from "@/components/ui/combobox";
-import { clients } from "@/data/clients";
-import { getFrameworksForClient } from "@/data/frameworks";
-import { getInventoryForClient } from "@/data/inventory";
-import { getEngagementForClient } from "@/data/engagement";
-import { getTrendingDataForClient } from "@/data/mockTrendingData";
-import { getInventoryDetail } from "@/data/inventoryDetails";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useClients, useClient, useAIInventory, useClientDashboard, useAlerts } from "@/hooks/useApi";
+// Removed mock data imports - using API data instead
 import { InventoryDetailDialog } from "@/components/InventoryDetailDialog";
 import { InventoryList } from "@/components/client/InventoryList";
 import { AlertsRibbon } from "@/components/alerts-ribbon";
 import { AlertsFeed } from "@/components/alerts-feed";
 import { AlertFamily } from "@/data/alerts";
 import { getRiskLevel, getRiskBadgeClass, formatNumber, formatDelta, getStatusPillClass, getIntegrationColor, formatDate } from "@/data/utils";
-import { TrendingUp, Users, Shield, CheckCircle, Search, TrendingDown } from "lucide-react";
+import { TrendingUp, Users, Shield, CheckCircle, Search, TrendingDown, AlertCircle, RefreshCw } from "lucide-react";
 
 const Client = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [selectedClientId, setSelectedClientId] = useState(searchParams.get("id") || "acme-health");
-  const [isLoading, setIsLoading] = useState(true);
+  const [selectedClientId, setSelectedClientId] = useState(searchParams.get("id") || "");
   const [inventorySearch, setInventorySearch] = useState("");
   const [inventoryTypeFilter, setInventoryTypeFilter] = useState<string>("all");
   const [inventoryStatusFilter, setInventoryStatusFilter] = useState<string>("all");
@@ -36,17 +32,35 @@ const Client = () => {
   const [inventoryDialogOpen, setInventoryDialogOpen] = useState(false);
   const [alertFamilyFilter, setAlertFamilyFilter] = useState<AlertFamily | null>(null);
 
-  const selectedClient = clients.find(c => c.id === selectedClientId);
-  const frameworks = getFrameworksForClient(selectedClientId);
-  const inventory = getInventoryForClient(selectedClientId);
-  const engagement = getEngagementForClient(selectedClientId);
-  const trendingData = getTrendingDataForClient(selectedClientId);
-  const selectedInventoryDetail = selectedInventoryItem ? getInventoryDetail(selectedInventoryItem) : null;
+  // API hooks
+  const { data: clients, isLoading: clientsLoading, error: clientsError, refetch: refetchClients } = useClients();
+  const { data: selectedClient, isLoading: clientLoading, error: clientError, refetch: refetchClient } = useClient(selectedClientId);
+  const { data: aiInventory, isLoading: inventoryLoading, error: inventoryError, refetch: refetchInventory } = useAIInventory();
+  const { data: dashboardData, isLoading: dashboardLoading, error: dashboardError, refetch: refetchDashboard } = useClientDashboard(selectedClientId);
+  const { data: alerts = [], isLoading: alertsLoading, error: alertsError, refetch: refetchAlerts } = useAlerts({ limit: 100 });
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, [selectedClientId]);
+  // Get inventory for the selected client from API data and map to expected format
+  const rawInventory = aiInventory?.find(client => client.clientId === selectedClientId)?.items || [];
+  const inventory = rawInventory.map(item => ({
+    id: item.id,
+    type: item.type as 'Application' | 'Agent',
+    name: item.name,
+    vendor: item.vendor,
+    users: item.active_users,
+    avgDailyInteractions: item.avgDailyInteractions || item.avg_daily_interactions || 0,
+    status: (item.status === 'Blocked' ? 'Unsanctioned' : 'Permitted') as 'Permitted' | 'Unsanctioned',
+    integrations: item.integrations || []
+  }));
+  
+  // Mock data for components that don't have backend endpoints yet - will be replaced with API calls
+  const frameworks = []; // TODO: Replace with API call
+  const engagement = null; // TODO: Replace with API call
+  const trendingData = null; // TODO: Replace with API call
+  const selectedInventoryDetail = null; // TODO: Replace with API call
+
+  // Error states
+  const hasError = clientsError || clientError || inventoryError || dashboardError || alertsError;
+  const isLoading = clientsLoading || clientLoading || inventoryLoading || dashboardLoading || alertsLoading;
 
   useEffect(() => {
     if (selectedClientId !== searchParams.get("id")) {
@@ -54,10 +68,27 @@ const Client = () => {
     }
   }, [selectedClientId, searchParams, setSearchParams]);
 
-  const clientOptions = clients.map(client => ({
+  // Auto-select first client if no client ID is provided
+  useEffect(() => {
+    if (!selectedClientId && clients && clients.length > 0) {
+      setSelectedClientId(clients[0].id);
+    }
+  }, [selectedClientId, clients]);
+
+  // Ensure selected client is valid; if not, auto-correct to first available
+  useEffect(() => {
+    if (clients && clients.length > 0 && selectedClientId) {
+      const exists = clients.some(c => c.id === selectedClientId);
+      if (!exists) {
+        setSelectedClientId(clients[0].id);
+      }
+    }
+  }, [clients, selectedClientId]);
+
+  const clientOptions = clients?.map(client => ({
     value: client.id,
     label: client.name
-  }));
+  })) || [];
 
   const handleInventoryItemClick = (itemId: string) => {
     setSelectedInventoryItem(itemId);
@@ -73,48 +104,93 @@ const Client = () => {
     return matchesSearch && matchesType && matchesStatus;
   });
 
-  const kpiCards = selectedClient && trendingData ? [
+  const handleRetry = () => {
+    refetchClients();
+    refetchClient();
+    refetchInventory();
+    refetchDashboard();
+    refetchAlerts();
+  };
+
+  const kpiCards = selectedClient ? [
     {
       title: "Applications Monitored",
-      value: selectedClient.appsMonitored,
+      value: selectedClient.apps_monitored,
       icon: TrendingUp,
       description: "AI applications tracked for this client",
-      trend: trendingData.appsMonitoredDelta,
+      trend: selectedClient.apps_added_7d || 0,
       trendType: "number" as const
     },
     {
       title: "Interactions Monitored",
-      value: selectedClient.interactionsMonitored,
+      value: selectedClient.interactions_monitored,
       icon: Users,
       description: "Daily AI interactions monitored",
-      trend: parseFloat(((trendingData.interactionsMonitoredDelta / selectedClient.interactionsMonitored) * 100).toFixed(1)),
+      trend: selectedClient.interactions_pct_change_7d || 0,
       trendType: "percentage" as const
     },
     {
       title: "Agents Deployed",
-      value: selectedClient.agentsDeployed,
+      value: selectedClient.agents_deployed,
       icon: Users,
       description: "Active AI agents in use",
-      trend: trendingData.agentsDeployedDelta,
+      trend: selectedClient.agents_deployed_change_7d || 0,
       trendType: "number" as const
     },
     {
       title: "AI Risk Assessment",
-      value: getRiskLevel(selectedClient.riskScore),
+      value: getRiskLevel(selectedClient.risk_score),
       icon: Shield,
       description: "Current risk level assessment",
       isBadge: true
     },
     {
       title: "Compliance Coverage",
-      value: `${selectedClient.complianceCoverage}%`,
+      value: `${selectedClient.compliance_coverage}%`,
       icon: CheckCircle,
       description: "Overall compliance framework coverage",
-      trend: trendingData.complianceCoverageDelta,
+      trend: 0,
       trendType: "percentage" as const
     }
   ] : [];
 
+  // Error state
+  if (hasError) {
+    return (
+      <AppLayout 
+        headerTitle="Single Client View"
+        headerActions={
+          <Button onClick={handleRetry} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
+        }
+      >
+        <div className="space-y-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <div className="space-y-2">
+                <p className="font-semibold">Failed to load client data</p>
+                <p className="text-sm">
+                  {clientsError && "Failed to load clients list. "}
+                  {clientError && "Failed to load client details. "}
+                  {inventoryError && "Failed to load AI inventory. "}
+                  {dashboardError && "Failed to load dashboard data. "}
+                </p>
+                <Button onClick={handleRetry} variant="outline" size="sm" className="mt-2">
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Loading state
   if (isLoading) {
     return (
       <AppLayout 
@@ -163,15 +239,46 @@ const Client = () => {
     );
   }
 
+  // No data state
   if (!selectedClient) {
     return (
-      <AppLayout headerTitle="Single Client View">
-        <div className="flex items-center justify-center h-64">
-          <p className="text-subtext">Client not found</p>
+      <AppLayout 
+        headerTitle="Single Client View"
+        headerActions={
+          <Button onClick={handleRetry} variant="outline" size="sm">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
+        }
+      >
+        <div className="space-y-6">
+          <Card className="border-0 shadow-elegant">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="text-center space-y-4">
+                <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">No client data found</h3>
+                  <p className="text-muted-foreground">
+                    {selectedClientId ? 
+                      `No data available for client ID: ${selectedClientId}` : 
+                      "Please select a client to view details."
+                    }
+                  </p>
+                </div>
+                <Button onClick={handleRetry} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Try Again
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </AppLayout>
     );
   }
+
 
   return (
     <AppLayout 
@@ -236,6 +343,8 @@ const Client = () => {
         <AlertsFeed 
           clientId={selectedClientId}
           familyFilter={alertFamilyFilter}
+          alerts={alerts as any}
+          clients={clients as any}
         />
 
         {/* Middle Row - Compliance Progress & AI Inventory */}

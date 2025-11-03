@@ -1,5 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
+import { RoleBasedNavigation } from "./RoleBasedNavigation";
 import { Menu } from "lucide-react";
 
 interface AppLayoutProps {
@@ -28,11 +29,10 @@ export function AppLayout({ children, headerTitle, headerActions }: AppLayoutPro
                 </h1>
               )}
               
-              {headerActions && (
-                <div className="flex items-center gap-4">
-                  {headerActions}
-                </div>
-              )}
+              <div className="flex items-center gap-4">
+                {headerActions}
+                <RoleBasedNavigation />
+              </div>
             </div>
           </header>
 

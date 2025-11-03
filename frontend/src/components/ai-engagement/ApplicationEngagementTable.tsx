@@ -3,10 +3,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TrendingUp, TrendingDown, Bot, ExternalLink, Loader2 } from "lucide-react";
-import { aiEngagementData, ApplicationEngagement, isDataInitialized } from "@/data/aiEngagement";
 import { ApplicationDrawer } from "./ApplicationDrawer";
-
 import { useAIEngagementData } from "@/hooks/useAIEngagementData";
+
+// Define the ApplicationEngagement interface locally
+interface ApplicationEngagement {
+  id: string;
+  name: string;
+  vendor: string;
+  icon: string;
+  active_users: number;
+  interactions_per_day: number;
+  utilization: string;
+  trend_pct_7d: number;
+  status: string;
+  last_activity_iso: string;
+}
 
 export const ApplicationEngagementTable = ({ id, days }: { id?: string; days?: number }) => {
   const [selectedApp, setSelectedApp] = useState<ApplicationEngagement | null>(null);
@@ -48,6 +60,25 @@ export const ApplicationEngagementTable = ({ id, days }: { id?: string; days?: n
     );
   }
 
+  // Get applications from the engagement data
+  const applications = engagementData?.applications || [];
+  
+  // Show no data message if no applications
+  if (!applications || applications.length === 0) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Application Engagement</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-32">
+            <p className="text-muted-foreground">No application engagement data available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <>
       <Card id={id} className="scroll-mt-20">
@@ -67,7 +98,7 @@ export const ApplicationEngagementTable = ({ id, days }: { id?: string; days?: n
               </TableRow>
             </TableHeader>
             <TableBody>
-              {aiEngagementData.applications.map((app) => (
+              {applications.map((app) => (
                 <TableRow 
                   key={app.application}
                   className="cursor-pointer hover:bg-muted/50"

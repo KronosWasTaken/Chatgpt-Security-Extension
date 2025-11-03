@@ -43,9 +43,11 @@ async def login(
     session:AsyncSession=Depends(get_async_session)
 ):
     try:
+        print(login_data)
         user = (await session.execute(
     select(User).where(User.email == login_data.email, User.is_active == True)
 )).scalars().first()
+        print("userdata")
         
         if user:
             if not PasswordManager.verify_password(login_data.password,user.hashed_password):
@@ -95,6 +97,7 @@ async def login(
             
         
     except Exception as e:
+        
         raise HTTPException(
             status_code=http_status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Authentication failed: {str(e)}"

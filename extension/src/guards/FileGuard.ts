@@ -148,7 +148,6 @@ export class FileGuard {
 
       console.log('🔍 REAL_FILE_SCAN: Getting BackendApiService instance...')
       const backendApi = BackendApiService.getInstance()
-
       try {
         console.log('🔍 REAL_FILE_SCAN: Extracting file text...')
         let fileText: string | undefined
@@ -176,11 +175,12 @@ export class FileGuard {
         })
         
         // Use the same path as test file scan - send to background script
-        const backendResult:EnhancedScanResult = await new Promise((resolve, reject) => {
+        const backendResult: EnhancedScanResult = await new Promise((resolve, reject) => {
           chrome.runtime.sendMessage({
             type: 'SCAN_FILE',
             fileName: file.name,
-            fileData: fileData
+            fileData: fileData,
+            fileType: file.type
           }, (response) => {
             if (chrome.runtime.lastError) {
               console.error('❌ REAL_FILE_SCAN: Chrome runtime error:', chrome.runtime.lastError)

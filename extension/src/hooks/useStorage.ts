@@ -66,12 +66,7 @@ export const useConfig = () => {
 
 export const useLogs = () => {
   const defaultLogs: LogEntry[] = [
-    {
-      id: '1',
-      timestamp: new Date().toISOString(),
-      message: 'File Upload Scanner initialized successfully by Aaditya Raj',
-      type: 'info'
-    }
+   
   ]
 
   return useStorage('logs', defaultLogs)

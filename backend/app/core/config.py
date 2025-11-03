@@ -43,7 +43,11 @@ class Settings(BaseSettings):
     AWS_KMS_KEY_ID: Optional[str] = None
     
 
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:8080,chrome-extension://*"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173,chrome-extension://*,moz-extension://*"
+    CORS_ORIGINS: str = Field(
+        default="http://localhost:3000,http://localhost:5173,chrome-extension://*,moz-extension://*",
+        description="Comma-separated list of CORS origins"
+    )
     ALLOWED_CREDENTIALS: bool = True
     
 
@@ -65,6 +69,12 @@ class Settings(BaseSettings):
     # VirusTotal
     VT_API_KEY: Optional[str] = None
     VT_API_BASE: str = "https://www.virustotal.com/api/v3"
+    
+    # File Upload Security
+    MAX_UPLOAD_BYTES: int = 10 * 1024 * 1024  # 10 MB default
+    # Note: Sensitive file extensions (pfx, p12, pem, key) are allowed but will be flagged as threats
+    ALLOWED_EXTS: str = "pdf,jpg,jpeg,png,txt,md,zip,json,log,csv,pfx,p12,pem,key,crt,cer,jks"
+    ALLOWED_MIME: str = "application/pdf,image/jpeg,image/png,text/plain,text/markdown,application/zip,application/json,text/csv,text/x-log,application/x-pkcs12,application/x-x509-ca-cert"
     
     # Email
     SMTP_HOST: Optional[str] = None

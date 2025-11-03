@@ -66,7 +66,7 @@ export const useAIInventory = () => {
     refetchOnReconnect: true,
     staleTime: 60_000,
     gcTime: 5 * 60_000,
-    refetchInterval: 60_000,
+    // refetchInterval: 60_000,
   });
 };
 
@@ -210,12 +210,60 @@ export const useAlertsFeed = () => {
   return useQuery({
     queryKey: queryKeys.alertsFeed,
     queryFn: () => apiClient.getAlertsFeed(),
-    refetchInterval: 30000, // Refetch every 30 seconds
+    // refetchInterval: 30000, // Refetch every 30 seconds
     staleTime: 5_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: 'always',
+  });
+};
+
+// Client interaction hooks
+export const useClientInteractions = (clientId: string) => {
+  return useQuery({
+    queryKey: ['clients', clientId, 'interactions'],
+    queryFn: () => apiClient.getClientInteractions(clientId),
+    enabled: !!clientId,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
+    // refetchInterval: 60_000,
+  });
+};
+
+export const useApplicationInteractions = (clientId: string, appId: string) => {
+  return useQuery({
+    queryKey: ['clients', clientId, 'applications', appId, 'interactions'],
+    queryFn: () => apiClient.getApplicationInteractions(clientId, appId),
+    enabled: !!clientId && !!appId,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
+    // refetchInterval: 60_000, // Refetch every minute
+  });
+};
+
+export const useIncrementInteractionCount = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ clientId, appId, count }: { 
+      clientId: string; 
+      appId: string; 
+      count?: number; 
+    }) => apiClient.incrementInteractionCount(clientId, appId, count),
+    onSuccess: (_, { clientId, appId }) => {
+      // Invalidate and refetch interaction data
+      queryClient.invalidateQueries({ queryKey: ['clients', clientId, 'interactions'] });
+      queryClient.invalidateQueries({ queryKey: ['clients', clientId, 'applications', appId, 'interactions'] });
+      queryClient.refetchQueries({ queryKey: ['clients', clientId, 'interactions'] });
+    },
+    onError: handleApiError,
   });
 };
 
@@ -226,6 +274,82 @@ export const useCurrentUser = () => {
     queryFn: () => apiClient.getCurrentUser(),
     staleTime: 5 * 60_000,
     gcTime: 10 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
+  });
+};
+
+// Action Queue hooks
+export const useClientActionQueue = (clientId: string) => {
+  return useQuery({
+    queryKey: ['action-queue', clientId],
+    queryFn: () => apiClient.getClientActionQueue(clientId),
+    enabled: !!clientId,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
+  });
+};
+
+export const useResolveAction = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ clientId, actionId, actionType, resolution }: { 
+      clientId: string; 
+      actionId: string; 
+      actionType: string; 
+      resolution: string; 
+    }) => apiClient.resolveAction(clientId, actionId, actionType, resolution),
+    onSuccess: (_, { clientId }) => {
+      queryClient.invalidateQueries({ queryKey: ['action-queue', clientId] });
+      toast({
+        title: "Success",
+        description: "Action resolved successfully",
+      });
+    },
+    onError: handleApiError,
+  });
+};
+
+// Compliance hooks
+export const useClientComplianceSummary = (clientId: string) => {
+  return useQuery({
+    queryKey: ['compliance-summary', clientId],
+    queryFn: () => apiClient.getClientComplianceSummary(clientId),
+    enabled: !!clientId,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
+  });
+};
+
+export const useClientComplianceReport = (clientId: string) => {
+  return useQuery({
+    queryKey: ['compliance-report', clientId],
+    queryFn: () => apiClient.getClientComplianceReport(clientId),
+    enabled: !!clientId,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    refetchOnMount: 'always',
+  });
+};
+
+// Policies hooks
+export const useClientPolicies = (clientId: string) => {
+  return useQuery({
+    queryKey: ['policies', clientId],
+    queryFn: () => apiClient.getClientPolicies(clientId),
+    enabled: !!clientId,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
     refetchOnMount: 'always',

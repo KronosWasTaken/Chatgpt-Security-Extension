@@ -21,6 +21,7 @@ interface SensitiveActionsModalProps {
   actions: SensitiveAction[];
 }
 
+// Mock data - will be replaced with API call
 const mockSensitiveActions: SensitiveAction[] = [
   {
     id: "1",

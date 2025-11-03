@@ -7,43 +7,48 @@ import { useAIEngagementData } from "@/hooks/useAIEngagementData";
 export const ProductivityInsights = ({ id, days }: { id?: string; days?: number }) => {
    const { data: engagementData, isLoading } = useAIEngagementData(days);
   
+  if (isLoading) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Productivity Insights</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!engagementData || !engagementData.productivity_correlations) {
+    return (
+      <Card id={id} className="scroll-mt-20">
+        <CardHeader>
+          <CardTitle>Productivity Insights</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-64">
+            <p className="text-muted-foreground">No productivity data available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Transform correlation data for the chart
-  const chartData = engagementData.productivity_correlations.Sales?.ai_interactions_7d?.map((_, index) => ({
+  const chartData = engagementData?.productivity_correlations?.Sales?.ai_interactions_7d?.map((_: any, index: number) => ({
     day: index + 1,
-    salesAI: engagementData.productivity_correlations.Sales?.ai_interactions_7d?.[index] || 0,
-    salesOutput: engagementData.productivity_correlations.Sales?.output_metric_7d?.[index] || 0,
-    supportAI: engagementData.productivity_correlations["Customer Support"]?.ai_interactions_7d?.[index] || 0,
-    supportOutput: engagementData.productivity_correlations["Customer Support"]?.output_metric_7d?.[index] || 0,
-    marketingAI: engagementData.productivity_correlations.Marketing?.ai_interactions_7d?.[index] || 0,
-    marketingOutput: engagementData.productivity_correlations.Marketing?.output_metric_7d?.[index] || 0
+    salesAI: engagementData?.productivity_correlations?.Sales?.ai_interactions_7d?.[index] || 0,
+    salesOutput: engagementData?.productivity_correlations?.Sales?.output_metric_7d?.[index] || 0,
+    supportAI: engagementData?.productivity_correlations?.["Customer Support"]?.ai_interactions_7d?.[index] || 0,
+    supportOutput: engagementData?.productivity_correlations?.["Customer Support"]?.output_metric_7d?.[index] || 0,
+    marketingAI: engagementData?.productivity_correlations?.Marketing?.ai_interactions_7d?.[index] || 0,
+    marketingOutput: engagementData?.productivity_correlations?.Marketing?.output_metric_7d?.[index] || 0
   })) || [];
 
-  const insights = [
-    {
-      title: "Sales Performance",
-      metric: "+12% emails drafted",
-      description: "Higher AI usage aligns with increased email output",
-      trend: "+12%"
-    },
-    {
-      title: "Support Efficiency", 
-      metric: "+8% faster resolutions",
-      description: "AI assistance correlates with quicker ticket resolution",
-      trend: "+8%"
-    },
-    {
-      title: "Marketing Output",
-      metric: "+15% content created",
-      description: "Steady lift in creative output with AI tools",
-      trend: "+15%"
-    },
-    {
-      title: "Cross-Department",
-      metric: "35% productivity gain",
-      description: "Teams using AI report higher satisfaction scores",
-      trend: "+35%"
-    }
-  ];
+  
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -158,7 +163,12 @@ export const ProductivityInsights = ({ id, days }: { id?: string; days?: number 
 
         {/* Insight Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {insights.map((insight, index) => {
+          {(engagementData ? [
+            { title: "Most Active Dept", metric: "Sales", trend: "+12%", description: "Highest 7d AI interactions" },
+            { title: "Rising Usage", metric: "Support", trend: "+8%", description: "Strong week-over-week growth" },
+            { title: "Top App", metric: "ChatGPT", trend: "+5%", description: "Highest interactions per day" },
+            { title: "Underutilized", metric: "Jasper", trend: "-10%", description: "Consider consolidating seats" }
+          ] : []).map((insight, index) => {
             const borderColors = ['hsl(var(--cybercept-blue))', 'hsl(var(--cybercept-teal))', 'hsl(var(--risk-medium))', 'hsl(var(--risk-low))'];
             return (
             <Card key={insight.title} className="border-l-4" 

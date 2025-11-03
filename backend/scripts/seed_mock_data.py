@@ -398,7 +398,7 @@ async def seed_client_users(session: AsyncSession, clients):
             "is_active": True,
             "msp_id": None,
             "role": "client_admin",
-            "permissions": ["read", "write", "admin"]
+            "permissions": ["read", "write", "admin", "compliance"]
         },
         # FinanceFirst Bank users
         {

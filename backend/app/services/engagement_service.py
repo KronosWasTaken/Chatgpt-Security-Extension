@@ -92,8 +92,11 @@ class EngagementService:
         for row in result:
             # Calculate 7-day trend
             trend = await self._calculate_7d_trend_for_service(client_id, row.ai_service_id, target_date)
-            # Calculate utilization based on interactions
-            utilization = self._calculate_utilization(row.interactions_per_day or 0)
+            # Calculate utilization based on interactions per active user
+            utilization = self._calculate_utilization(
+                row.interactions_per_day or 0,
+                row.active_users or 1
+            )
             app_entry: Dict[str, Any] = {
                 'ai_service_id': str(row.ai_service_id),
                 'application': row.application,
@@ -421,23 +424,38 @@ class EngagementService:
         
         return round(((current_avg - prev_avg) / prev_avg) * 100, 2)
     
-    def _calculate_utilization(self, interactions: int) -> str:
-        """Calculate utilization level based on interactions"""
-        if interactions >= 100:
+    def _calculate_utilization(self, interactions: int, active_users: int = 1) -> str:
+        """Calculate utilization level based on interactions per user with realistic thresholds"""
+        # Calculate per-user interaction rate for more realistic assessment
+        per_user_rate = interactions / max(active_users, 1)
+        
+        # Realistic thresholds based on typical enterprise AI usage patterns:
+        # - Heavy users: 20-30+ interactions/day (constant usage)
+        # - Moderate users: 8-20 interactions/day (regular usage)
+        # - Light users: 1-8 interactions/day (occasional usage)
+        # - Minimal: <1 interaction/day (rare usage)
+        
+        if per_user_rate >= 20:
+            return 'Very High'
+        elif per_user_rate >= 8:
             return 'High'
-        elif interactions >= 50:
+        elif per_user_rate >= 3:
             return 'Medium'
-        else:
+        elif per_user_rate >= 1:
             return 'Low'
+        else:
+            return 'Minimal'
     
     def _get_utilization_recommendation(self, utilization: str) -> str:
         """Get recommendation based on utilization level"""
-        if utilization == 'High':
-            return 'Consider scaling up resources or optimizing usage patterns'
-        elif utilization == 'Low':
-            return 'Consider training users or evaluating necessity'
-        else:
-            return 'Monitor for changes in usage patterns'
+        recommendations = {
+            'Very High': 'Power users detected - ensure governance policies and monitor for burnout or shadow IT',
+            'High': 'Strong adoption - standardize best practices and track productivity gains',
+            'Medium': 'Healthy usage - maintain training programs and gather user feedback',
+            'Low': 'Emerging adoption - boost awareness campaigns and identify use case gaps',
+            'Minimal': 'Limited engagement - reassess tool fit or provide targeted enablement'
+        }
+        return recommendations.get(utilization, 'Monitor for changes in usage patterns')
 
     async def _get_gemini_app_recommendation(self, app_entry: Dict[str, Any]) -> Optional[str]:
         """Generate a concise recommendation using Gemini, if configured.

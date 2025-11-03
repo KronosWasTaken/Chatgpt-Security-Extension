@@ -11,7 +11,11 @@ from app.api.v1.endpoints import(
     alerts,
     analyze,
     scan,
-    audit
+    audit,
+    client_interactions,
+    action_queue,
+    test,
+    websocket
 )
 
 
@@ -41,6 +45,14 @@ api_router.include_router(analyze.router,prefix="/analyze",tags=["analyze"])
 api_router.include_router(scan.router,prefix="/scan",tags=["scan"])
 
 api_router.include_router(audit.router,prefix="/audit",tags=["audit"])
+
+api_router.include_router(client_interactions.router,prefix="/clients",tags=["client-interactions"])
+
+api_router.include_router(action_queue.router,prefix="/action-queue",tags=["action-queue"])
+
+api_router.include_router(test.router,prefix="/test",tags=["test"])
+
+api_router.include_router(websocket.router,prefix="",tags=["websocket"])
 
 
 

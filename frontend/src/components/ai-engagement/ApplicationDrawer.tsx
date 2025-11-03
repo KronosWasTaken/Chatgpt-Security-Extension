@@ -21,14 +21,14 @@ interface ApplicationDrawerProps {
 export const ApplicationDrawer = ({ application, open, onOpenChange }: ApplicationDrawerProps) => {
   if (!application) return null;
 
-  // Mock 30-day trend data
+  // Mock data - will be replaced with API call
   const trendData = Array.from({ length: 30 }, (_, i) => ({
     day: i + 1,
     activeUsers: Math.floor(application.active_users * (0.8 + Math.random() * 0.4)),
     interactions: Math.floor(application.interactions_per_day * (0.8 + Math.random() * 0.4))
   }));
 
-  // Mock department breakdown
+  // Mock department breakdown - will be replaced with API call
   const departmentData = [
     { name: 'Sales', value: 38, color: 'hsl(var(--chart-1))' },
     { name: 'Support', value: 26, color: 'hsl(var(--chart-2))' },

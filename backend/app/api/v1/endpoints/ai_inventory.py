@@ -138,20 +138,70 @@ async def get_ai_inventory(
     """Get AI inventory for all clients"""
     user = request.state.user
     
-    if user['role'] not in ["msp_admin", "msp_user"]:
-        return []
+    if user['role'] in ["msp_admin", "msp_user"]:
+        # MSP users can see all clients
+        msp_id = UUID(user['msp_id'])
+        
+        # Get all clients for this MSP
+        clients_query = select(Client).where(Client.msp_id == msp_id)
+        clients_result = await session.execute(clients_query)
+        clients = clients_result.scalars().all()
+        
+        inventory_data = []
+        
+        for client in clients:
+            # Get ALL AI services for this client (not just those with usage data)
+            ai_services_query = select(ClientAIServices).where(
+                ClientAIServices.client_id == client.id
+            )
+            ai_services_result = await session.execute(ai_services_query)
+            ai_services = ai_services_result.scalars().all()
+            
+            items = []
+            for service in ai_services:
+                risk_score = get_risk_score_for_service(service)
+                risk_level = calculate_risk(risk_score)
+                
+                # Calculate average daily interactions from usage table (if usage data exists)
+                avg_daily_interactions = await calculate_avg_daily_interactions(
+                    session, str(client.id), str(service.id)
+                )
+                
+                items.append({
+                    "id": str(service.id),
+                    "type": service.type,
+                    "name": service.name,
+                    "vendor": service.vendor,
+                    "users": service.users,
+                    "avgDailyInteractions": avg_daily_interactions,
+                    "status": service.status,
+                    "integrations": service.integrations or [],
+                    "risk_level": risk_level,
+                    "risk_score": risk_score,
+                    "active_users": service.users  # Using users as active_users for now
+                })
+            
+            inventory_data.append({
+                "clientId": str(client.id),
+                "clientName": client.name,
+                "items": items
+            })
+        
+        return inventory_data
     
-    msp_id = UUID(user['msp_id'])
-    
-    # Get all clients for this MSP
-    clients_query = select(Client).where(Client.msp_id == msp_id)
-    clients_result = await session.execute(clients_query)
-    clients = clients_result.scalars().all()
-    
-    inventory_data = []
-    
-    for client in clients:
-        # Get ALL AI services for this client (not just those with usage data)
+    elif user['role'] in ["client_admin", "end_user"]:
+        # Client users can only see their own client's inventory
+        client_id = UUID(user['client_id'])
+        
+        # Get client
+        client_query = select(Client).where(Client.id == client_id)
+        client_result = await session.execute(client_query)
+        client = client_result.scalar_one_or_none()
+        
+        if not client:
+            return []
+        
+        # Get AI services for this client
         ai_services_query = select(ClientAIServices).where(
             ClientAIServices.client_id == client.id
         )
@@ -182,13 +232,14 @@ async def get_ai_inventory(
                 "active_users": service.users  # Using users as active_users for now
             })
         
-        inventory_data.append({
+        return [{
             "clientId": str(client.id),
             "clientName": client.name,
             "items": items
-        })
+        }]
     
-    return inventory_data
+    else:
+        return []
 
 @router.post("/", response_model=AIApplicationResponse)
 async def create_ai_application(
@@ -199,29 +250,42 @@ async def create_ai_application(
     """Create a new AI application"""
     user = request.state.user
     
-    if user['role'] not in ["msp_admin", "msp_user"]:
-        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    if user['role'] in ["msp_admin", "msp_user"]:
+        msp_id = UUID(user['msp_id'])
+        
+        # If no client_id provided, use the first client for this MSP
+        if not app_data.client_id:
+            client_query = select(Client).where(Client.msp_id == msp_id).limit(1)
+            client_result = await session.execute(client_query)
+            client = client_result.scalar_one_or_none()
+            if not client:
+                raise HTTPException(status_code=404, detail="No clients found for this MSP")
+            client_id = client.id
+        else:
+            client_id = UUID(app_data.client_id)
+            # Verify client belongs to this MSP
+            client_query = select(Client).where(
+                and_(Client.id == client_id, Client.msp_id == msp_id)
+            )
+            client_result = await session.execute(client_query)
+            client = client_result.scalar_one_or_none()
+            if not client:
+                raise HTTPException(status_code=404, detail="Client not found or access denied")
     
-    msp_id = UUID(user['msp_id'])
-    
-    # If no client_id provided, use the first client for this MSP
-    if not app_data.client_id:
-        client_query = select(Client).where(Client.msp_id == msp_id).limit(1)
+    elif user['role'] in ["client_admin", "end_user"]:
+        # Client users can only create applications for their own client
+        client_id = UUID(user['client_id'])
+        
+        # Get client
+        client_query = select(Client).where(Client.id == client_id)
         client_result = await session.execute(client_query)
         client = client_result.scalar_one_or_none()
+        
         if not client:
-            raise HTTPException(status_code=404, detail="No clients found for this MSP")
-        client_id = client.id
+            raise HTTPException(status_code=404, detail="Client not found")
+    
     else:
-        client_id = UUID(app_data.client_id)
-        # Verify client belongs to this MSP
-        client_query = select(Client).where(
-            and_(Client.id == client_id, Client.msp_id == msp_id)
-        )
-        client_result = await session.execute(client_query)
-        client = client_result.scalar_one_or_none()
-        if not client:
-            raise HTTPException(status_code=404, detail="Client not found or access denied")
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
     
     # First, create or find an AIService record
     ai_service_query = select(AIService).where(

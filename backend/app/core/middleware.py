@@ -18,17 +18,30 @@ class AuthMiddleWare(BaseHTTPMiddleware):
             "/api/v1/auth/login",
             "/api/v1/auth/refresh",
             "/api/v1/auth/logout",
+            "/api/v1/test/test",
+            "/api/v1/test/mock-clients",
+            "/api/v1/test/mock-ai-inventory",
+            "/api/v1/test/mock-alerts",
+            # Auth required for protected APIs
             # "/api/v1/scan/file",  
-            # "/api/v1/scan/file/legacy",  
-            # "/api/v1/audit/events" 
+            # "/api/v1/scan/file/legacy", 
         ]
         
         if request.method == "OPTIONS" or request.url.path in skip_auth_paths:
             return await call_next(request)
         
         auth_header = request.headers.get("Authorization")
-        if not auth_header or not auth_header.startswith("Bearer"):
-            raise HTTPException(status_code=401, detail="Missing token")
+        if not auth_header:
+            raise HTTPException(
+                status_code=401,
+                detail={"error": "Missing authorization header", "detail": "Authorization header is required"}
+            )
+        
+        if not auth_header.startswith("Bearer"):
+            raise HTTPException(
+                status_code=401,
+                detail={"error": "Invalid authorization header", "detail": "Authorization header must start with 'Bearer '"}
+            )
         
         token = auth_header.split(" ")[1]
         
