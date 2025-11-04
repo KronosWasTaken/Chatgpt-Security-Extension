@@ -669,6 +669,7 @@ export class PromptGuard {
     this.showNotification('Prompt safe ✅', 'success')
     
     // Trigger native Send using SEND_BUTTON selector array (exact match to source)
+    // This will send the prompt through its normal flow after successful scan
     await this.triggerNativeSend()
     
     return false
@@ -677,8 +678,19 @@ export class PromptGuard {
   /**
    * Trigger native Send button click - matches source findAndClickSendButton() pattern
    * Uses SEND_BUTTON selector array from ElementSelector
+   * Creates an approved event to bypass the interceptor and allow normal flow
+   * Ensures prompt text is preserved before sending
    */
   private async triggerNativeSend(): Promise<void> {
+    // First, verify text is still present in textarea before sending
+    const textData = ElementSelector.getFirstTextWithContent()
+    if (!textData || !textData.text || textData.text.length === 0) {
+      console.warn('⚠️ triggerNativeSend: No text found in textarea, cannot send')
+      return
+    }
+    
+    console.log('✅ triggerNativeSend: Text verified, proceeding to send:', textData.text.substring(0, 50))
+    
     const sendButtons = ElementSelector.getAllSendButtons()
     
     for (const button of sendButtons) {
@@ -688,8 +700,32 @@ export class PromptGuard {
         
         setTimeout(() => {
           try {
-            // Trigger native click event
-            button.click()
+            // Verify text is still present before clicking
+            const verifyText = ElementSelector.getFirstTextWithContent()
+            if (!verifyText || !verifyText.text || verifyText.text.length === 0) {
+              console.warn('⚠️ triggerNativeSend: Text cleared before send, aborting')
+              this.stateManager.enable(button)
+              return
+            }
+            
+            // Create an approved click event that will bypass the interceptor
+            const approvedClickEvent = this.eventManager.createApprovedEvent(new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window,
+              buttons: 1
+            }))
+            
+            // Mark the event as approved
+            ;(approvedClickEvent as any).promptGuardApproved = true
+            
+            // Dispatch the approved event on the button first
+            button.dispatchEvent(approvedClickEvent)
+            
+            // Also try native click as fallback to ensure send happens
+            if (button && button.offsetParent !== null) {
+              button.click()
+            }
             
             // Re-enable after send completes
             setTimeout(() => {
@@ -709,6 +745,22 @@ export class PromptGuard {
     const form = document.querySelector('form')
     if (form) {
       try {
+        // Verify text is still present before submitting
+        const verifyText = ElementSelector.getFirstTextWithContent()
+        if (!verifyText || !verifyText.text || verifyText.text.length === 0) {
+          console.warn('⚠️ triggerNativeSend: Text cleared before form submit, aborting')
+          return
+        }
+        
+        // Create an approved submit event
+        const approvedSubmitEvent = this.eventManager.createApprovedEvent(new Event('submit', {
+          bubbles: true,
+          cancelable: true
+        }))
+        ;(approvedSubmitEvent as any).promptGuardApproved = true
+        form.dispatchEvent(approvedSubmitEvent)
+        
+        // Also try native submit as fallback
         ;(form as any).requestSubmit ? (form as any).requestSubmit() : form.submit()
       } catch (error) {
         console.error('Failed to submit form:', error)
