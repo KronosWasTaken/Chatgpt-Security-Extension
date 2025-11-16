@@ -85,7 +85,7 @@ export class ElementStateManager {
       cursor: 'not-allowed'
     })
 
-    element.title = `🛡️ ${reason}`
+    element.title = ` ${reason}`
     element.classList.add('prompt-guard-disabled')
   }
 

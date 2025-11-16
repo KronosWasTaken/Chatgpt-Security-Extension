@@ -156,7 +156,7 @@ async def scan_file(
         await DetectionPatternService.ensure_loaded(session)
 
         # Use the comprehensive file analysis service
-        print(f"🔍 SCAN_FILE: Starting file analysis...")
+        print(f" SCAN_FILE: Starting file analysis...")
         add("info", "scan started")
         analysis_result = await FileAnalysisService.analyze_file_for_extension(
             content, filename, text
@@ -174,7 +174,7 @@ async def scan_file(
             analysis_result['threats'].append(f"Sensitive file detected: {sensitive_reason}")
             analysis_result['summary'] = f"Sensitive file detected: {sensitive_reason}"
         
-        print(f"🔍 SCAN_FILE: Analysis completed: {analysis_result}")
+        print(f" SCAN_FILE: Analysis completed: {analysis_result}")
         
         # Log file analysis result
         logger.info(f"File scanned: {filename}")
@@ -227,10 +227,10 @@ async def scan_file(
         #     # Don't fail the scan if audit logging fails
         #     print(f"Audit logging failed: {audit_error}")
         
-        print(f"✅ SCAN_FILE: File scan completed: {filename} - Risk: {analysis_result.get('riskLevel', 'unknown')} - Block: {analysis_result.get('shouldBlock', False)}")
+        print(f" SCAN_FILE: File scan completed: {filename} - Risk: {analysis_result.get('riskLevel', 'unknown')} - Block: {analysis_result.get('shouldBlock', False)}")
         add("success", f"result computed: risk={analysis_result.get('riskLevel', 'unknown')}")
         add("info", "response ready")
-        print(f"✅ SCAN_FILE: Full result: {analysis_result}")
+        print(f" SCAN_FILE: Full result: {analysis_result}")
         
         processing_time_ms = int((time.time() - start_time) * 1000)
         

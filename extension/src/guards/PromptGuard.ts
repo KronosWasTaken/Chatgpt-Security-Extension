@@ -18,23 +18,23 @@ export class PromptGuard {
   private globalSubmitting = false
 
   constructor() {
-    console.log('╔════════════════════════════════════════════════════════════════════╗')
-    console.log('║  PromptGuard Constructor Called                                    ║')
-    console.log('╚════════════════════════════════════════════════════════════════════╝')
+    console.log('')
+    console.log('  PromptGuard Constructor Called                                    ')
+    console.log('')
     
     console.log('   Initializing BackendApiService...')
     this.backendApi = BackendApiService.getInstance()
-    console.log('   ✅ BackendApiService instance created')
+    console.log('    BackendApiService instance created')
     
     console.log('   Setting up event handlers...')
     this.setupEventHandlers()
-    console.log('   ✅ Event handlers set up')
+    console.log('    Event handlers set up')
     
     console.log('   Initializing protection...')
     this.initializeProtection()
-    console.log('   ✅ Protection initialized')
+    console.log('    Protection initialized')
     
-    console.log('✅ PromptGuard: Fully initialized and ready to intercept prompts')
+    console.log(' PromptGuard: Fully initialized and ready to intercept prompts')
     console.log('   Use window.__promptGuardInstance to access the instance')
     console.log('   Use window.__promptGuardInstance.checkPromptSafety("test") to test')
   }
@@ -49,16 +49,16 @@ export class PromptGuard {
       promptLen: text?.length || 0
     })
     console.log('='.repeat(80))
-    console.log('🔍 PromptGuard.checkPromptSafety: ENTRY')
+    console.log(' PromptGuard.checkPromptSafety: ENTRY')
     console.log('='.repeat(80))
-    console.log('🧩 Prompt analysis started', { correlationId, promptLength: text?.length })
+    console.log(' Prompt analysis started', { correlationId, promptLength: text?.length })
     console.log('   Text length:', text?.length || 0)
     console.log('   Text preview:', text?.substring(0, 100) || 'N/A')
     console.log('   Full text:', text)
     console.log('   Text type:', typeof text)
     
     if (!text || text.length < 5) {
-      console.log('✅ Text too short or empty, allowing')
+      console.log(' Text too short or empty, allowing')
       logger.debug('prompt_guard_check_passed', { 
         latencyMs: Date.now() - startTime,
         reason: 'text too short'
@@ -67,7 +67,7 @@ export class PromptGuard {
     }
 
     const preview = this.truncateText(text, 300)
-    console.log('\n📝 Prompt details:')
+    console.log('\n Prompt details:')
     console.log('   Preview (300 chars):', preview)
     console.log('   Full length:', text.length)
     console.log('   Full text:', text)
@@ -76,7 +76,7 @@ export class PromptGuard {
     // Do not write any pre-action logs; logging occurs only after completion
 
     try {
-      console.log('\n📡 STEP 1: Using BackendApiService to analyze prompt')
+      console.log('\n STEP 1: Using BackendApiService to analyze prompt')
       console.log('   Prompt text:', text)
       console.log('   Initializing BackendApiService...')
       
@@ -126,9 +126,9 @@ export class PromptGuard {
           errType: 'null_response',
           reason: 'Backend API returned null'
         })
-        console.error('❌ BackendApiService returned null - BLOCKING PROMPT')
+        console.error(' BackendApiService returned null - BLOCKING PROMPT')
         // Preserve text on block (source behavior - do NOT clear)
-        this.showNotification('❌ Prompt analysis failed. Prompt blocked for security.', 'error')
+        this.showNotification(' Prompt analysis failed. Prompt blocked for security.', 'error')
         
         return {
           isSafe: false,
@@ -153,7 +153,7 @@ export class PromptGuard {
         dangerousPattern: backendResponse.dangerousPattern
       } as any
       
-      console.log('\n📥 STEP 2: Response from BackendApiService')
+      console.log('\n STEP 2: Response from BackendApiService')
       console.log('   isThreats:', backendResponse.isThreats)
       console.log('   shouldBlock:', response.shouldBlock)
       console.log('   riskLevel:', backendResponse.riskLevel)
@@ -167,15 +167,15 @@ export class PromptGuard {
       // Check for backend failures
       if (!response || !response.success) {
         const error = response?.error || 'Backend analysis failed'
-        console.error('❌ PromptGuard.checkPromptSafety: Backend analysis failed - BLOCKING prompt', error)
+        console.error(' PromptGuard.checkPromptSafety: Backend analysis failed - BLOCKING prompt', error)
         // Preserve text on block (source behavior - do NOT clear)
         
         if (error.includes('Authentication required')) {
-          this.showNotification('🔐 Authentication required. Please log in to use prompt protection.', 'error')
+          this.showNotification(' Authentication required. Please log in to use prompt protection.', 'error')
         } else if (error.includes('Backend unreachable') || error.includes('network')) {
-          this.showNotification('❌ Backend unreachable. Prompt blocked for security. Please contact administrator.', 'error')
+          this.showNotification(' Backend unreachable. Prompt blocked for security. Please contact administrator.', 'error')
         } else {
-          this.showNotification('❌ Prompt analysis failed. Prompt blocked for security.', 'error')
+          this.showNotification(' Prompt analysis failed. Prompt blocked for security.', 'error')
         }
         
         return {
@@ -188,7 +188,7 @@ export class PromptGuard {
       }
 
       // STEP 3: Process backend response (matches source response handling contract)
-      console.log('\n📝 STEP 3: Processing backend analysis result')
+      console.log('\n STEP 3: Processing backend analysis result')
       
       const shouldBlock = Boolean(response.shouldBlock) || Boolean(response.isThreats)
       
@@ -214,11 +214,11 @@ export class PromptGuard {
           reason: response.blockReason || 'Threat indicators detected',
           riskLevel: response.riskLevel
         })
-        console.log('\n🚨 DECISION: THREAT DETECTED - BLOCKING PROMPT')
+        console.log('\n DECISION: THREAT DETECTED - BLOCKING PROMPT')
         console.log('   Reason:', response.blockReason || 'Threat indicators detected')
         
         // Show blocked toast (exact match to source)
-        const blockedMessage = `Prompt blocked ❌: ${response.blockReason || response.summary || 'Security policy violation'}`
+        const blockedMessage = `Prompt blocked : ${response.blockReason || response.summary || 'Security policy violation'}`
         this.showNotification(blockedMessage, 'error')
         
         // Clear text inputs on block (user requirement)
@@ -274,7 +274,7 @@ export class PromptGuard {
         latencyMs,
         riskLevel: response.riskLevel 
       })
-      console.log('\n✅ DECISION: Prompt is SAFE - ALLOWING submission')
+      console.log('\n DECISION: Prompt is SAFE - ALLOWING submission')
       console.log('   Risk level:', response.riskLevel)
       console.log('   Summary:', response.summary)
       
@@ -314,22 +314,22 @@ export class PromptGuard {
       return { isSafe: true, response }
     } catch (error) {
       // CRITICAL: Backend dependency - if ANY error occurs, block the prompt
-      console.error('\n❌ CRITICAL ERROR: Backend analysis failed')
+      console.error('\n CRITICAL ERROR: Backend analysis failed')
       console.error('   Error type:', error instanceof Error ? error.name : typeof error)
       console.error('   Error message:', error instanceof Error ? error.message : String(error))
       console.error('   Stack trace:', error instanceof Error ? error.stack : 'none')
-      console.error('\n🚫 BLOCKING PROMPT - No backend response received')
+      console.error('\n BLOCKING PROMPT - No backend response received')
       console.error('   Reason: Backend is required for all prompts')
       console.error('   Prompt text:', text.substring(0, 100))
       
       // Preserve text on block (source behavior - do NOT clear)
       
-      let errorMessage = '❌ Unable to reach backend. Prompt blocked for security.'
+      let errorMessage = ' Unable to reach backend. Prompt blocked for security.'
       if (error instanceof Error) {
         if (error.message.includes('timeout')) {
-          errorMessage = '❌ Backend timeout. Prompt blocked for security.'
+          errorMessage = ' Backend timeout. Prompt blocked for security.'
         } else if (error.message.includes('network')) {
-          errorMessage = '❌ Network error. Prompt blocked for security.'
+          errorMessage = ' Network error. Prompt blocked for security.'
         }
       }
       
@@ -338,10 +338,10 @@ export class PromptGuard {
       const normalizedError = errorMsg || 'Unknown error occurred'
       
       console.error(`Prompt analysis failed [${correlationId}]:`, error)
-      this.showNotification(`❌ ${normalizedError}`, 'error')
+      this.showNotification(` ${normalizedError}`, 'error')
       
       await this.logThreatToExtension(
-        '🚨 PROMPT BLOCKED - Backend unreachable/no response',
+        ' PROMPT BLOCKED - Backend unreachable/no response',
         text,
         { 
           error: normalizedError,
@@ -416,7 +416,7 @@ export class PromptGuard {
   }
 
   private setupEventHandlers(): void {
-    console.log('\n🔍 Setting up event handlers...')
+    console.log('\n Setting up event handlers...')
     console.log('   Registering: click, keydown, submit, paste, input')
     
     this.eventManager.addHandler('click', this.handleClick.bind(this))
@@ -431,16 +431,16 @@ export class PromptGuard {
     // Add direct event listeners for debugging EVERY interaction
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement
-      console.log('🔍 [DEBUG] Click detected on element:', target.tagName, target.className)
+      console.log(' [DEBUG] Click detected on element:', target.tagName, target.className)
       
       if (ElementSelector.isSendButton(target)) {
-        console.log('🎯 [DEBUG] Send button detected:', target)
+        console.log(' [DEBUG] Send button detected:', target)
       }
     }, true)
     
     document.addEventListener('keydown', (e) => {
       const target = e.target as HTMLElement
-      console.log('🔍 [DEBUG] Keydown detected:', e.key, 'on', target.tagName)
+      console.log(' [DEBUG] Keydown detected:', e.key, 'on', target.tagName)
       
       const isSendShortcut = (
         (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) ||
@@ -448,7 +448,7 @@ export class PromptGuard {
       )
       
       if (isSendShortcut) {
-        console.log('🎯 [DEBUG] Send shortcut detected:', e.key)
+        console.log(' [DEBUG] Send shortcut detected:', e.key)
       }
     }, true)
     
@@ -496,27 +496,27 @@ export class PromptGuard {
       }
     }, true)
 
-    console.log('✅ All event handlers registered')
+    console.log(' All event handlers registered')
     console.log('   Will intercept ALL clicks and keyboard events')
   }
 
   private async handleClick(event: Event): Promise<boolean> {
-    console.log('🔍 PromptGuard.handleClick: Event intercepted')
+    console.log(' PromptGuard.handleClick: Event intercepted')
     
     if (!this.isEnabled) {
-      console.log('⏸️ PromptGuard.handleClick: Guard disabled, allowing')
+      console.log('⏸ PromptGuard.handleClick: Guard disabled, allowing')
       return true
     }
 
     const target = event.target as HTMLElement
-    console.log('🔍 PromptGuard.handleClick: Target element:', target.tagName, target.className)
+    console.log(' PromptGuard.handleClick: Target element:', target.tagName, target.className)
     
     if (!ElementSelector.isSendButton(target)) {
-      console.log('⏸️ PromptGuard.handleClick: Not a send button, allowing')
+      console.log('⏸ PromptGuard.handleClick: Not a send button, allowing')
       return true
     }
 
-    console.log('✅ PromptGuard.handleClick: Send button detected!')
+    console.log(' PromptGuard.handleClick: Send button detected!')
     
     // Use the same handler as Enter key and form submit to ensure consistent behavior
     return await this.handleSendAction(event, target)
@@ -538,10 +538,10 @@ export class PromptGuard {
         if (!res.isSafe) {
           await this.handleThreatDetected(res.pattern, res.response, text, res.piiResult)
         } else {
-          this.showNotification('✅ Manual scan passed – no threats detected', 'success')
+          this.showNotification(' Manual scan passed – no threats detected', 'success')
         }
       } else {
-        this.showNotification('ℹ️ No prompt text found to scan', 'info')
+        this.showNotification('ℹ No prompt text found to scan', 'info')
       }
       return false
     }
@@ -574,7 +574,7 @@ export class PromptGuard {
 
     if (!this.isReady) {
       this.eventManager.preventAndStop(event)
-      this.showNotification('🚫 Paste blocked - security guard initializing...', 'warning')
+      this.showNotification(' Paste blocked - security guard initializing...', 'warning')
       return false
     }
 
@@ -631,7 +631,7 @@ export class PromptGuard {
     
     if (!this.isReady) {
       this.eventManager.preventAndStop(event)
-      this.showNotification('🚫 Send blocked - security guard initializing...', 'warning')
+      this.showNotification(' Send blocked - security guard initializing...', 'warning')
       return false
     }
 
@@ -666,7 +666,7 @@ export class PromptGuard {
     }
 
     // Step 3: If safe, show success toast and trigger native Send
-    this.showNotification('Prompt safe ✅', 'success')
+    this.showNotification('Prompt safe ', 'success')
     
     // Trigger native Send using SEND_BUTTON selector array (exact match to source)
     // This will send the prompt through its normal flow after successful scan
@@ -685,11 +685,11 @@ export class PromptGuard {
     // First, verify text is still present in textarea before sending
     const textData = ElementSelector.getFirstTextWithContent()
     if (!textData || !textData.text || textData.text.length === 0) {
-      console.warn('⚠️ triggerNativeSend: No text found in textarea, cannot send')
+      console.warn(' triggerNativeSend: No text found in textarea, cannot send')
       return
     }
     
-    console.log('✅ triggerNativeSend: Text verified, proceeding to send:', textData.text.substring(0, 50))
+    console.log(' triggerNativeSend: Text verified, proceeding to send:', textData.text.substring(0, 50))
     
     const sendButtons = ElementSelector.getAllSendButtons()
     
@@ -703,7 +703,7 @@ export class PromptGuard {
             // Verify text is still present before clicking
             const verifyText = ElementSelector.getFirstTextWithContent()
             if (!verifyText || !verifyText.text || verifyText.text.length === 0) {
-              console.warn('⚠️ triggerNativeSend: Text cleared before send, aborting')
+              console.warn(' triggerNativeSend: Text cleared before send, aborting')
               this.stateManager.enable(button)
               return
             }
@@ -748,7 +748,7 @@ export class PromptGuard {
         // Verify text is still present before submitting
         const verifyText = ElementSelector.getFirstTextWithContent()
         if (!verifyText || !verifyText.text || verifyText.text.length === 0) {
-          console.warn('⚠️ triggerNativeSend: Text cleared before form submit, aborting')
+          console.warn(' triggerNativeSend: Text cleared before form submit, aborting')
           return
         }
         
@@ -816,7 +816,7 @@ export class PromptGuard {
   private async handleThreatDetected(pattern?: string, response?: any, blockedText?: string, piiResult?: any, correlationIdParam?: string): Promise<void> {
     // Safe initialization of correlationId
     const correlationId = correlationIdParam || (globalThis.crypto?.randomUUID?.() || crypto.randomUUID?.() || Math.random().toString(36).substring(2, 12))
-    console.log('🔍 handleThreatDetected called with:', { pattern, response, blockedText, piiResult })
+    console.log(' handleThreatDetected called with:', { pattern, response, blockedText, piiResult })
     
     // Clear input field for FAILURE/UNSAFE prompts
     this.clearTextInputs()
@@ -858,30 +858,30 @@ export class PromptGuard {
     }
     
     if (piiResult?.hasPII) {
-      console.log('🚨 PII detected (backend), logging to extension...', { correlationId })
-      const riskEmoji = piiResult.riskLevel === 'high' ? '🚨' : piiResult.riskLevel === 'medium' ? '⚠️' : 'ℹ️'
+      console.log(' PII detected (backend), logging to extension...', { correlationId })
+      const riskEmoji = piiResult.riskLevel === 'high' ? '' : piiResult.riskLevel === 'medium' ? '' : 'ℹ'
       const types = piiResult.types || []
       
       await this.logPIIToExtension(
-        `🚨 BLOCKED PII - ${piiResult.riskLevel.toUpperCase()} risk: ${types.join(', ')}`,
+        ` BLOCKED PII - ${piiResult.riskLevel.toUpperCase()} risk: ${types.join(', ')}`,
         blockedText,
         piiResult,
         correlationId
       )
     } else if (pattern) {
-      console.log('🚨 Pattern detected, logging to extension...', { correlationId })
+      console.log(' Pattern detected, logging to extension...', { correlationId })
       await this.logThreatToExtension(
-        `🚨 BLOCKED PROMPT - Fallback Pattern Detection: "${pattern}"`,
+        ` BLOCKED PROMPT - Fallback Pattern Detection: "${pattern}"`,
         blockedText,
         { pattern, type: 'fallback_pattern', correlationId },
         correlationId
       )
     } else if (response) {
-      console.log('🚨 Backend analysis detected threat, logging to extension...', { correlationId })
+      console.log(' Backend analysis detected threat, logging to extension...', { correlationId })
       const riskLevel = response.riskLevel?.toUpperCase() || 'UNKNOWN'
       
       await this.logThreatToExtension(
-        `🚨 BLOCKED PROMPT - ${riskLevel} risk: ${reason}`,
+        ` BLOCKED PROMPT - ${riskLevel} risk: ${reason}`,
         blockedText,
         { response, type: 'ai_detection', correlationId },
         correlationId
@@ -895,8 +895,8 @@ export class PromptGuard {
     
     try {
       const logMessage = blockedText 
-        ? `${message}\n\n📋 BLOCKED PROMPT TEXT:\n"${this.truncateText(blockedText, 500)}"\n\n🔍 Details: ${JSON.stringify({ ...details, correlationId }, null, 2)}`
-        : `${message}\n\n🔍 Details: ${JSON.stringify({ ...details, correlationId }, null, 2)}`
+        ? `${message}\n\n BLOCKED PROMPT TEXT:\n"${this.truncateText(blockedText, 500)}"\n\n Details: ${JSON.stringify({ ...details, correlationId }, null, 2)}`
+        : `${message}\n\n Details: ${JSON.stringify({ ...details, correlationId }, null, 2)}`
         
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
@@ -934,8 +934,8 @@ export class PromptGuard {
     
     try {
       const logMessage = blockedText 
-        ? `${message}\n\n📋 BLOCKED TEXT:\n"${this.truncateText(blockedText, 500)}"\n\n🔍 PII Details: ${JSON.stringify({ ...piiResult, correlationId }, null, 2)}`
-        : `${message}\n\n🔍 PII Details: ${JSON.stringify({ ...piiResult, correlationId }, null, 2)}`
+        ? `${message}\n\n BLOCKED TEXT:\n"${this.truncateText(blockedText, 500)}"\n\n PII Details: ${JSON.stringify({ ...piiResult, correlationId }, null, 2)}`
+        : `${message}\n\n PII Details: ${JSON.stringify({ ...piiResult, correlationId }, null, 2)}`
         
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
@@ -1035,12 +1035,12 @@ export class PromptGuard {
   private setupDOMObserver(): void {
     const startObserver = () => {
       if (!document.body) {
-        console.log('🕇 PromptGuard: document.body not ready, waiting...')
+        console.log(' PromptGuard: document.body not ready, waiting...')
         setTimeout(startObserver, 100)
         return
       }
 
-      console.log('✅ PromptGuard: Starting DOM observer (SPA-safe rebinding)')
+      console.log(' PromptGuard: Starting DOM observer (SPA-safe rebinding)')
       this.domObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === 'childList') {
@@ -1154,7 +1154,7 @@ export class PromptGuard {
     try {
       this.isReady = true
       this.stateManager.enableAllSendButtons()
-      this.showNotification('🛡️ Prompt protection active!', 'success')
+      this.showNotification(' Prompt protection active!', 'success')
       
       // Fire-and-forget test call (does not affect readiness)
       const dynamicPrompt = `healthcheck ${window.location.hostname} ${new Date().toISOString()}`
@@ -1193,7 +1193,7 @@ export class PromptGuard {
   }
 
   cleanup(): void {
-    console.log('🧹 PromptGuard: Cleaning up...')
+    console.log(' PromptGuard: Cleaning up...')
     
     // Disconnect MutationObserver
     if (this.domObserver) {
@@ -1210,6 +1210,6 @@ export class PromptGuard {
     // Clear attached inputs
     this.attachedMainInputs = new WeakSet<HTMLElement>()
     
-    console.log('✅ PromptGuard: Cleanup complete')
+    console.log(' PromptGuard: Cleanup complete')
   }
 }

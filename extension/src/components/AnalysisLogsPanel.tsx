@@ -438,15 +438,7 @@ export default function AnalysisLogsPanel() {
               >
                 <div className="flex items-start space-x-3">
                   <div className="flex-shrink-0 mt-0.5">
-                    {normalizedLog.status === 'SUCCESS' ? (
-                      <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" />
-                      </svg>
-                    )}
+                   
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
@@ -488,7 +480,7 @@ export default function AnalysisLogsPanel() {
                         className="mb-2 text-xs text-slate-400 hover:text-slate-300 underline cursor-pointer"
                         aria-label={expandedLogs.has(normalizedLog.id) ? 'Collapse details' : 'Expand details'}
                       >
-                        {expandedLogs.has(normalizedLog.id) ? '▼ Collapse' : '▶ Expand'}
+                        {expandedLogs.has(normalizedLog.id) ? ' Collapse' : ' Expand'}
                       </button>
                     )}
 

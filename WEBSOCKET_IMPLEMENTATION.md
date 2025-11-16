@@ -123,7 +123,7 @@ function EngagementDashboard({ clientId }: { clientId: string }) {
 
   return (
     <div>
-      <div>Status: {isConnected ? '🟢 Connected' : '🔴 Disconnected'}</div>
+      <div>Status: {isConnected ? ' Connected' : ' Disconnected'}</div>
       {connectionError && <div>Error: {connectionError}</div>}
       
       {latestEngagementData && (
@@ -183,7 +183,7 @@ function AlertNotifications() {
 
   return (
     <div>
-      WebSocket Status: {isConnected ? '✓ Active' : '✗ Inactive'}
+      WebSocket Status: {isConnected ? ' Active' : ' Inactive'}
     </div>
   );
 }
@@ -369,13 +369,13 @@ ws.onerror = (error) => console.error('Error:', error);
 
 ## Security Considerations
 
-- ✅ JWT authentication required
-- ✅ Role-based access control
-- ✅ Client/MSP isolation
-- ✅ Connection limit per user (can be added)
-- ✅ Message validation
-- ⚠️ Consider rate limiting for messages
-- ⚠️ Consider encryption for sensitive data
+-  JWT authentication required
+-  Role-based access control
+-  Client/MSP isolation
+-  Connection limit per user (can be added)
+-  Message validation
+-  Consider rate limiting for messages
+-  Consider encryption for sensitive data
 
 ## Future Enhancements
 

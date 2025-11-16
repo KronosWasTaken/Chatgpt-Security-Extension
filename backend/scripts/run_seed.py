@@ -13,10 +13,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from seed_mock_data import main
 
 if __name__ == "__main__":
-    print("🚀 Starting mock data seeding...")
+    print(" Starting mock data seeding...")
     try:
         asyncio.run(main())
-        print("\n✅ Seeding completed successfully!")
+        print("\n Seeding completed successfully!")
     except Exception as e:
-        print(f"\n❌ Seeding failed: {e}")
+        print(f"\n Seeding failed: {e}")
         sys.exit(1)

@@ -112,15 +112,15 @@ Fixed HTTP 400 errors between the Plasmo browser extension and FastAPI backend, 
 2. Extension auto-detects and calls `/api/v1/analyze/prompt`
 3. Check browser console for correlation IDs
 4. Open extension options page
-5. Click "📊 API Logs" button in bottom-right
+5. Click " API Logs" button in bottom-right
 6. View real-time logs with success/error status
 
 ### Expected Behavior
-- ✅ No 400 errors (unless actual validation failure)
-- ✅ Correlation IDs in logs and responses
-- ✅ Popup shows real-time API activity
-- ✅ Error details visible in popup
-- ✅ Server logs in console show structured format
+-  No 400 errors (unless actual validation failure)
+-  Correlation IDs in logs and responses
+-  Popup shows real-time API activity
+-  Error details visible in popup
+-  Server logs in console show structured format
 
 ## No Breaking Changes
 - All existing features preserved

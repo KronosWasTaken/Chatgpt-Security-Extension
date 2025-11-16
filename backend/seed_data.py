@@ -53,9 +53,9 @@ async def create_bob_client_data():
                 
                 session.add(bob_user)
                 await session.flush()  # Get the user ID
-                print("✅ Created new user: Bob Johnson")
+                print(" Created new user: Bob Johnson")
             else:
-                print("✅ Found existing user: Bob Johnson")
+                print(" Found existing user: Bob Johnson")
             
             # Check if Bob's client already exists
             client_result = await session.execute(select(Client).where(Client.name == "TechCorp Solutions"))
@@ -81,9 +81,9 @@ async def create_bob_client_data():
                 
                 session.add(bob_client)
                 await session.flush()  # Get the client ID
-                print("✅ Created new client: TechCorp Solutions")
+                print(" Created new client: TechCorp Solutions")
             else:
-                print("✅ Found existing client: TechCorp Solutions")
+                print(" Found existing client: TechCorp Solutions")
             
             # Update Bob's user with client_id
             bob_user.client_id = bob_client.id
@@ -378,27 +378,27 @@ async def create_bob_client_data():
             
             await session.commit()
             
-            print("✅ Successfully seeded Bob's client data!")
+            print(" Successfully seeded Bob's client data!")
             print(f"   - Client: {bob_client.name} (ID: {bob_client.id})")
             print(f"   - User: {bob_user.name} (Email: {bob_user.email})")
             print(f"   - AI Services: {len(ai_services)}")
             print(f"   - Usage Records: {len(usage_data)}")
             print(f"   - Agent Engagements: {len(agent_engagements)}")
             print(f"   - Alerts: {len(alerts)}")
-            print(f"\n🔑 Login credentials:")
+            print(f"\n Login credentials:")
             print(f"   Email: {bob_user.email}")
             print(f"   Password: password123")
             
         except Exception as e:
             await session.rollback()
-            print(f"❌ Error seeding data: {e}")
+            print(f" Error seeding data: {e}")
             raise
 
 async def main():
     """Main function to run the seeding script"""
-    print("🌱 Starting database seeding for Bob's client data...")
+    print(" Starting database seeding for Bob's client data...")
     await create_bob_client_data()
-    print("🎉 Database seeding completed!")
+    print(" Database seeding completed!")
 
 if __name__ == "__main__":
     asyncio.run(main())

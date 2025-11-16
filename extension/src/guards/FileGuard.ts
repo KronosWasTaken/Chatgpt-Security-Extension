@@ -39,22 +39,22 @@ export class FileGuard {
   private isEnabled = true
 
   async handleFileUpload(files: FileList, source: string): Promise<boolean> {
-    console.log('🔍 REAL_FILE_UPLOAD: Starting file upload handling...')
-    console.log('🔍 REAL_FILE_UPLOAD: Files count:', files.length)
-    console.log('🔍 REAL_FILE_UPLOAD: Source:', source)
-    console.log('🔍 REAL_FILE_UPLOAD: FileGuard enabled:', this.isEnabled)
+    console.log(' REAL_FILE_UPLOAD: Starting file upload handling...')
+    console.log(' REAL_FILE_UPLOAD: Files count:', files.length)
+    console.log(' REAL_FILE_UPLOAD: Source:', source)
+    console.log(' REAL_FILE_UPLOAD: FileGuard enabled:', this.isEnabled)
     
     if (!this.isEnabled) {
-      console.log('⏸️ REAL_FILE_UPLOAD: FileGuard disabled, allowing upload')
+      console.log('⏸ REAL_FILE_UPLOAD: FileGuard disabled, allowing upload')
       return true
     }
 
     const config = await this.getConfig()
-    console.log('🔍 REAL_FILE_UPLOAD: Config loaded:', config)
+    console.log(' REAL_FILE_UPLOAD: Config loaded:', config)
     const scanResults: EnhancedScanResult[] = []
     
     for (const file of Array.from(files)) {
-      console.log('🔍 REAL_FILE_UPLOAD: Processing file:', {
+      console.log(' REAL_FILE_UPLOAD: Processing file:', {
         name: file.name,
         size: file.size,
         type: file.type,
@@ -62,42 +62,42 @@ export class FileGuard {
       })
       
       const result = await this.processFile(file, config, scanResults)
-      console.log('🔍 REAL_FILE_UPLOAD: File processing result:', result)
+      console.log(' REAL_FILE_UPLOAD: File processing result:', result)
       
       if (!result) {
-        console.log('❌ REAL_FILE_UPLOAD: File blocked, stopping processing')
+        console.log(' REAL_FILE_UPLOAD: File blocked, stopping processing')
         return false
       }
     }
 
     if (files.length > 0) {
-      console.log('✅ REAL_FILE_UPLOAD: All files passed, showing success notification')
-      this.showNotification(`✅ ${files.length} file(s) passed security scan and cleared for upload`, 'success')
+      console.log(' REAL_FILE_UPLOAD: All files passed, showing success notification')
+      this.showNotification(` ${files.length} file(s) passed security scan and cleared for upload`, 'success')
       await this.logFileUploadSuccess(files, scanResults)
     }
 
-    console.log('✅ REAL_FILE_UPLOAD: Upload handling completed successfully')
+    console.log(' REAL_FILE_UPLOAD: Upload handling completed successfully')
     return true
   }
 
   private async processFile(file: File, config: any, scanResults: EnhancedScanResult[]): Promise<boolean> {
-    console.log('🔍 REAL_FILE_PROCESS: Starting file processing...')
-    console.log('🔍 REAL_FILE_PROCESS: File details:', {
+    console.log(' REAL_FILE_PROCESS: Starting file processing...')
+    console.log(' REAL_FILE_PROCESS: File details:', {
       name: file.name,
       size: file.size,
       type: file.type
     })
     
     // Perform comprehensive file scan via backend
-    console.log('🔍 REAL_FILE_PROCESS: Calling scanFile...')
+    console.log(' REAL_FILE_PROCESS: Calling scanFile...')
     const scanResult = await this.scanFile(file)
-    console.log('🔍 REAL_FILE_PROCESS: Scan result received:', scanResult)
+    console.log(' REAL_FILE_PROCESS: Scan result received:', scanResult)
     scanResults.push(scanResult)
     
     if (!scanResult.success) {
-      console.log('❌ REAL_FILE_PROCESS: Scan failed:', scanResult.error)
+      console.log(' REAL_FILE_PROCESS: Scan failed:', scanResult.error)
       this.showNotification(
-        `🚫 Upload blocked: ${file.name} - Security scan failed  : ${scanResult.error}`,
+        ` Upload blocked: ${file.name} - Security scan failed  : ${scanResult.error}`,
         'error'
       )
       await this.logFileBlocked(file.name, `Scan failed: ${scanResult.error}`, scanResult)
@@ -107,9 +107,9 @@ export class FileGuard {
     // Check if file should be blocked based on backend analysis
     if (scanResult.shouldBlock) {
       const blockReason = scanResult.blockReason || 'Security threat detected'
-      console.log('❌ REAL_FILE_PROCESS: File blocked by backend:', blockReason)
+      console.log(' REAL_FILE_PROCESS: File blocked by backend:', blockReason)
       this.showNotification(
-        `🚫 Upload blocked: ${file.name} - ${blockReason}`,
+        ` Upload blocked: ${file.name} - ${blockReason}`,
         'error'
       )
       await this.logFileBlocked(file.name, blockReason, scanResult)
@@ -117,13 +117,13 @@ export class FileGuard {
     }
 
     // File passed all backend security checks
-    console.log('✅ REAL_FILE_PROCESS: File passed all security checks')
+    console.log(' REAL_FILE_PROCESS: File passed all security checks')
     return true
   }
 
   private async scanFile(file: File): Promise<EnhancedScanResult> {
-    console.log('🔍 REAL_FILE_SCAN: Starting file scan...')
-    console.log('🔍 REAL_FILE_SCAN: File details:', {
+    console.log(' REAL_FILE_SCAN: Starting file scan...')
+    console.log(' REAL_FILE_SCAN: File details:', {
       name: file.name,
       size: file.size,
       type: file.type,
@@ -134,7 +134,7 @@ export class FileGuard {
       const fileSizeMB = file.size / (1024 * 1024)
       
       if (fileSizeMB > 32) {
-        console.log('❌ REAL_FILE_SCAN: File too large:', fileSizeMB, 'MB')
+        console.log(' REAL_FILE_SCAN: File too large:', fileSizeMB, 'MB')
         return {
           isMalicious: false,
           detectionCount: 0,
@@ -146,27 +146,27 @@ export class FileGuard {
         }
       }
 
-      console.log('🔍 REAL_FILE_SCAN: Getting BackendApiService instance...')
+      console.log(' REAL_FILE_SCAN: Getting BackendApiService instance...')
       const backendApi = BackendApiService.getInstance()
       try {
-        console.log('🔍 REAL_FILE_SCAN: Extracting file text...')
+        console.log(' REAL_FILE_SCAN: Extracting file text...')
         let fileText: string | undefined
         try {
           fileText = await file.text()
-          console.log('🔍 REAL_FILE_SCAN: File text extracted, length:', fileText?.length || 0)
+          console.log(' REAL_FILE_SCAN: File text extracted, length:', fileText?.length || 0)
         } catch (e) {
-          console.log('⚠️ REAL_FILE_SCAN: Could not extract text from file:', e)
+          console.log(' REAL_FILE_SCAN: Could not extract text from file:', e)
           fileText = undefined
         }
 
-        console.log('🔍 REAL_FILE_SCAN: Converting file to ArrayBuffer for background script...')
+        console.log(' REAL_FILE_SCAN: Converting file to ArrayBuffer for background script...')
         
         // Convert file to ArrayBuffer (same as test file scan)
         const arrayBuffer = await file.arrayBuffer()
         const fileData = Array.from(new Uint8Array(arrayBuffer))
         
-        console.log('🔍 REAL_FILE_SCAN: File converted, sending to background script...')
-        console.log('🔍 REAL_FILE_SCAN: File details:', {
+        console.log(' REAL_FILE_SCAN: File converted, sending to background script...')
+        console.log(' REAL_FILE_SCAN: File details:', {
           name: file.name,
           size: file.size,
           type: file.type,
@@ -183,19 +183,19 @@ export class FileGuard {
             fileType: file.type
           }, (response) => {
             if (chrome.runtime.lastError) {
-              console.error('❌ REAL_FILE_SCAN: Chrome runtime error:', chrome.runtime.lastError)
+              console.error(' REAL_FILE_SCAN: Chrome runtime error:', chrome.runtime.lastError)
               reject(new Error(chrome.runtime.lastError.message))
             } else {
-              console.log('🔍 REAL_FILE_SCAN: Background script response:', response)
+              console.log(' REAL_FILE_SCAN: Background script response:', response)
               resolve(response)
             }
           })
         })
         
-        console.log('🔍 REAL_FILE_SCAN: Background script result received:', backendResult)
+        console.log(' REAL_FILE_SCAN: Background script result received:', backendResult)
         
         if (backendResult) {
-          console.log('✅ REAL_FILE_SCAN: Background script scan successful')
+          console.log(' REAL_FILE_SCAN: Background script scan successful')
           return {
             isMalicious: backendResult.isMalicious || false,
             detectionCount: backendResult.detectionCount || 0,
@@ -214,7 +214,7 @@ export class FileGuard {
             fileHash: backendResult.fileHash || undefined
           }
         } else {
-          console.log('❌ REAL_FILE_SCAN: Background script returned null result')
+          console.log(' REAL_FILE_SCAN: Background script returned null result')
           return {
             isMalicious: false,
             detectionCount: 0,
@@ -225,7 +225,7 @@ export class FileGuard {
           }
         }
       } catch (backendError) {
-        console.log('❌ REAL_FILE_SCAN: Background script scan error:', backendError)
+        console.log(' REAL_FILE_SCAN: Background script scan error:', backendError)
         return {
           isMalicious: false,
           detectionCount: 0,
@@ -237,7 +237,7 @@ export class FileGuard {
         }
       }
     } catch (error) {
-      console.log('❌ REAL_FILE_SCAN: General scan error:', error)
+      console.log(' REAL_FILE_SCAN: General scan error:', error)
       return {
         isMalicious: false,
         detectionCount: 0,
@@ -299,11 +299,11 @@ export class FileGuard {
 
   private async logFileBlocked(fileName: string, reason: string, scanResult?: EnhancedScanResult): Promise<void> {
     try {
-      const message = `🚫 BLOCKED FILE - ${reason}`
-      let logMessage = `${message}\n\n📁 FILE NAME: ${fileName}`
+      const message = ` BLOCKED FILE - ${reason}`
+      let logMessage = `${message}\n\n FILE NAME: ${fileName}`
       
       if (scanResult) {
-        logMessage += `\n\n🔍 SCAN RESULTS:`
+        logMessage += `\n\n SCAN RESULTS:`
         logMessage += `\n   • Risk Level: ${scanResult.riskLevel || 'unknown'}`
         logMessage += `\n   • Success: ${scanResult.success ? 'Yes' : 'No'}`
         
@@ -336,8 +336,8 @@ export class FileGuard {
         }
       }
       
-      console.log('🔍 REAL_FILE_LOG: Sending blocked file log to extension...')
-      console.log('🔍 REAL_FILE_LOG: Log message:', logMessage)
+      console.log(' REAL_FILE_LOG: Sending blocked file log to extension...')
+      console.log(' REAL_FILE_LOG: Log message:', logMessage)
       
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
@@ -346,7 +346,7 @@ export class FileGuard {
         category: 'file_scan'
       })
       
-      console.log('✅ REAL_FILE_LOG: Blocked file log sent successfully')
+      console.log(' REAL_FILE_LOG: Blocked file log sent successfully')
       
       // Log to backend if available
       const backendApi = BackendApiService.getInstance()
@@ -372,8 +372,8 @@ export class FileGuard {
         })
       }
     } catch (error) {
-      console.error('❌ REAL_FILE_LOG: Could not log file block to extension:', error)
-      console.error('❌ REAL_FILE_LOG: Error details:', {
+      console.error(' REAL_FILE_LOG: Could not log file block to extension:', error)
+      console.error(' REAL_FILE_LOG: Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       })
@@ -383,14 +383,14 @@ export class FileGuard {
   private async logFileUploadSuccess(files: FileList, scanResults?: EnhancedScanResult[]): Promise<void> {
     try {
       const fileNames = Array.from(files).map(f => f.name).join(', ')
-      const message = `✅ ALLOWED FILE UPLOAD - Security scan passed`
-      let logMessage = `${message}\n\n📁 FILES: ${fileNames}`
+      const message = ` ALLOWED FILE UPLOAD - Security scan passed`
+      let logMessage = `${message}\n\n FILES: ${fileNames}`
       
       if (scanResults && scanResults.length > 0) {
-        logMessage += `\n\n🔍 SCAN RESULTS:`
+        logMessage += `\n\n SCAN RESULTS:`
         scanResults.forEach((result, index) => {
           const fileName = fileNames.split(', ')[index] || `File ${index + 1}`
-          logMessage += `\n📄 ${fileName}:`
+          logMessage += `\n ${fileName}:`
           logMessage += `\n   • Risk Level: ${result.riskLevel || 'safe'}`
           logMessage += `\n   • Backend Scan: ${result.success ? 'Success' : 'Failed'}`
           
@@ -416,8 +416,8 @@ export class FileGuard {
         })
       }
       
-      console.log('🔍 REAL_FILE_LOG: Sending success file log to extension...')
-      console.log('🔍 REAL_FILE_LOG: Log message:', logMessage)
+      console.log(' REAL_FILE_LOG: Sending success file log to extension...')
+      console.log(' REAL_FILE_LOG: Log message:', logMessage)
         
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
@@ -426,7 +426,7 @@ export class FileGuard {
         category: 'file_scan'
       })
       
-      console.log('✅ REAL_FILE_LOG: Success file log sent successfully')
+      console.log(' REAL_FILE_LOG: Success file log sent successfully')
       
       // Log to backend if available
       const backendApi = BackendApiService.getInstance()
@@ -449,8 +449,8 @@ export class FileGuard {
         })
       }
     } catch (error) {
-      console.error('❌ REAL_FILE_LOG: Could not log file upload success to extension:', error)
-      console.error('❌ REAL_FILE_LOG: Error details:', {
+      console.error(' REAL_FILE_LOG: Could not log file upload success to extension:', error)
+      console.error(' REAL_FILE_LOG: Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       })

@@ -7,25 +7,25 @@
 #### PromptGuard.ts - Constructor and Event Handlers
 ```typescript
 constructor() {
-  console.log('🔍 PromptGuard: Constructor called')
+  console.log(' PromptGuard: Constructor called')
   // ...
-  console.log('✅ PromptGuard: Initialized')
+  console.log(' PromptGuard: Initialized')
 }
 
 setupEventHandlers() {
-  console.log('🔍 PromptGuard.setupEventHandlers: Setting up event handlers')
+  console.log(' PromptGuard.setupEventHandlers: Setting up event handlers')
   // Added direct debug listeners for clicks and keyboard
   // ...
-  console.log('✅ PromptGuard.setupEventHandlers: Event handlers registered')
+  console.log(' PromptGuard.setupEventHandlers: Event handlers registered')
 }
 ```
 
 #### PromptGuard.ts - Click Handler with Full Logging
 ```typescript
 async handleClick(event: Event) {
-  console.log('🔍 PromptGuard.handleClick: Event intercepted')
-  console.log('🔍 PromptGuard.handleClick: Target element:', target.tagName)
-  console.log('✅ PromptGuard.handleClick: Send button detected!')
+  console.log(' PromptGuard.handleClick: Event intercepted')
+  console.log(' PromptGuard.handleClick: Target element:', target.tagName)
+  console.log(' PromptGuard.handleClick: Send button detected!')
   // Every single decision point is logged
 }
 ```
@@ -47,7 +47,7 @@ Added listeners that log **every** click and keyboard event, even before they re
 document.addEventListener('click', (e) => {
   const target = e.target as HTMLElement
   if (ElementSelector.isSendButton(target)) {
-    console.log('🔍 PromptGuard: Detected send button click on:', target)
+    console.log(' PromptGuard: Detected send button click on:', target)
   }
 }, true)
 
@@ -58,7 +58,7 @@ document.addEventListener('keydown', (e) => {
     (e.key === 'Enter' && e.target && (e.target as HTMLElement).tagName === 'TEXTAREA')
   )
   if (isSendShortcut) {
-    console.log('🔍 PromptGuard: Detected keyboard send shortcut:', e.key)
+    console.log(' PromptGuard: Detected keyboard send shortcut:', e.key)
   }
 }, true)
 ```
@@ -68,10 +68,10 @@ document.addEventListener('keydown', (e) => {
 Every step of prompt analysis is logged with timestamps and details:
 
 ```typescript
-console.log('🔍 PromptGuard.checkPromptSafety: ENTRY - text length:', text?.length)
-console.log('🔍 PromptGuard.checkPromptSafety: Analyzing prompt (preview):', preview)
-console.log('📡 PromptGuard.checkPromptSafety: Sending to background script...')
-console.log('📥 PromptGuard.checkPromptSafety: Received response from background script:', response)
+console.log(' PromptGuard.checkPromptSafety: ENTRY - text length:', text?.length)
+console.log(' PromptGuard.checkPromptSafety: Analyzing prompt (preview):', preview)
+console.log(' PromptGuard.checkPromptSafety: Sending to background script...')
+console.log(' PromptGuard.checkPromptSafety: Received response from background script:', response)
 ```
 
 ## How to See the Logs
@@ -84,10 +84,10 @@ console.log('📥 PromptGuard.checkPromptSafety: Received response from backgrou
 ```
 [PROMPT-GUARD] Content script starting...
 [PROMPT-GUARD] Creating new instance...
-🔍 PromptGuard: Constructor called
-🔍 PromptGuard.setupEventHandlers: Setting up event handlers
-✅ PromptGuard.setupEventHandlers: Event handlers registered
-✅ PromptGuard: Initialized
+ PromptGuard: Constructor called
+ PromptGuard.setupEventHandlers: Setting up event handlers
+ PromptGuard.setupEventHandlers: Event handlers registered
+ PromptGuard: Initialized
 [PROMPT-GUARD] Instance created and registered
 [PROMPT-GUARD] Logged to extension storage
 [PROMPT-GUARD] Initialization complete
@@ -95,25 +95,25 @@ console.log('📥 PromptGuard.checkPromptSafety: Received response from backgrou
 
 #### When Clicking Send Button:
 ```
-🔍 PromptGuard: Detected send button click on: <button>
-🔍 PromptGuard.handleClick: Event intercepted
-🔍 PromptGuard.handleClick: Target element: BUTTON button-submit
-✅ PromptGuard.handleClick: Send button detected!
-🔍 PromptGuard.handleClick: Text data: "Your prompt text here..."
-🚨 PromptGuard.handleClick: Calling checkPromptSafety with: "Your prompt..."
-🔍 PromptGuard.checkPromptSafety: ENTRY - text length: 45
-🔍 PromptGuard.checkPromptSafety: Analyzing prompt...
-📡 PromptGuard.checkPromptSafety: Sending to background script...
-📥 TEST_PROMPT_INJECTION received: {promptReceived: true, ...}
-📝 TEST_PROMPT_INJECTION: Step 1 - Logging captured prompt...
-✅ TEST_PROMPT_INJECTION: Prompt logged to extension storage
-📝 TEST_PROMPT_INJECTION: Step 2 - Loading config and auth...
-📝 TEST_PROMPT_INJECTION: Step 3 - Config loaded: {apiUrl: ..., hasAuth: true}
-📡 TEST_PROMPT_INJECTION: Sending fetch request...
-✅ TEST_PROMPT_INJECTION: Fetch completed in 245ms
+ PromptGuard: Detected send button click on: <button>
+ PromptGuard.handleClick: Event intercepted
+ PromptGuard.handleClick: Target element: BUTTON button-submit
+ PromptGuard.handleClick: Send button detected!
+ PromptGuard.handleClick: Text data: "Your prompt text here..."
+ PromptGuard.handleClick: Calling checkPromptSafety with: "Your prompt..."
+ PromptGuard.checkPromptSafety: ENTRY - text length: 45
+ PromptGuard.checkPromptSafety: Analyzing prompt...
+ PromptGuard.checkPromptSafety: Sending to background script...
+ TEST_PROMPT_INJECTION received: {promptReceived: true, ...}
+ TEST_PROMPT_INJECTION: Step 1 - Logging captured prompt...
+ TEST_PROMPT_INJECTION: Prompt logged to extension storage
+ TEST_PROMPT_INJECTION: Step 2 - Loading config and auth...
+ TEST_PROMPT_INJECTION: Step 3 - Config loaded: {apiUrl: ..., hasAuth: true}
+ TEST_PROMPT_INJECTION: Sending fetch request...
+ TEST_PROMPT_INJECTION: Fetch completed in 245ms
    Status: 200 OK
-📥 PromptGuard.checkPromptSafety: Received response from background script
-✅ PromptGuard.handleClick: Safety check result: true/false
+ PromptGuard.checkPromptSafety: Received response from background script
+ PromptGuard.handleClick: Safety check result: true/false
 ```
 
 ## Testing Steps
@@ -127,7 +127,7 @@ npm run build
 ### Step 2: Reload Extension
 1. Go to `chrome://extensions/`
 2. Find your extension
-3. Click the reload button 🔄
+3. Click the reload button 
 
 ### Step 3: Open Test Page
 ```
@@ -142,8 +142,8 @@ file:///C:/Users/snoorabbits/OneDrive/Videos/tryapi/Chatgpt-Security-Extension/t
 ### Step 6: Verify Backend Call
 Look for these specific logs:
 ```
-📡 TEST_PROMPT_INJECTION: Sending fetch request...
-✅ TEST_PROMPT_INJECTION: Fetch completed in XXXms
+ TEST_PROMPT_INJECTION: Sending fetch request...
+ TEST_PROMPT_INJECTION: Fetch completed in XXXms
 ```
 
 ## Common Issues & Solutions
@@ -192,32 +192,32 @@ The text might be too short or in a different element. Check ElementSelector log
 
 ## What to Look For
 
-### ✅ Good Signs:
+###  Good Signs:
 - `[PROMPT-GUARD] Content script starting...` appears
-- `🔍 PromptGuard: Detected send button click` when clicking
-- `🚨 PromptGuard.handleClick: Calling checkPromptSafety` appears
-- `📡 TEST_PROMPT_INJECTION: Sending fetch request...` appears
-- `✅ TEST_PROMPT_INJECTION: Fetch completed` with 200 status
+- ` PromptGuard: Detected send button click` when clicking
+- ` PromptGuard.handleClick: Calling checkPromptSafety` appears
+- ` TEST_PROMPT_INJECTION: Sending fetch request...` appears
+- ` TEST_PROMPT_INJECTION: Fetch completed` with 200 status
 
-### ❌ Bad Signs:
+###  Bad Signs:
 - No `[PROMPT-GUARD]` logs = content script not loading
-- No `🔍 PromptGuard: Detected send button click` = event listeners not working
-- No `🚨 PromptGuard.handleClick: Calling checkPromptSafety` = handler not being called
-- No `📡 TEST_PROMPT_INJECTION: Sending fetch request...` = not reaching background script
+- No ` PromptGuard: Detected send button click` = event listeners not working
+- No ` PromptGuard.handleClick: Calling checkPromptSafety` = handler not being called
+- No ` TEST_PROMPT_INJECTION: Sending fetch request...` = not reaching background script
 
 ## Summary
 
 Every single interaction is now logged:
-1. ✅ Content script loading
-2. ✅ PromptGuard instantiation
-3. ✅ Event handler setup
-4. ✅ Click/keyboard detection
-5. ✅ Send button identification
-6. ✅ Text extraction
-7. ✅ Safety check call
-8. ✅ Background message
-9. ✅ Backend API call
-10. ✅ Response handling
+1.  Content script loading
+2.  PromptGuard instantiation
+3.  Event handler setup
+4.  Click/keyboard detection
+5.  Send button identification
+6.  Text extraction
+7.  Safety check call
+8.  Background message
+9.  Backend API call
+10.  Response handling
 
 If you don't see logs at ANY step, you'll know exactly where the flow breaks!
 

@@ -47,7 +47,7 @@ Just regular text content.
 
 async def test_file_analysis_service():
     """Test the FileAnalysisService directly"""
-    print("🧪 Testing FileAnalysisService...")
+    print(" Testing FileAnalysisService...")
     
     try:
         from app.services.file_analysis_service import FileAnalysisService
@@ -55,7 +55,7 @@ async def test_file_analysis_service():
         test_files = create_test_files()
         
         for filename, content in test_files.items():
-            print(f"\n📁 Testing file: {filename}")
+            print(f"\n Testing file: {filename}")
             
             if isinstance(content, str):
                 content_bytes = content.encode('utf-8')
@@ -64,32 +64,32 @@ async def test_file_analysis_service():
             
             result = await FileAnalysisService.analyze_file(content_bytes, filename)
             
-            print(f"  ✅ Success: {result['success']}")
-            print(f"  🎯 Risk Level: {result['riskLevel']}")
-            print(f"  🚫 Should Block: {result['shouldBlock']}")
-            print(f"  📝 Summary: {result['summary']}")
+            print(f"   Success: {result['success']}")
+            print(f"   Risk Level: {result['riskLevel']}")
+            print(f"   Should Block: {result['shouldBlock']}")
+            print(f"   Summary: {result['summary']}")
             
             if result['shouldBlock']:
-                print(f"  ⚠️  Block Reason: {result['blockReason']}")
+                print(f"    Block Reason: {result['blockReason']}")
             
             if result['piiDetection']['hasPII']:
-                print(f"  🔍 PII Detected: {result['piiDetection']['count']} patterns")
+                print(f"   PII Detected: {result['piiDetection']['count']} patterns")
             
             if result['isSensitiveFile']:
-                print(f"  🔐 Sensitive File: Yes")
+                print(f"   Sensitive File: Yes")
             
             if result['isMaliciousFile']:
-                print(f"  🦠 Malicious File: Yes")
+                print(f"   Malicious File: Yes")
     
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f" Import error: {e}")
         print("Make sure you're running this from the backend directory")
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        print(f" Test failed: {e}")
 
 async def test_pattern_service():
     """Test the PatternService functions"""
-    print("\n🧪 Testing PatternService...")
+    print("\n Testing PatternService...")
     
     try:
         from app.services.pattern_service import (
@@ -109,7 +109,7 @@ async def test_pattern_service():
             sensitive = is_sensitive_file(filename)
             malicious = is_malicious_file(filename)
             
-            print(f"  📁 {filename}:")
+            print(f"   {filename}:")
             print(f"    Sensitive: {sensitive}")
             print(f"    Malicious: {malicious}")
             
@@ -119,19 +119,19 @@ async def test_pattern_service():
             print(f"    PII Detection: {pii_result['hasPII']} ({pii_result['count']} patterns)")
     
     except ImportError as e:
-        print(f"❌ Import error: {e}")
+        print(f" Import error: {e}")
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        print(f" Test failed: {e}")
 
 def test_extension_integration():
     """Test extension integration (simulated)"""
-    print("\n🧪 Testing Extension Integration (Backend-Only)...")
+    print("\n Testing Extension Integration (Backend-Only)...")
     
     # Simulate extension calling backend
     test_files = create_test_files()
     
     for filename, content in test_files.items():
-        print(f"\n📁 Simulating backend-only scan for: {filename}")
+        print(f"\n Simulating backend-only scan for: {filename}")
         
         # Simulate file size check
         if isinstance(content, str):
@@ -142,20 +142,20 @@ def test_extension_integration():
         file_size_mb = file_size / (1024 * 1024)
         
         if file_size_mb > 32:
-            print(f"  ❌ File too large: {file_size_mb:.2f}MB")
+            print(f"   File too large: {file_size_mb:.2f}MB")
             continue
         
-        print(f"  ✅ File size OK: {file_size_mb:.2f}MB")
+        print(f"   File size OK: {file_size_mb:.2f}MB")
         
         # Simulate backend API call (no local fallback)
-        print(f"  🔄 Calling backend API (required)...")
-        print(f"  📤 POST /api/v1/scan/file")
-        print(f"  📥 Response: {{'success': True, 'riskLevel': 'medium', 'shouldBlock': True}}")
-        print(f"  🚫 No local fallback - backend is mandatory")
+        print(f"   Calling backend API (required)...")
+        print(f"   POST /api/v1/scan/file")
+        print(f"   Response: {{'success': True, 'riskLevel': 'medium', 'shouldBlock': True}}")
+        print(f"   No local fallback - backend is mandatory")
 
 async def main():
     """Run all tests"""
-    print("🚀 Starting File Scanning Integration Tests")
+    print(" Starting File Scanning Integration Tests")
     print("=" * 50)
     
     # Test pattern service
@@ -168,15 +168,15 @@ async def main():
     test_extension_integration()
     
     print("\n" + "=" * 50)
-    print("✅ All tests completed!")
-    print("\n📋 Summary:")
-    print("  • Pattern matching: ✅ Backend-only")
-    print("  • PII detection: ✅ Backend-only") 
-    print("  • File analysis: ✅ Backend-only")
-    print("  • Extension integration: ✅ Backend-only")
-    print("  • Audit logging: ✅ Backend-only")
+    print(" All tests completed!")
+    print("\n Summary:")
+    print("  • Pattern matching:  Backend-only")
+    print("  • PII detection:  Backend-only") 
+    print("  • File analysis:  Backend-only")
+    print("  • Extension integration:  Backend-only")
+    print("  • Audit logging:  Backend-only")
     
-    print("\n🔧 Next steps:")
+    print("\n Next steps:")
     print("  1. Start the backend server")
     print("  2. Extension will automatically use backend API")
     print("  3. Test with real files in browser")

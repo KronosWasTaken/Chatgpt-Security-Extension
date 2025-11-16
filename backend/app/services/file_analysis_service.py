@@ -27,27 +27,27 @@ class FileAnalysisService:
         mime_type, _ = mimetypes.guess_type(filename)
         
         # Extract text content if not provided
-        print(f"🔍 FILE_EXTRACTION: Extracting text content from file...")
-        print(f"🔍 FILE_EXTRACTION: File size: {file_size} bytes")
-        print(f"🔍 FILE_EXTRACTION: MIME type: {mime_type}")
-        print(f"🔍 FILE_EXTRACTION: File text provided: {file_text is not None}")
+        print(f" FILE_EXTRACTION: Extracting text content from file...")
+        print(f" FILE_EXTRACTION: File size: {file_size} bytes")
+        print(f" FILE_EXTRACTION: MIME type: {mime_type}")
+        print(f" FILE_EXTRACTION: File text provided: {file_text is not None}")
         
         if file_text is None:
             try:
                 file_text = file_content.decode('utf-8', errors='ignore')
-                print(f"🔍 FILE_EXTRACTION: Successfully decoded file content")
-                print(f"🔍 FILE_EXTRACTION: Decoded text length: {len(file_text)}")
-                print(f"🔍 FILE_EXTRACTION: Decoded text preview: {file_text[:200]}...")
+                print(f" FILE_EXTRACTION: Successfully decoded file content")
+                print(f" FILE_EXTRACTION: Decoded text length: {len(file_text)}")
+                print(f" FILE_EXTRACTION: Decoded text preview: {file_text[:200]}...")
             except Exception as e:
-                print(f"🔍 FILE_EXTRACTION: Failed to decode file content: {e}")
+                print(f" FILE_EXTRACTION: Failed to decode file content: {e}")
                 file_text = ""
         else:
-            print(f"🔍 FILE_EXTRACTION: Using provided file text")
-            print(f"🔍 FILE_EXTRACTION: Provided text length: {len(file_text)}")
-            print(f"🔍 FILE_EXTRACTION: Provided text preview: {file_text[:200]}...")
+            print(f" FILE_EXTRACTION: Using provided file text")
+            print(f" FILE_EXTRACTION: Provided text length: {len(file_text)}")
+            print(f" FILE_EXTRACTION: Provided text preview: {file_text[:200]}...")
         
         # Perform pattern-based analysis
-        print(f"🔍 FILE_EXTRACTION: Calling analyze_file_content with text...")
+        print(f" FILE_EXTRACTION: Calling analyze_file_content with text...")
         pattern_analysis = analyze_file_content(file_text, filename)
         
         # VirusTotal analysis
@@ -202,45 +202,45 @@ class FileAnalysisService:
     @staticmethod
     def _should_block_file(pattern_analysis: Dict[str, Any], vt_analysis: Dict[str, Any], size_analysis: Dict[str, Any]) -> bool:
         """Determine if file should be blocked based on analysis results"""
-        print(f"🔍 BLOCK_DECISION: Evaluating blocking criteria...")
-        print(f"🔍 BLOCK_DECISION: isMaliciousFile: {pattern_analysis['isMaliciousFile']}")
-        print(f"🔍 BLOCK_DECISION: isSensitiveFile: {pattern_analysis['isSensitiveFile']}")
-        print(f"🔍 BLOCK_DECISION: dangerousPatterns: {pattern_analysis['dangerousPatterns']}")
-        print(f"🔍 BLOCK_DECISION: vt_isMalicious: {vt_analysis.get('isMalicious', False)}")
-        print(f"🔍 BLOCK_DECISION: isTooLarge: {size_analysis['isTooLarge']}")
-        print(f"🔍 BLOCK_DECISION: PII detection: {pattern_analysis['piiDetection']}")
+        print(f" BLOCK_DECISION: Evaluating blocking criteria...")
+        print(f" BLOCK_DECISION: isMaliciousFile: {pattern_analysis['isMaliciousFile']}")
+        print(f" BLOCK_DECISION: isSensitiveFile: {pattern_analysis['isSensitiveFile']}")
+        print(f" BLOCK_DECISION: dangerousPatterns: {pattern_analysis['dangerousPatterns']}")
+        print(f" BLOCK_DECISION: vt_isMalicious: {vt_analysis.get('isMalicious', False)}")
+        print(f" BLOCK_DECISION: isTooLarge: {size_analysis['isTooLarge']}")
+        print(f" BLOCK_DECISION: PII detection: {pattern_analysis['piiDetection']}")
         
         # Always block these critical conditions
         if (pattern_analysis["isMaliciousFile"] or 
             vt_analysis.get("isMalicious", False) or
             size_analysis["isTooLarge"]):
-            print(f"🔍 BLOCK_DECISION: BLOCKING - Critical threat detected")
+            print(f" BLOCK_DECISION: BLOCKING - Critical threat detected")
             return True
         
         # Block sensitive files only if they also have dangerous patterns or PII
         if pattern_analysis["isSensitiveFile"]:
             if (pattern_analysis["dangerousPatterns"] and len(pattern_analysis["dangerousPatterns"]) > 0) or pattern_analysis["piiDetection"]["hasPII"]:
-                print(f"🔍 BLOCK_DECISION: BLOCKING - Sensitive file with dangerous content")
+                print(f" BLOCK_DECISION: BLOCKING - Sensitive file with dangerous content")
                 return True
             else:
-                print(f"🔍 BLOCK_DECISION: ALLOWING - Sensitive file but no dangerous content")
+                print(f" BLOCK_DECISION: ALLOWING - Sensitive file but no dangerous content")
         
         # Block files with dangerous patterns
         if pattern_analysis["dangerousPatterns"] and len(pattern_analysis["dangerousPatterns"]) > 0:
-            print(f"🔍 BLOCK_DECISION: BLOCKING - Dangerous patterns detected: {pattern_analysis['dangerousPatterns']}")
+            print(f" BLOCK_DECISION: BLOCKING - Dangerous patterns detected: {pattern_analysis['dangerousPatterns']}")
             return True
         
         # Block based on PII detection (configurable)
         pii_has_pii = pattern_analysis["piiDetection"]["hasPII"]
         pii_risk_level = pattern_analysis["piiDetection"]["riskLevel"]
         
-        print(f"🔍 BLOCK_DECISION: PII check - hasPII: {pii_has_pii}, riskLevel: {pii_risk_level}")
+        print(f" BLOCK_DECISION: PII check - hasPII: {pii_has_pii}, riskLevel: {pii_risk_level}")
         
         if pii_has_pii and pii_risk_level in ["high", "medium"]:
-            print(f"🔍 BLOCK_DECISION: BLOCKING - PII detected with {pii_risk_level} risk")
+            print(f" BLOCK_DECISION: BLOCKING - PII detected with {pii_risk_level} risk")
             return True
         
-        print(f"🔍 BLOCK_DECISION: ALLOWING - No blocking criteria met")
+        print(f" BLOCK_DECISION: ALLOWING - No blocking criteria met")
         return False
     
     @staticmethod

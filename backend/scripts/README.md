@@ -2,7 +2,7 @@
 
 This directory contains scripts for seeding the AI Compliance Platform with comprehensive mock data for development and testing.
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Run Complete Seeding
 ```bash
@@ -16,7 +16,7 @@ cd backend
 python scripts/seed_mock_data.py
 ```
 
-## 📊 What Gets Seeded
+##  What Gets Seeded
 
 ### **Core Data**
 - **1 MSP** - Cybercept MSP (Enterprise tier)
@@ -45,7 +45,7 @@ python scripts/seed_mock_data.py
 - **4 Detection Patterns** - SSN, Medical Records, Email, Credit Cards
 - **Alert Data** - Realistic security and compliance alerts
 
-## 🏢 Seeded Clients
+##  Seeded Clients
 
 ### **TechCorp Solutions** (Technology)
 - **Industry**: Technology
@@ -75,7 +75,7 @@ python scripts/seed_mock_data.py
 - **AI Apps**: Jasper AI
 - **Focus**: Marketing and Content
 
-## 🤖 AI Services
+##  AI Services
 
 ### **ChatGPT** (OpenAI)
 - **Category**: Text Generation
@@ -113,7 +113,7 @@ python scripts/seed_mock_data.py
 - **Domains**: perplexity.ai
 - **Features**: Research, citations, real-time data
 
-## 🛡️ Compliance Frameworks
+##  Compliance Frameworks
 
 ### **HIPAA** (Healthcare)
 - **Version**: 2023
@@ -133,7 +133,7 @@ python scripts/seed_mock_data.py
 - **Industries**: Retail, E-commerce, Financial Services
 - **Key Standards**: Secure networks, protect cardholder data
 
-## 🔍 Detection Patterns
+##  Detection Patterns
 
 ### **SSN Detection** (HIPAA)
 - **Pattern**: `\b\d{3}-?\d{2}-?\d{4}\b`
@@ -155,7 +155,7 @@ python scripts/seed_mock_data.py
 - **Severity**: Critical
 - **Context**: Credit Card, Payment, Card Number
 
-## 📈 Usage Patterns
+##  Usage Patterns
 
 ### **Realistic Data Generation**
 - **Base Interactions**: 50-250 per service per day
@@ -170,7 +170,7 @@ python scripts/seed_mock_data.py
 - **Support**: High usage, customer service
 - **Finance**: Low usage, restricted access
 
-## 🚨 Alert Data
+##  Alert Data
 
 ### **Usage Anomaly**
 - **Title**: "Unusual AI Usage Pattern Detected"
@@ -189,7 +189,7 @@ python scripts/seed_mock_data.py
 
 
 
-## 🔧 Customization
+##  Customization
 
 ### **Modify Client Data**
 Edit the `clients_data` list in `seed_mock_data.py` to add more clients or modify existing ones.
@@ -203,7 +203,7 @@ Modify the `seed_client_usage_data` function to change usage patterns and volume
 ### **Add Compliance Frameworks**
 Edit the `frameworks_data` list to add new compliance frameworks.
 
-## 📝 Notes
+##  Notes
 
 - **Idempotent**: Scripts can be run multiple times safely
 - **Realistic Data**: All data is designed to be realistic and useful for testing
@@ -211,7 +211,7 @@ Edit the `frameworks_data` list to add new compliance frameworks.
 - **Timestamps**: Realistic timestamps and date ranges
 - **Validation**: All data passes model validation
 
-## 🎯 Use Cases
+##  Use Cases
 
 This seeded data is perfect for:
 - **API Testing**: Test all endpoints with realistic data
@@ -220,4 +220,4 @@ This seeded data is perfect for:
 - **Performance Testing**: Test with realistic data volumes
 - **Demo Purposes**: Show realistic system behavior
 
-The seeded data provides a complete, realistic environment for development and testing! 🎉
+The seeded data provides a complete, realistic environment for development and testing! 

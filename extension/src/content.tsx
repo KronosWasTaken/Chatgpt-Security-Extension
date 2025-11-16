@@ -29,23 +29,23 @@ class ContentScript {
 
   constructor() {
     try {
-      console.log('🚀 ContentScript: Starting initialization...')
-      console.log('🚀 ContentScript: Current URL:', window.location.href)
-      console.log('🚀 ContentScript: Document ready state:', document.readyState)
-      console.log('🚀 ContentScript: Chrome runtime available:', !!chrome?.runtime)
+      console.log(' ContentScript: Starting initialization...')
+      console.log(' ContentScript: Current URL:', window.location.href)
+      console.log(' ContentScript: Document ready state:', document.readyState)
+      console.log(' ContentScript: Chrome runtime available:', !!chrome?.runtime)
       
       this.securityManager = new SecurityManager()
       this.setupMessageListener()
       this.checkAuthenticationAndInitialize()
     } catch (error) {
-      console.error('🚨 ContentScript constructor failed:', error)
+      console.error(' ContentScript constructor failed:', error)
       this.logError('ContentScript constructor failed', error)
     }
   }
 
   private setupMessageListener(): void {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-      console.log('📨 ContentScript received message:', request.type)
+      console.log(' ContentScript received message:', request.type)
       
       switch (request.type) {
         case 'STATUS_CHANGED':
@@ -74,40 +74,40 @@ class ContentScript {
 
   private async checkAuthenticationAndInitialize(): Promise<void> {
     try {
-      console.log('🔐 ContentScript: Checking authentication status...')
+      console.log(' ContentScript: Checking authentication status...')
       
       // Check authentication status from storage
       const result = await chrome.storage.sync.get(['authUser'])
       const isAuthenticated = result.authUser && result.authUser.token
       
-      console.log('🔐 ContentScript: Authentication status:', isAuthenticated)
+      console.log(' ContentScript: Authentication status:', isAuthenticated)
       this.isAuthenticated = isAuthenticated
       
       if (isAuthenticated) {
-        console.log('🔐 ContentScript: User authenticated, proceeding with initialization')
+        console.log(' ContentScript: User authenticated, proceeding with initialization')
         await this.initialize()
       } else {
-        console.log('🔐 ContentScript: User not authenticated, disabling security features')
+        console.log(' ContentScript: User not authenticated, disabling security features')
         await this.disableSecurity()
         await this.logError('Security features disabled - user not authenticated', null)
       }
     } catch (error) {
-      console.error('🔐 ContentScript: Authentication check failed:', error)
+      console.error(' ContentScript: Authentication check failed:', error)
       await this.logError('Authentication check failed', error)
       await this.disableSecurity()
     }
   }
 
   private async handleAuthStatusChange(isAuthenticated: boolean): Promise<void> {
-    console.log(`🔐 ContentScript: Auth status changed to ${isAuthenticated ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'}`)
+    console.log(` ContentScript: Auth status changed to ${isAuthenticated ? 'AUTHENTICATED' : 'NOT AUTHENTICATED'}`)
     
     this.isAuthenticated = isAuthenticated
     
     if (isAuthenticated) {
-      console.log('🔐 ContentScript: User authenticated, enabling security features')
+      console.log(' ContentScript: User authenticated, enabling security features')
       await this.enableSecurity()
     } else {
-      console.log('🔐 ContentScript: User not authenticated, disabling security features')
+      console.log(' ContentScript: User not authenticated, disabling security features')
       await this.disableSecurity()
     }
     
@@ -115,16 +115,16 @@ class ContentScript {
   }
 
   private async handleStatusChange(isEnabled: boolean): Promise<void> {
-    console.log(`🔄 ContentScript: Status changed to ${isEnabled ? 'ENABLED' : 'DISABLED'}`)
+    console.log(` ContentScript: Status changed to ${isEnabled ? 'ENABLED' : 'DISABLED'}`)
     
     this.isEnabled = isEnabled
     
     // Only enable security if both enabled AND authenticated
     if (isEnabled && this.isAuthenticated) {
-      console.log('🔄 ContentScript: Both enabled and authenticated, enabling security')
+      console.log(' ContentScript: Both enabled and authenticated, enabling security')
       await this.enableSecurity()
     } else {
-      console.log('🔄 ContentScript: Disabling security (enabled:', isEnabled, ', authenticated:', this.isAuthenticated, ')')
+      console.log(' ContentScript: Disabling security (enabled:', isEnabled, ', authenticated:', this.isAuthenticated, ')')
       await this.disableSecurity()
     }
     
@@ -134,11 +134,11 @@ class ContentScript {
 
   private async enableSecurity(): Promise<void> {
     try {
-      console.log('🛡️ Enabling security features...')
+      console.log(' Enabling security features...')
       
       // Double-check authentication before enabling
       if (!this.isAuthenticated) {
-        console.log('🔐 Security enable blocked - user not authenticated')
+        console.log(' Security enable blocked - user not authenticated')
         await this.logError('Security features blocked - authentication required', null)
         return
       }
@@ -152,62 +152,62 @@ class ContentScript {
       // Enable all security components
       this.securityManager.setEnabled(true)
       
-      console.log('✅ Security features enabled')
+      console.log(' Security features enabled')
     } catch (error) {
-      console.error('🚨 Failed to enable security:', error)
+      console.error(' Failed to enable security:', error)
       this.logError('Failed to enable security', error)
     }
   }
 
   private async disableSecurity(): Promise<void> {
     try {
-      console.log('⚪ Disabling security features...')
+      console.log(' Disabling security features...')
       
       // Disable all security components
       this.securityManager.setEnabled(false)
       
-      console.log('✅ Security features disabled')
+      console.log(' Security features disabled')
     } catch (error) {
-      console.error('🚨 Failed to disable security:', error)
+      console.error(' Failed to disable security:', error)
       this.logError('Failed to disable security', error)
     }
   }
 
   private async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.log('⚠️ ContentScript already initialized, skipping...')
+      console.log(' ContentScript already initialized, skipping...')
       return
     }
 
     try {
-      console.log('🔄 ContentScript: Initializing...')
+      console.log(' ContentScript: Initializing...')
       
       if (document.readyState === 'loading') {
-        console.log('🕇 DOM loading, waiting for DOMContentLoaded...')
+        console.log(' DOM loading, waiting for DOMContentLoaded...')
         document.addEventListener('DOMContentLoaded', () => this.startSecurity())
       } else {
-        console.log('✅ DOM ready, starting security immediately...')
+        console.log(' DOM ready, starting security immediately...')
         this.startSecurity()
       }
 
       this.isInitialized = true
-      console.log('✅ ContentScript initialization complete')
+      console.log(' ContentScript initialization complete')
     } catch (error) {
-      console.error('🚨 ContentScript initialization failed:', error)
+      console.error(' ContentScript initialization failed:', error)
       this.logError('ContentScript initialization failed', error)
     }
   }
 
   private async startSecurity(): Promise<void> {
     try {
-      console.log('🛡️ Starting SecurityManager...')
+      console.log(' Starting SecurityManager...')
       await this.securityManager.initialize()
-      console.log('✅ Security Manager initialized successfully')
+      console.log(' Security Manager initialized successfully')
       
       await this.logSuccess('Security Manager initialized on: ' + window.location.href)
       await this.testLogging()
     } catch (error) {
-      console.error('🚨 SecurityManager initialization failed:', error)
+      console.error(' SecurityManager initialization failed:', error)
       this.logError('SecurityManager initialization failed', error)
     }
   }
@@ -229,7 +229,7 @@ class ContentScript {
     try {
       await chrome.runtime.sendMessage({
         type: 'ADD_LOG',
-        message: '🧪 TEST LOG from localhost - File scan logging test',
+        message: ' TEST LOG from localhost - File scan logging test',
         logType: 'info',
         category: 'file_scan'
       })
@@ -257,7 +257,7 @@ class ContentScript {
         this.securityManager.cleanup()
       }
       this.isInitialized = false
-      console.log('🧹 ContentScript cleanup complete')
+      console.log(' ContentScript cleanup complete')
     } catch (error) {
       console.error('ContentScript cleanup failed:', error)
     }

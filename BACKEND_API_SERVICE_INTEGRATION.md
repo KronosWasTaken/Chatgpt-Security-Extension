@@ -89,32 +89,32 @@ Block or allow based on backend decision
 
 ## Benefits
 
-### ✅ Proper Configuration
+###  Proper Configuration
 - Loads config from Chrome storage
 - Handles authentication automatically
 - Checks if backend is enabled
 
-### ✅ Consistent API Calls
+###  Consistent API Calls
 - Uses same service as other features
 - Proper error handling
 - Auth token included automatically
 
-### ✅ Better Logging
+###  Better Logging
 ```
-📡 STEP 1: Using BackendApiService to analyze prompt
+ STEP 1: Using BackendApiService to analyze prompt
    Initializing BackendApiService...
    BackendApiService initialized
    Backend enabled: true
    Backend config: { apiUrl: "http://localhost:8000", ... }
    Calling analyzePromptInjection...
    
-📡 Backend response received:
+ Backend response received:
    isThreats: false
    shouldBlock: false
    riskLevel: safe
 ```
 
-### ✅ Robust Error Handling
+###  Robust Error Handling
 ```
 if (!backendResponse) {
   // Backend returned null - BLOCK PROMPT
@@ -148,15 +148,15 @@ this.promptGuard = new PromptGuard()
 
 ## Status
 
-✅ BackendApiService integrated
-✅ Proper initialization
-✅ Auth handling
-✅ Configuration loading
-✅ Response conversion
-✅ Error handling
-✅ Logging enhanced
-✅ SecurityManager works with it
-✅ No breaking changes
+ BackendApiService integrated
+ Proper initialization
+ Auth handling
+ Configuration loading
+ Response conversion
+ Error handling
+ Logging enhanced
+ SecurityManager works with it
+ No breaking changes
 
-Everything works like a charm! 🎉
+Everything works like a charm! 
 

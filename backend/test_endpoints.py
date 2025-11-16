@@ -21,11 +21,11 @@ async def test_login():
         )
         
         if response.status_code != 200:
-            print(f"✗ Login failed: {response.status_code} - {response.text}")
+            print(f" Login failed: {response.status_code} - {response.text}")
             return None
         
         token = response.json().get("access_token")
-        print(f"✓ Token obtained: {token[:20]}...")
+        print(f" Token obtained: {token[:20]}...")
         return token
 
 
@@ -50,11 +50,11 @@ async def test_analyze_prompt(token: str):
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✓ Prompt analysis successful")
+            print(f" Prompt analysis successful")
             print(f"  Risk Level: {data.get('riskLevel')}")
             print(f"  Should Block: {data.get('shouldBlock')}")
         else:
-            print(f"✗ Failed: {response.status_code}")
+            print(f" Failed: {response.status_code}")
             print(f"  Response: {response.text}")
 
 
@@ -86,11 +86,11 @@ async def test_scan_file(token: str):
                 
                 if response.status_code == 200:
                     data = response.json()
-                    print(f"✓ File scan successful")
+                    print(f" File scan successful")
                     print(f"  Risk Level: {data.get('riskLevel')}")
                     print(f"  Is Malicious: {data.get('isMalicious')}")
                 else:
-                    print(f"✗ Failed: {response.status_code}")
+                    print(f" Failed: {response.status_code}")
                     try:
                         print(f"  Response: {response.json()}")
                     except:
@@ -116,9 +116,9 @@ async def test_endpoint_without_auth():
         print(f"Status: {response.status_code}")
         
         if response.status_code == 200:
-            print(f"✓ Works without auth (as expected)")
+            print(f" Works without auth (as expected)")
         else:
-            print(f"✗ Failed: {response.status_code}")
+            print(f" Failed: {response.status_code}")
             print(f"  Response: {response.text}")
 
 
@@ -128,7 +128,7 @@ async def main():
     # Test login
     token = await test_login()
     if not token:
-        print("\n✗ Cannot proceed without token")
+        print("\n Cannot proceed without token")
         return
     
     # Test analyze/prompt with auth

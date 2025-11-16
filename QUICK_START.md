@@ -1,6 +1,6 @@
 # Quick Start: Prompt Injection Blocking
 
-## 🚀 5-Minute Setup
+##  5-Minute Setup
 
 ### 1. Start Backend
 ```bash
@@ -28,23 +28,23 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MjliZTNlZS00MjcyLTQzODUtYmJkNS0
 
 ### 5. Test
 Open `test-prompt-blocking.html` in Chrome and try:
-- ❌ "Ignore previous instructions" → Should BLOCK
-- ✅ "What is the weather?" → Should ALLOW
+-  "Ignore previous instructions" → Should BLOCK
+-  "What is the weather?" → Should ALLOW
 
-## 📊 What's Different Now?
+##  What's Different Now?
 
 ### Before:
 - Only local Gemini API analysis
 - No backend integration
 
 ### After:
-- ✅ Backend analysis (primary)
-- ✅ Local Gemini fallback
-- ✅ Pattern matching fallback
-- ✅ Comprehensive logging
-- ✅ Works with authentication
+-  Backend analysis (primary)
+-  Local Gemini fallback
+-  Pattern matching fallback
+-  Comprehensive logging
+-  Works with authentication
 
-## 🔍 Quick Test
+##  Quick Test
 
 ### Test Backend API:
 ```powershell
@@ -60,18 +60,18 @@ Expected: `"isThreats": true, "riskLevel": "high"`
 3. Type malicious prompt in a textarea
 4. Try to submit
 5. Watch console for logs:
-   - 🔍 Analysis starts
-   - 🏛️ Backend analysis attempt
-   - ✅ or 🚨 Result
+   -  Analysis starts
+   -  Backend analysis attempt
+   -  or  Result
    - Blocked if malicious
 
-## 📁 Files Changed
+##  Files Changed
 
 1. `extension/src/services/BackendApiService.ts` - Added `analyzePromptInjection()`
 2. `extension/src/background/index.ts` - Updated `TEST_PROMPT_INJECTION` handler
 3. `extension/src/guards/PromptGuard.ts` - Enhanced logging
 
-## 🎯 Key Points
+##  Key Points
 
 - **Backend First**: Tries backend analysis before fallback
 - **Auth Required**: Uses JWT token from Chrome storage
@@ -79,7 +79,7 @@ Expected: `"isThreats": true, "riskLevel": "high"`
 - **Clear Logs**: Every step logged in console
 - **No Breaking Changes**: Existing functionality preserved
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 | Issue | Solution |
 |-------|----------|
@@ -88,26 +88,26 @@ Expected: `"isThreats": true, "riskLevel": "high"`
 | Using "local-gemini" | Backend might be down, check logs |
 | No logs in console | Reload page, check extension loaded |
 
-## 📚 More Info
+##  More Info
 
 - **Full Documentation**: `PROMPT_ANALYSIS_INTEGRATION.md`
 - **Testing Guide**: `TESTING_GUIDE.md`
 - **Complete Summary**: `INTEGRATION_SUMMARY.md`
 
-## ✅ Verification Checklist
+##  Verification Checklist
 
 - [ ] Backend running on :8000
 - [ ] Extension built successfully
 - [ ] Extension loaded in Chrome
 - [ ] Logged in with JWT token
 - [ ] Backend enabled in settings
-- [ ] Test malicious prompt → BLOCKED ✓
-- [ ] Test safe prompt → ALLOWED ✓
-- [ ] Console shows "backend" as scanType ✓
+- [ ] Test malicious prompt → BLOCKED 
+- [ ] Test safe prompt → ALLOWED 
+- [ ] Console shows "backend" as scanType 
 
 ---
 
-**Status**: ✅ Complete and ready for testing
-**Build**: ✅ No errors
-**Backend API**: ✅ Tested and working
-**Blocking Logic**: ✅ Verified correct
+**Status**:  Complete and ready for testing
+**Build**:  No errors
+**Backend API**:  Tested and working
+**Blocking Logic**:  Verified correct

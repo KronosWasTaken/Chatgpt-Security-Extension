@@ -25,11 +25,11 @@ async def test_analyze_prompt():
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Success")
+            print(f" Success")
             print(f"  Risk Level: {data.get('riskLevel')}")
             print(f"  Should Block: {data.get('shouldBlock')}")
         else:
-            print(f"❌ Failed: {response.status_code}")
+            print(f" Failed: {response.status_code}")
             print(f"  Response: {response.text}")
 
 
@@ -47,12 +47,12 @@ async def test_analyze_prompt_wrong_content_type():
         print(f"Status: {response.status_code}")
         
         if response.status_code == 415:
-            print(f"✅ Correctly returned 415 (Unsupported Media Type)")
+            print(f" Correctly returned 415 (Unsupported Media Type)")
             data = response.json()
             print(f"  Expected: {data.get('expected')}")
             print(f"  Received: {data.get('received')}")
         else:
-            print(f"❌ Unexpected status: {response.status_code}")
+            print(f" Unexpected status: {response.status_code}")
             print(f"  Response: {response.text}")
 
 
@@ -78,12 +78,12 @@ async def test_audit_events_create():
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Success")
+            print(f" Success")
             print(f"  Log ID: {data.get('log_id')}")
             print(f"  Message: {data.get('message')}")
             return data.get('log_id')
         else:
-            print(f"❌ Failed: {response.status_code}")
+            print(f" Failed: {response.status_code}")
             print(f"  Response: {response.text}")
             return None
 
@@ -108,12 +108,12 @@ async def test_audit_events_search():
         
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Success")
+            print(f" Success")
             print(f"  Total: {data.get('total')}")
             print(f"  Logs returned: {len(data.get('logs', []))}")
             print(f"  Has more: {data.get('has_more')}")
         else:
-            print(f"❌ Failed: {response.status_code}")
+            print(f" Failed: {response.status_code}")
             print(f"  Response: {response.text}")
 
 
@@ -134,11 +134,11 @@ async def test_cors_preflight():
         print(f"Status: {response.status_code}")
         
         if response.status_code == 200:
-            print(f"✅ Preflight successful")
+            print(f" Preflight successful")
             print(f"  Access-Control-Allow-Origin: {response.headers.get('access-control-allow-origin', 'none')}")
             print(f"  Access-Control-Allow-Methods: {response.headers.get('access-control-allow-methods', 'none')}")
         else:
-            print(f"❌ Preflight failed: {response.status_code}")
+            print(f" Preflight failed: {response.status_code}")
 
 
 async def main():

@@ -207,31 +207,31 @@ class ApiClient {
       TokenManager.setUser(response.user_info);
       
       // Log successful login
-      console.log('🔍 Attempting to log successful login...');
+      console.log(' Attempting to log successful login...');
       try {
         await auditLogService.logAuthentication('login', {
           user_email: credentials.email,
           user_role: response.user_info.role,
           login_time: new Date().toISOString(),
         });
-        console.log('✅ Login audit log successful');
+        console.log(' Login audit log successful');
       } catch (auditError) {
-        console.error('❌ Login audit log failed:', auditError);
+        console.error(' Login audit log failed:', auditError);
       }
       
       return response;
     } catch (error) {
       // Log failed login attempt
-      console.log('🔍 Attempting to log failed login...');
+      console.log(' Attempting to log failed login...');
       try {
         await auditLogService.logAuthentication('login_failed', {
           user_email: credentials.email,
           error_message: error instanceof Error ? error.message : 'Unknown error',
           attempt_time: new Date().toISOString(),
         });
-        console.log('✅ Failed login audit log successful');
+        console.log(' Failed login audit log successful');
       } catch (auditError) {
-        console.error('❌ Failed login audit log failed:', auditError);
+        console.error(' Failed login audit log failed:', auditError);
       }
       throw error;
     }
@@ -256,16 +256,16 @@ class ApiClient {
     const user = TokenManager.getUser();
     
     // Log logout before removing token
-    console.log('🔍 Attempting to log logout...');
+    console.log(' Attempting to log logout...');
     try {
       await auditLogService.logAuthentication('logout', {
         user_email: user?.email,
         user_role: user?.role,
         logout_time: new Date().toISOString(),
       });
-      console.log('✅ Logout audit log successful');
+      console.log(' Logout audit log successful');
     } catch (auditError) {
-      console.error('❌ Logout audit log failed:', auditError);
+      console.error(' Logout audit log failed:', auditError);
     }
     
     TokenManager.removeToken();

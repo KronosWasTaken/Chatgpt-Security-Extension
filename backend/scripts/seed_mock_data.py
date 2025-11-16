@@ -29,7 +29,7 @@ def hash_password(password: str) -> str:
 
 async def seed_msp_data(session: AsyncSession):
     """Seed MSP data"""
-    print("🏢 Seeding MSP data...")
+    print(" Seeding MSP data...")
     
     msp_data = {
         "name": "Cybercept MSP",
@@ -63,15 +63,15 @@ async def seed_msp_data(session: AsyncSession):
         session.add(msp)
         await session.commit()
         await session.refresh(msp)
-        print(f"  ✅ Created MSP: {msp.name}")
+        print(f"   Created MSP: {msp.name}")
     else:
-        print(f"  ✅ MSP already exists: {msp.name}")
+        print(f"   MSP already exists: {msp.name}")
     
     return msp
 
 async def seed_users(session: AsyncSession, msp_id: uuid.UUID):
     """Seed user data"""
-    print("👥 Seeding users...")
+    print(" Seeding users...")
     
     users_data = [
         {
@@ -125,9 +125,9 @@ async def seed_users(session: AsyncSession, msp_id: uuid.UUID):
             session.add(user)
             await session.commit()
             await session.refresh(user)
-            print(f"  ✅ Created user: {user.email}")
+            print(f"   Created user: {user.email}")
         else:
-            print(f"  ✅ User already exists: {user.email}")
+            print(f"   User already exists: {user.email}")
         
         users.append(user)
     
@@ -135,7 +135,7 @@ async def seed_users(session: AsyncSession, msp_id: uuid.UUID):
 
 async def seed_ai_services(session: AsyncSession):
     """Seed AI services data"""
-    print("🤖 Seeding AI services...")
+    print(" Seeding AI services...")
     
     ai_services_data = [
         {
@@ -258,9 +258,9 @@ async def seed_ai_services(session: AsyncSession):
             session.add(service)
             await session.commit()
             await session.refresh(service)
-            print(f"  ✅ Created AI service: {service.name} by {service.vendor}")
+            print(f"   Created AI service: {service.name} by {service.vendor}")
         else:
-            print(f"  ✅ AI service already exists: {service.name}")
+            print(f"   AI service already exists: {service.name}")
         
         ai_services.append(service)
     
@@ -268,7 +268,7 @@ async def seed_ai_services(session: AsyncSession):
 
 async def seed_clients(session: AsyncSession, msp_id: uuid.UUID):
     """Seed client data"""
-    print("🏢 Seeding clients...")
+    print(" Seeding clients...")
     
     clients_data = [
         {
@@ -362,9 +362,9 @@ async def seed_clients(session: AsyncSession, msp_id: uuid.UUID):
             session.add(client)
             await session.commit()
             await session.refresh(client)
-            print(f"  ✅ Created client: {client.name}")
+            print(f"   Created client: {client.name}")
         else:
-            print(f"  ✅ Client already exists: {client.name}")
+            print(f"   Client already exists: {client.name}")
         
         clients.append(client)
     
@@ -372,7 +372,7 @@ async def seed_clients(session: AsyncSession, msp_id: uuid.UUID):
 
 async def seed_client_users(session: AsyncSession, clients):
     """Seed client users"""
-    print("👥 Seeding client users...")
+    print(" Seeding client users...")
     
     client_users_data = [
         # TechCorp Solutions users
@@ -450,9 +450,9 @@ async def seed_client_users(session: AsyncSession, clients):
             session.add(user)
             await session.commit()
             await session.refresh(user)
-            print(f"  ✅ Created client user: {user.email} for {client.name}")
+            print(f"   Created client user: {user.email} for {client.name}")
         else:
-            print(f"  ✅ Client user already exists: {user.email}")
+            print(f"   Client user already exists: {user.email}")
         
         users.append(user)
     
@@ -460,7 +460,7 @@ async def seed_client_users(session: AsyncSession, clients):
 
 async def seed_client_ai_applications(session: AsyncSession, clients, ai_services):
     """Seed client AI applications"""
-    print("📱 Seeding client AI applications...")
+    print(" Seeding client AI applications...")
     
     applications_data = [
         # TechCorp Solutions
@@ -593,9 +593,9 @@ async def seed_client_ai_applications(session: AsyncSession, clients, ai_service
             session.add(application)
             await session.commit()
             await session.refresh(application)
-            print(f"  ✅ Created application: {application.name} for {client.name}")
+            print(f"   Created application: {application.name} for {client.name}")
         else:
-            print(f"  ✅ Application already exists: {application.name} for {client.name}")
+            print(f"   Application already exists: {application.name} for {client.name}")
         
         applications.append(application)
     
@@ -603,7 +603,7 @@ async def seed_client_ai_applications(session: AsyncSession, clients, ai_service
 
 async def seed_client_usage_data(session: AsyncSession, clients, ai_services, users):
     """Seed client AI service usage data"""
-    print("📊 Seeding client usage data...")
+    print(" Seeding client usage data...")
     
     # Get client users for usage data
     client_users = [user for user in users if user.client_id is not None]
@@ -657,13 +657,13 @@ async def seed_client_usage_data(session: AsyncSession, clients, ai_services, us
             session.add(usage_obj)
         
         await session.commit()
-        print(f"  ✅ Added usage batch {i//batch_size + 1}/{(len(usage_data) + batch_size - 1)//batch_size}")
+        print(f"   Added usage batch {i//batch_size + 1}/{(len(usage_data) + batch_size - 1)//batch_size}")
     
-    print(f"  ✅ Created {len(usage_data)} usage records")
+    print(f"   Created {len(usage_data)} usage records")
 
 async def seed_agent_engagement(session: AsyncSession, clients):
     """Seed agent engagement data"""
-    print("🤖 Seeding agent engagement data...")
+    print(" Seeding agent engagement data...")
     
     agents_data = [
         {
@@ -734,13 +734,13 @@ async def seed_agent_engagement(session: AsyncSession, clients):
             session.add(agent)
             await session.commit()
             await session.refresh(agent)
-            print(f"  ✅ Created agent: {agent.agent} for {client.name}")
+            print(f"   Created agent: {agent.agent} for {client.name}")
         else:
-            print(f"  ✅ Agent already exists: {agent.agent} for {client.name}")
+            print(f"   Agent already exists: {agent.agent} for {client.name}")
 
 async def seed_user_engagement(session: AsyncSession, clients, users):
     """Seed user engagement data"""
-    print("👤 Seeding user engagement data...")
+    print(" Seeding user engagement data...")
     
     client_users = [user for user in users if user.client_id is not None]
     
@@ -774,13 +774,13 @@ async def seed_user_engagement(session: AsyncSession, clients, users):
             session.add(engagement)
             await session.commit()
             await session.refresh(engagement)
-            print(f"  ✅ Created user engagement: {user.name} for {client.name}")
+            print(f"   Created user engagement: {user.name} for {client.name}")
         else:
-            print(f"  ✅ User engagement already exists: {user.name}")
+            print(f"   User engagement already exists: {user.name}")
 
 async def seed_productivity_correlations(session: AsyncSession, clients):
     """Seed productivity correlations data"""
-    print("📈 Seeding productivity correlations...")
+    print(" Seeding productivity correlations...")
     
     departments = ["Engineering", "Sales", "Marketing", "Support", "Finance"]
     
@@ -814,13 +814,13 @@ async def seed_productivity_correlations(session: AsyncSession, clients):
                 session.add(correlation)
                 await session.commit()
                 await session.refresh(correlation)
-                print(f"  ✅ Created productivity correlation: {department} for {client.name}")
+                print(f"   Created productivity correlation: {department} for {client.name}")
             else:
-                print(f"  ✅ Productivity correlation already exists: {department} for {client.name}")
+                print(f"   Productivity correlation already exists: {department} for {client.name}")
 
 async def seed_compliance_frameworks(session: AsyncSession):
     """Seed compliance frameworks"""
-    print("🛡️ Seeding compliance frameworks...")
+    print(" Seeding compliance frameworks...")
     
     frameworks_data = [
         {
@@ -889,9 +889,9 @@ async def seed_compliance_frameworks(session: AsyncSession):
             session.add(framework)
             await session.commit()
             await session.refresh(framework)
-            print(f"  ✅ Created framework: {framework.name}")
+            print(f"   Created framework: {framework.name}")
         else:
-            print(f"  ✅ Framework already exists: {framework.name}")
+            print(f"   Framework already exists: {framework.name}")
         
         frameworks.append(framework)
     
@@ -899,7 +899,7 @@ async def seed_compliance_frameworks(session: AsyncSession):
 
 async def seed_detection_patterns(session: AsyncSession, frameworks):
     """Seed detection patterns"""
-    print("🔍 Seeding detection patterns...")
+    print(" Seeding detection patterns...")
 
     # Include both compliance regexes and operational pattern types used by the loader
     patterns_data = [
@@ -1035,13 +1035,13 @@ async def seed_detection_patterns(session: AsyncSession, frameworks):
             session.add(pattern)
             await session.commit()
             await session.refresh(pattern)
-            print(f"  ✅ Created pattern: {pattern.pattern_name} for {framework.name}")
+            print(f"   Created pattern: {pattern.pattern_name} for {framework.name}")
         else:
-            print(f"  ✅ Pattern already exists: {pattern.pattern_name}")
+            print(f"   Pattern already exists: {pattern.pattern_name}")
 
 async def seed_alerts(session: AsyncSession, clients):
     """Seed alert data"""
-    print("🚨 Seeding alerts...")
+    print(" Seeding alerts...")
     
     alerts_data = [
         {
@@ -1125,13 +1125,13 @@ async def seed_alerts(session: AsyncSession, clients):
             session.add(alert)
             await session.commit()
             await session.refresh(alert)
-            print(f"  ✅ Created alert: {alert.family} for {client.name} (AI Service: {ai_service.name if ai_service else 'None'})")
+            print(f"   Created alert: {alert.family} for {client.name} (AI Service: {ai_service.name if ai_service else 'None'})")
         else:
-            print(f"  ✅ Alert already exists: {alert.family}")
+            print(f"   Alert already exists: {alert.family}")
 
 async def seed_client_metrics(session: AsyncSession, clients):
     """Seed client metrics data"""
-    print("📊 Seeding client metrics...")
+    print(" Seeding client metrics...")
     
     for client in clients:
         # Check if metrics already exist for today
@@ -1158,13 +1158,13 @@ async def seed_client_metrics(session: AsyncSession, clients):
             session.add(metrics)
             await session.commit()
             await session.refresh(metrics)
-            print(f"  ✅ Created metrics for {client.name}")
+            print(f"   Created metrics for {client.name}")
         else:
-            print(f"  ✅ Metrics already exist for {client.name}")
+            print(f"   Metrics already exist for {client.name}")
 
 async def main():
     """Main seeding function"""
-    print("🌱 Starting comprehensive mock data seeding...")
+    print(" Starting comprehensive mock data seeding...")
     print("=" * 60)
     
     try:
@@ -1187,27 +1187,27 @@ async def main():
             await seed_client_metrics(session, clients)
             
             print("\n" + "=" * 60)
-            print("🎉 Mock data seeding completed successfully!")
-            print("\n📊 Summary of seeded data:")
-            print(f"  🏢 MSPs: 1")
-            print(f"  👥 MSP Users: {len(msp_users)}")
-            print(f"  👥 Client Users: {len(client_users)}")
-            print(f"  🤖 AI Services: {len(ai_services)}")
-            print(f"  🏢 Clients: {len(clients)}")
-            print(f"  📱 Applications: {len(applications)}")
-            print(f"  📊 Usage Records: ~{len(clients) * len(ai_services) * 30}")
-            print(f"  🛡️ Compliance Frameworks: {len(frameworks)}")
-            print(f"  🔍 Detection Patterns: 4")
-            print(f"  🚨 Alerts: 3")
+            print(" Mock data seeding completed successfully!")
+            print("\n Summary of seeded data:")
+            print(f"   MSPs: 1")
+            print(f"   MSP Users: {len(msp_users)}")
+            print(f"   Client Users: {len(client_users)}")
+            print(f"   AI Services: {len(ai_services)}")
+            print(f"   Clients: {len(clients)}")
+            print(f"   Applications: {len(applications)}")
+            print(f"   Usage Records: ~{len(clients) * len(ai_services) * 30}")
+            print(f"   Compliance Frameworks: {len(frameworks)}")
+            print(f"   Detection Patterns: 4")
+            print(f"   Alerts: 3")
             
-            print("\n🚀 The system is now ready for testing!")
+            print("\n The system is now ready for testing!")
             print("   You can now test the add client AI application endpoint")
             print("   and all other functionality with realistic data.")
             
             break  # Exit the async generator
             
     except Exception as e:
-        print(f"\n❌ Error during seeding: {e}")
+        print(f"\n Error during seeding: {e}")
         raise
 
 if __name__ == "__main__":

@@ -27,9 +27,9 @@ Backend will be available at: `http://localhost:8000`
 2. Type some text in the input field
 3. Extension should auto-detect the prompt
 4. Open extension options page
-5. Click "📊 API Logs" button in bottom-right
+5. Click " API Logs" button in bottom-right
 6. Verify logs show:
-   - ✅ Green success indicator
+   -  Green success indicator
    - Correlation ID in logs
    - Request/response details
 
@@ -38,7 +38,7 @@ Backend will be available at: `http://localhost:8000`
 2. Type in ChatGPT input field
 3. Extension should handle error gracefully
 4. Check API logs popup:
-   - ❌ Red error indicator
+   -  Red error indicator
    - Error details visible
    - Network error message
 
@@ -64,13 +64,13 @@ validation_error corrId=xyz789 method=POST path=/api/v1/analyze/prompt errors=1
 Open Developer Tools → Console
 Look for logs like:
 ```
-🔍 Analyzing prompt with backend: {promptLength: 42, url: "http://localhost:8000/api/v1/analyze/prompt", hasAuth: true}
-📡 Backend response received: {status: 200, correlationId: "abc123"}
-✅ Backend prompt analysis completed: {result: {...}, correlationId: "abc123"}
+ Analyzing prompt with backend: {promptLength: 42, url: "http://localhost:8000/api/v1/analyze/prompt", hasAuth: true}
+ Backend response received: {status: 200, correlationId: "abc123"}
+ Backend prompt analysis completed: {result: {...}, correlationId: "abc123"}
 ```
 
 #### API Logs Popup (UI)
-Click "📊 API Logs" button in options page
+Click " API Logs" button in options page
 - Real-time success/error indicators
 - Expandable details
 - Timestamps

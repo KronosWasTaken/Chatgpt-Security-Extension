@@ -11,7 +11,7 @@ def test_backend_api():
     """Test the backend API endpoints"""
     base_url = "http://127.0.0.1:8001"
     
-    print("🧪 Testing Backend API")
+    print(" Testing Backend API")
     print("=" * 40)
     
     # Test 1: Health check
@@ -19,37 +19,37 @@ def test_backend_api():
     try:
         response = requests.get(f"{base_url}/health", timeout=5)
         if response.status_code == 200:
-            print("   ✅ Health check passed")
+            print("    Health check passed")
             print(f"   Response: {response.json()}")
         else:
-            print(f"   ❌ Health check failed: {response.status_code}")
+            print(f"    Health check failed: {response.status_code}")
             print(f"   Error: {response.text}")
     except Exception as e:
-        print(f"   ❌ Health check error: {e}")
+        print(f"    Health check error: {e}")
     
     # Test 2: API docs
     print("\n2. Testing API documentation...")
     try:
         response = requests.get(f"{base_url}/docs", timeout=5)
         if response.status_code == 200:
-            print("   ✅ API docs accessible")
+            print("    API docs accessible")
         else:
-            print(f"   ❌ API docs failed: {response.status_code}")
+            print(f"    API docs failed: {response.status_code}")
     except Exception as e:
-        print(f"   ❌ API docs error: {e}")
+        print(f"    API docs error: {e}")
     
     # Test 3: Test scan endpoint
     print("\n3. Testing scan test endpoint...")
     try:
         response = requests.get(f"{base_url}/api/v1/scan/test", timeout=5)
         if response.status_code == 200:
-            print("   ✅ Scan test endpoint passed")
+            print("    Scan test endpoint passed")
             print(f"   Response: {response.json()}")
         else:
-            print(f"   ❌ Scan test endpoint failed: {response.status_code}")
+            print(f"    Scan test endpoint failed: {response.status_code}")
             print(f"   Error: {response.text}")
     except Exception as e:
-        print(f"   ❌ Scan test endpoint error: {e}")
+        print(f"    Scan test endpoint error: {e}")
     
     # Test 4: Test file scan endpoint
     print("\n4. Testing file scan endpoint...")
@@ -63,17 +63,17 @@ def test_backend_api():
         response = requests.post(f"{base_url}/api/v1/scan/file", files=files, data=data, timeout=10)
         
         if response.status_code == 200:
-            print("   ✅ File scan endpoint passed")
+            print("    File scan endpoint passed")
             result = response.json()
             print(f"   Response: {json.dumps(result, indent=2)}")
         else:
-            print(f"   ❌ File scan endpoint failed: {response.status_code}")
+            print(f"    File scan endpoint failed: {response.status_code}")
             print(f"   Error: {response.text}")
     except Exception as e:
-        print(f"   ❌ File scan endpoint error: {e}")
+        print(f"    File scan endpoint error: {e}")
     
     print("\n" + "=" * 40)
-    print("✅ Backend API testing completed!")
+    print(" Backend API testing completed!")
 
 if __name__ == "__main__":
     test_backend_api()

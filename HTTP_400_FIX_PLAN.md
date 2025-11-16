@@ -8,7 +8,7 @@ Extension is receiving HTTP 400 errors on:
 ## Root Cause Analysis
 
 ### Endpoint 1: `/api/v1/analyze/prompt`
-**Status**: In `skip_auth_paths` - doesn't require authentication ✅
+**Status**: In `skip_auth_paths` - doesn't require authentication 
 **Expected Request**:
 ```json
 {
@@ -25,7 +25,7 @@ Extension is receiving HTTP 400 errors on:
 - Wrong Content-Type header
 
 ### Endpoint 2: `/api/v1/scan/file`
-**Status**: NOT in `skip_auth_paths` - REQUIRES authentication ⚠️
+**Status**: NOT in `skip_auth_paths` - REQUIRES authentication 
 **Expected Request**:
 - Multipart form data
 - Required field: `file` (UploadFile)
@@ -82,7 +82,7 @@ const formData = new FormData()
 formData.append('file', file)  // Ensure file is actual File object
 if (text) formData.append('text', text)
 
-const response = await fetch(url,和治疗  method: 'POST',
+const response = await fetch(url,  method: 'POST',
   headers: {
     'Authorization': `Bearer ${token}`  // Required for file scan
     // Don't set Content-Type - browser sets it with boundary
@@ -155,10 +155,10 @@ const response = await fetch(url,和治疗  method: 'POST',
 
 ## Success Criteria
 
-- ✅ All tests pass
-- ✅ No 400 errors in logs
-- ✅ Correlation IDs present in all responses
-- ✅ Logs visible in UI popup
-- ✅ Request/response format validated
-- ✅ CORS working properly
-- ✅ Auth flow working correctly
+-  All tests pass
+-  No 400 errors in logs
+-  Correlation IDs present in all responses
+-  Logs visible in UI popup
+-  Request/response format validated
+-  CORS working properly
+-  Auth flow working correctly

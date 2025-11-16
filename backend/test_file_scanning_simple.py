@@ -11,7 +11,7 @@ def test_file_scanning():
     """Test file scanning without audit logging"""
     base_url = "http://localhost:8000"
     
-    print("🧪 Testing File Scanning (No Audit Logging)")
+    print(" Testing File Scanning (No Audit Logging)")
     print("=" * 50)
     
     # Test 1: Regular file
@@ -31,15 +31,15 @@ def test_file_scanning():
         
         if response.status_code == 200:
             result = response.json()
-            print(f"   ✅ Scan successful")
+            print(f"    Scan successful")
             print(f"   Risk Level: {result.get('riskLevel', 'unknown')}")
             print(f"   Should Block: {result.get('shouldBlock', False)}")
             print(f"   Summary: {result.get('summary', 'No summary')}")
         else:
-            print(f"   ❌ Scan failed: {response.status_code}")
+            print(f"    Scan failed: {response.status_code}")
             print(f"   Error: {response.text}")
     except Exception as e:
-        print(f"   ❌ Error: {e}")
+        print(f"    Error: {e}")
     
     # Test 2: Sensitive file (.env)
     print("\n2. Testing sensitive file (.env)...")
@@ -58,16 +58,16 @@ def test_file_scanning():
         
         if response.status_code == 200:
             result = response.json()
-            print(f"   ✅ Scan successful")
+            print(f"    Scan successful")
             print(f"   Risk Level: {result.get('riskLevel', 'unknown')}")
             print(f"   Should Block: {result.get('shouldBlock', False)}")
             print(f"   Block Reason: {result.get('blockReason', 'None')}")
             print(f"   Is Sensitive: {result.get('isSensitiveFile', False)}")
         else:
-            print(f"   ❌ Scan failed: {response.status_code}")
+            print(f"    Scan failed: {response.status_code}")
             print(f"   Error: {response.text}")
     except Exception as e:
-        print(f"   ❌ Error: {e}")
+        print(f"    Error: {e}")
     
     # Test 3: Malicious file (.exe)
     print("\n3. Testing malicious file (.exe)...")
@@ -85,16 +85,16 @@ def test_file_scanning():
         
         if response.status_code == 200:
             result = response.json()
-            print(f"   ✅ Scan successful")
+            print(f"    Scan successful")
             print(f"   Risk Level: {result.get('riskLevel', 'unknown')}")
             print(f"   Should Block: {result.get('shouldBlock', False)}")
             print(f"   Block Reason: {result.get('blockReason', 'None')}")
             print(f"   Is Malicious: {result.get('isMaliciousFile', False)}")
         else:
-            print(f"   ❌ Scan failed: {response.status_code}")
+            print(f"    Scan failed: {response.status_code}")
             print(f"   Error: {response.text}")
     except Exception as e:
-        print(f"   ❌ Error: {e}")
+        print(f"    Error: {e}")
     
     # Test 4: File with PII
     print("\n4. Testing file with PII...")
@@ -113,7 +113,7 @@ def test_file_scanning():
         
         if response.status_code == 200:
             result = response.json()
-            print(f"   ✅ Scan successful")
+            print(f"    Scan successful")
             print(f"   Risk Level: {result.get('riskLevel', 'unknown')}")
             print(f"   Should Block: {result.get('shouldBlock', False)}")
             print(f"   Block Reason: {result.get('blockReason', 'None')}")
@@ -122,20 +122,20 @@ def test_file_scanning():
             if pii_detection.get('hasPII'):
                 print(f"   PII Count: {pii_detection.get('count', 0)}")
         else:
-            print(f"   ❌ Scan failed: {response.status_code}")
+            print(f"    Scan failed: {response.status_code}")
             print(f"   Error: {response.text}")
     except Exception as e:
-        print(f"   ❌ Error: {e}")
+        print(f"    Error: {e}")
     
     print("\n" + "=" * 50)
-    print("✅ File scanning tests completed!")
-    print("\n📋 Summary:")
-    print("  • File scanning: ✅ Working")
-    print("  • Sensitive file detection: ✅ Working")
-    print("  • Malicious file detection: ✅ Working")
-    print("  • PII detection: ✅ Working")
-    print("  • Audit logging: ❌ Disabled")
-    print("\n🔧 Next steps:")
+    print(" File scanning tests completed!")
+    print("\n Summary:")
+    print("  • File scanning:  Working")
+    print("  • Sensitive file detection:  Working")
+    print("  • Malicious file detection:  Working")
+    print("  • PII detection:  Working")
+    print("  • Audit logging:  Disabled")
+    print("\n Next steps:")
     print("  1. Test with extension in browser")
     print("  2. Verify file blocking behavior")
     print("  3. Re-enable audit logging when ready")

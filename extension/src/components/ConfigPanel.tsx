@@ -55,13 +55,13 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
         <div className="space-y-4">
           <div>
             <label className="block mb-2 text-sm font-medium text-slate-300">
-              🛡️ Threat Detection Configuration
+               Threat Detection Configuration
             </label>
             <div className="space-y-3">
               <div className="p-4 bg-blue-700 border border-blue-600 bg-opacity-30 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div className="flex-1 mr-3">
-                    <span className="text-sm font-medium text-blue-200">VirusTotal API (Primary Malware Scanner) 🛡️</span>
+                    <span className="text-sm font-medium text-blue-200">VirusTotal API (Primary Malware Scanner) </span>
                     <p className="mt-1 text-xs text-slate-400">
                       Always-on cloud malware detection - Primary scanner (requires API key)
                     </p>
@@ -74,7 +74,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
               
               <div className="flex items-center justify-between p-4 bg-opacity-50 border bg-slate-700 rounded-xl border-slate-600">
                 <div className="flex-1 mr-3">
-                  <span className="text-sm font-medium text-slate-200">Gemini 2.0 Flash (Prompt Injection Protection) 🤖</span>
+                  <span className="text-sm font-medium text-slate-200">Gemini 2.0 Flash (Prompt Injection Protection) </span>
                   <p className="mt-1 text-xs text-slate-400">
                     Ultra-fast AI detection of prompt injection attacks in real-time (requires API key)
                   </p>
@@ -90,7 +90,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
 
           <div>
             <label className="block mb-2 text-sm font-medium text-slate-300">
-              🤖 Gemini API Key (Prompt Injection Detection)
+               Gemini API Key (Prompt Injection Detection)
             </label>
             <input
               type="password"
@@ -115,7 +115,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
 
           <div>
             <label className="block mb-2 text-sm font-medium text-slate-300">
-              🛡️ VirusTotal API Key (File Malware Scanning)
+               VirusTotal API Key (File Malware Scanning)
             </label>
             <input
               type="password"
@@ -208,7 +208,7 @@ export default function ConfigPanel({ config, onConfigChange, onSave }: ConfigPa
                 <div className="flex-1 mr-3">
                   <span className="text-sm text-slate-300">Scan executable files with VirusTotal</span>
                   <p className="mt-1 text-xs text-slate-400">
-                    ⚠️ Allows .exe, .msi files to be scanned instead of immediately blocked
+                     Allows .exe, .msi files to be scanned instead of immediately blocked
                   </p>
                 </div>
                 <button

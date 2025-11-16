@@ -16,11 +16,11 @@ export default function SidePanel() {
   const [config, updateConfig, configLoading] = useConfig()
   const [logs, updateLogs, logsLoading] = useLogs()
   
-  console.log('🔐 SIDEPANEL: Loading states:', { authLoading, configLoading, logsLoading })
-  console.log('🔐 SIDEPANEL: Auth user:', user)
-  console.log('🔐 SIDEPANEL: Is authenticated:', isAuthenticated())
-  console.log('🔐 SIDEPANEL: Config:', config)
-  console.log('🔐 SIDEPANEL: Logs:', logs)
+  console.log(' SIDEPANEL: Loading states:', { authLoading, configLoading, logsLoading })
+  console.log(' SIDEPANEL: Auth user:', user)
+  console.log(' SIDEPANEL: Is authenticated:', isAuthenticated())
+  console.log(' SIDEPANEL: Config:', config)
+  console.log(' SIDEPANEL: Logs:', logs)
 
   const refreshLogsFromStorage = async () => {
     try {
@@ -42,7 +42,7 @@ export default function SidePanel() {
 
   // Show loading state while checking authentication
   if (authLoading) {
-    console.log('🔐 SIDEPANEL: Showing auth loading state...')
+    console.log(' SIDEPANEL: Showing auth loading state...')
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900 flex items-center justify-center">
         <div className="text-white text-xl flex items-center">
@@ -58,10 +58,10 @@ export default function SidePanel() {
 
   // Show login page if not authenticated
   const authenticated = isAuthenticated()
-  console.log('🔐 SIDEPANEL: Authentication check result:', authenticated)
+  console.log(' SIDEPANEL: Authentication check result:', authenticated)
   
   if (!authenticated) {
-    console.log('🔐 SIDEPANEL: User not authenticated, showing login page')
+    console.log(' SIDEPANEL: User not authenticated, showing login page')
     return <LoginPage onLogin={login} loading={authLoading} />
   }
 

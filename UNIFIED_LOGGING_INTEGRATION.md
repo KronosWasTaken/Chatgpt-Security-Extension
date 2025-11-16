@@ -5,13 +5,13 @@ Integrated API logs into the existing unified logging system (`chrome.storage.sy
 
 ## Changes Made
 
-### 1. **BackendApiService.ts** ✅
+### 1. **BackendApiService.ts** 
 - **Modified `logApiError()`** and `logApiSuccess()` methods
 - Changed from `chrome.storage.local.set({ apiLogs })` to `chrome.storage.sync.set({ logs })`
 - Logs now include `category: 'api'` for easy filtering
 - Integrated with existing `useLogs()` hook
 
-### 2. **ApiLogsPopup.tsx** ✅
+### 2. **ApiLogsPopup.tsx** 
 - **Updated to use unified logs system**
 - Now reads from `chrome.storage.sync.get(['logs'])` instead of separate `apiLogs`
 - Filters logs for API-related entries using:
@@ -20,7 +20,7 @@ Integrated API logs into the existing unified logging system (`chrome.storage.sy
   - `log.message?.includes('Backend')`
 - Clear function now filters out only API logs, preserving other log types
 
-### 3. **types/index.ts** ✅
+### 3. **types/index.ts** 
 - Added `'api'` to `LogEntry` category union type
 - Now supports: `'prompt_injection' | 'pii' | 'file_scan' | 'system' | 'api'`
 
@@ -98,17 +98,17 @@ chrome.storage.sync['logs'] = [
 
 ## Files Modified
 
-1. ✅ `extension/src/services/BackendApiService.ts`
+1.  `extension/src/services/BackendApiService.ts`
    - logApiError() - now writes to unified logs
    - logApiSuccess() - now writes to unified logs
    - Removed getLogs() method
 
-2. ✅ `extension/src/components/ApiLogsPopup.tsx`
+2.  `extension/src/components/ApiLogsPopup.tsx`
    - Updated to read from unified logs
    - Added filtering logic for API logs
    - Updated clear functionality
 
-3. ✅ `extension/src/types/index.ts`
+3.  `extension/src/types/index.ts`
    - Added 'api' to LogEntry category type
 
 ## Testing
@@ -140,8 +140,8 @@ chrome.storage.local.remove(['apiLogs'])
 
 ## Next Steps
 
-- ✅ Test API call logging
-- ✅ Verify logs appear in both LogsPanel and ApiLogsPopup
-- ✅ Test clear API logs functionality
-- ✅ Confirm other log categories still work
-- ✅ Check storage doesn't exceed limits
+-  Test API call logging
+-  Verify logs appear in both LogsPanel and ApiLogsPopup
+-  Test clear API logs functionality
+-  Confirm other log categories still work
+-  Check storage doesn't exceed limits

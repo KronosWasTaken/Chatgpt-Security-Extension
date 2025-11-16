@@ -18,9 +18,9 @@ export const config: PlasmoContentScript = {
 
 // Ensure single instance per page
 ;(async () => {
-  console.log('╔════════════════════════════════════════════════════════════════════╗')
-  console.log('║  [PROMPT-GUARD] Content Script Starting...                         ║')
-  console.log('╚════════════════════════════════════════════════════════════════════╝')
+  console.log('')
+  console.log('  [PROMPT-GUARD] Content Script Starting...                         ')
+  console.log('')
   console.log('   Page URL:', window.location.href)
   console.log('   Document ready:', document.readyState)
   console.log('   Body exists:', !!document.body)
@@ -43,22 +43,22 @@ export const config: PlasmoContentScript = {
     }
 
     ;(window as any).__promptGuardInstance = guard
-    console.log('[PROMPT-GUARD] ✅ Instance created and registered as window.__promptGuardInstance')
+    console.log('[PROMPT-GUARD]  Instance created and registered as window.__promptGuardInstance')
 
     // Send initialization log to extension
     try {
       await chrome.runtime.sendMessage({
         type: "ADD_LOG",
-        message: "🛡️ PromptGuard content script active and monitoring prompts",
+        message: " PromptGuard content script active and monitoring prompts",
         logType: "info",
         category: "system"
       })
-      console.log('[PROMPT-GUARD] ✅ Logged to extension storage')
+      console.log('[PROMPT-GUARD]  Logged to extension storage')
     } catch (error) {
-      console.error('[PROMPT-GUARD] ❌ Failed to log to extension:', error)
+      console.error('[PROMPT-GUARD]  Failed to log to extension:', error)
     }
 
-    console.log('[PROMPT-GUARD] ✅ Initialization complete - ready to intercept prompts')
+    console.log('[PROMPT-GUARD]  Initialization complete - ready to intercept prompts')
     console.log('   Test: Type in any textarea and try to send')
     
     // Add a visual indicator on the page
@@ -70,7 +70,7 @@ export const config: PlasmoContentScript = {
     console.log('[PROMPT-GUARD] Added visual indicator to page')
     
   } catch (e) {
-    console.error("[PROMPT-GUARD] ❌ CRITICAL: Failed to init PromptGuard content script:", e)
+    console.error("[PROMPT-GUARD]  CRITICAL: Failed to init PromptGuard content script:", e)
     console.error('   Error details:', {
       message: e instanceof Error ? e.message : String(e),
       stack: e instanceof Error ? e.stack : 'no stack'

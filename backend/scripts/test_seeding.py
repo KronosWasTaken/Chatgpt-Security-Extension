@@ -23,7 +23,7 @@ from sqlalchemy import select, func
 
 async def test_msp_data():
     """Test MSP data"""
-    print("🏢 Testing MSP data...")
+    print(" Testing MSP data...")
     
     async for session in get_async_session():
         msp_query = select(func.count(MSP.id))
@@ -31,21 +31,21 @@ async def test_msp_data():
         msp_count = result.scalar()
         
         if msp_count > 0:
-            print(f"  ✅ Found {msp_count} MSP(s)")
+            print(f"   Found {msp_count} MSP(s)")
             
             # Get first MSP details
             msp_detail_query = select(MSP).limit(1)
             result = await session.execute(msp_detail_query)
             msp = result.scalar_one()
-            print(f"  ✅ MSP: {msp.name} ({msp.subscription_tier})")
+            print(f"   MSP: {msp.name} ({msp.subscription_tier})")
             return True
         else:
-            print("  ❌ No MSPs found")
+            print("   No MSPs found")
             return False
 
 async def test_user_data():
     """Test user data"""
-    print("👥 Testing user data...")
+    print(" Testing user data...")
     
     async for session in get_async_session():
         user_query = select(func.count(User.id))
@@ -53,7 +53,7 @@ async def test_user_data():
         user_count = result.scalar()
         
         if user_count > 0:
-            print(f"  ✅ Found {user_count} user(s)")
+            print(f"   Found {user_count} user(s)")
             
             # Get user roles
             roles_query = select(User.role, func.count(User.id)).group_by(User.role)
@@ -61,15 +61,15 @@ async def test_user_data():
             roles = result.all()
             
             for role, count in roles:
-                print(f"  ✅ {role}: {count} user(s)")
+                print(f"   {role}: {count} user(s)")
             return True
         else:
-            print("  ❌ No users found")
+            print("   No users found")
             return False
 
 async def test_client_data():
     """Test client data"""
-    print("🏢 Testing client data...")
+    print(" Testing client data...")
     
     async for session in get_async_session():
         client_query = select(func.count(Client.id))
@@ -77,7 +77,7 @@ async def test_client_data():
         client_count = result.scalar()
         
         if client_count > 0:
-            print(f"  ✅ Found {client_count} client(s)")
+            print(f"   Found {client_count} client(s)")
             
             # Get client details
             clients_query = select(Client).limit(3)
@@ -85,15 +85,15 @@ async def test_client_data():
             clients = result.scalars().all()
             
             for client in clients:
-                print(f"  ✅ {client.name} ({client.industry}) - {client.employee_count} employees")
+                print(f"   {client.name} ({client.industry}) - {client.employee_count} employees")
             return True
         else:
-            print("  ❌ No clients found")
+            print("   No clients found")
             return False
 
 async def test_ai_services():
     """Test AI services data"""
-    print("🤖 Testing AI services...")
+    print(" Testing AI services...")
     
     async for session in get_async_session():
         service_query = select(func.count(AIService.id))
@@ -101,7 +101,7 @@ async def test_ai_services():
         service_count = result.scalar()
         
         if service_count > 0:
-            print(f"  ✅ Found {service_count} AI service(s)")
+            print(f"   Found {service_count} AI service(s)")
             
             # Get service details
             services_query = select(AIService).limit(3)
@@ -109,15 +109,15 @@ async def test_ai_services():
             services = result.scalars().all()
             
             for service in services:
-                print(f"  ✅ {service.name} by {service.vendor} ({service.category})")
+                print(f"   {service.name} by {service.vendor} ({service.category})")
             return True
         else:
-            print("  ❌ No AI services found")
+            print("   No AI services found")
             return False
 
 async def test_client_applications():
     """Test client AI applications"""
-    print("📱 Testing client applications...")
+    print(" Testing client applications...")
     
     async for session in get_async_session():
         app_query = select(func.count(ClientAIServices.id))
@@ -125,7 +125,7 @@ async def test_client_applications():
         app_count = result.scalar()
         
         if app_count > 0:
-            print(f"  ✅ Found {app_count} client application(s)")
+            print(f"   Found {app_count} client application(s)")
             
             # Get application details
             apps_query = select(ClientAIServices).limit(3)
@@ -133,15 +133,15 @@ async def test_client_applications():
             apps = result.scalars().all()
             
             for app in apps:
-                print(f"  ✅ {app.name} ({app.vendor}) - {app.status}")
+                print(f"   {app.name} ({app.vendor}) - {app.status}")
             return True
         else:
-            print("  ❌ No client applications found")
+            print("   No client applications found")
             return False
 
 async def test_usage_data():
     """Test usage data"""
-    print("📊 Testing usage data...")
+    print(" Testing usage data...")
     
     async for session in get_async_session():
         usage_query = select(func.count(ClientAIServiceUsage.id))
@@ -149,7 +149,7 @@ async def test_usage_data():
         usage_count = result.scalar()
         
         if usage_count > 0:
-            print(f"  ✅ Found {usage_count} usage record(s)")
+            print(f"   Found {usage_count} usage record(s)")
             
             # Get usage summary
             summary_query = select(
@@ -160,17 +160,17 @@ async def test_usage_data():
             result = await session.execute(summary_query)
             total, avg, dept_count = result.first()
             
-            print(f"  ✅ Total interactions: {total}")
-            print(f"  ✅ Average daily interactions: {avg:.1f}")
-            print(f"  ✅ Departments with usage: {dept_count}")
+            print(f"   Total interactions: {total}")
+            print(f"   Average daily interactions: {avg:.1f}")
+            print(f"   Departments with usage: {dept_count}")
             return True
         else:
-            print("  ❌ No usage data found")
+            print("   No usage data found")
             return False
 
 async def test_compliance_data():
     """Test compliance frameworks and patterns"""
-    print("🛡️ Testing compliance data...")
+    print(" Testing compliance data...")
     
     async for session in get_async_session():
         # Test frameworks
@@ -184,8 +184,8 @@ async def test_compliance_data():
         pattern_count = result.scalar()
         
         if framework_count > 0 and pattern_count > 0:
-            print(f"  ✅ Found {framework_count} compliance framework(s)")
-            print(f"  ✅ Found {pattern_count} detection pattern(s)")
+            print(f"   Found {framework_count} compliance framework(s)")
+            print(f"   Found {pattern_count} detection pattern(s)")
             
             # Get framework details
             frameworks_query = select(ComplianceFramework).limit(3)
@@ -193,15 +193,15 @@ async def test_compliance_data():
             frameworks = result.scalars().all()
             
             for framework in frameworks:
-                print(f"  ✅ {framework.name} v{framework.version}")
+                print(f"   {framework.name} v{framework.version}")
             return True
         else:
-            print("  ❌ No compliance data found")
+            print("   No compliance data found")
             return False
 
 async def test_agent_engagement():
     """Test agent engagement data"""
-    print("🤖 Testing agent engagement...")
+    print(" Testing agent engagement...")
     
     async for session in get_async_session():
         agent_query = select(func.count(AgentEngagement.id))
@@ -209,7 +209,7 @@ async def test_agent_engagement():
         agent_count = result.scalar()
         
         if agent_count > 0:
-            print(f"  ✅ Found {agent_count} agent engagement record(s)")
+            print(f"   Found {agent_count} agent engagement record(s)")
             
             # Get agent details
             agents_query = select(AgentEngagement).limit(3)
@@ -217,15 +217,15 @@ async def test_agent_engagement():
             agents = result.scalars().all()
             
             for agent in agents:
-                print(f"  ✅ {agent.agent} ({agent.vendor}) - {agent.status}")
+                print(f"   {agent.agent} ({agent.vendor}) - {agent.status}")
             return True
         else:
-            print("  ❌ No agent engagement data found")
+            print("   No agent engagement data found")
             return False
 
 async def test_alerts():
     """Test alert data"""
-    print("🚨 Testing alerts...")
+    print(" Testing alerts...")
     
     async for session in get_async_session():
         alert_query = select(func.count(Alert.id))
@@ -233,7 +233,7 @@ async def test_alerts():
         alert_count = result.scalar()
         
         if alert_count > 0:
-            print(f"  ✅ Found {alert_count} alert(s)")
+            print(f"   Found {alert_count} alert(s)")
             
             # Get alert details
             alerts_query = select(Alert).limit(3)
@@ -241,15 +241,15 @@ async def test_alerts():
             alerts = result.scalars().all()
             
             for alert in alerts:
-                print(f"  ✅ {alert.title} ({alert.severity}) - {alert.status}")
+                print(f"   {alert.title} ({alert.severity}) - {alert.status}")
             return True
         else:
-            print("  ❌ No alerts found")
+            print("   No alerts found")
             return False
 
 async def main():
     """Main test function"""
-    print("🧪 Testing Mock Data Seeding")
+    print(" Testing Mock Data Seeding")
     print("=" * 50)
     
     try:
@@ -272,33 +272,33 @@ async def main():
                 result = await test_func()
                 results.append((test_name, result))
             except Exception as e:
-                print(f"  ❌ Error testing {test_name}: {e}")
+                print(f"   Error testing {test_name}: {e}")
                 results.append((test_name, False))
         
         print("\n" + "=" * 50)
-        print("📋 Test Results Summary:")
+        print(" Test Results Summary:")
         
         passed = 0
         total = len(results)
         
         for test_name, result in results:
-            status = "✅ PASS" if result else "❌ FAIL"
+            status = " PASS" if result else " FAIL"
             print(f"  {test_name}: {status}")
             if result:
                 passed += 1
         
-        print(f"\n📊 Overall: {passed}/{total} tests passed")
+        print(f"\n Overall: {passed}/{total} tests passed")
         
         if passed == total:
-            print("\n🎉 All tests passed! Mock data seeding was successful.")
-            print("🚀 The system is ready for testing and development.")
+            print("\n All tests passed! Mock data seeding was successful.")
+            print(" The system is ready for testing and development.")
         else:
-            print(f"\n⚠️ {total - passed} test(s) failed. Check the output above for details.")
+            print(f"\n {total - passed} test(s) failed. Check the output above for details.")
         
         return passed == total
         
     except Exception as e:
-        print(f"\n❌ Test failed with error: {e}")
+        print(f"\n Test failed with error: {e}")
         return False
 
 if __name__ == "__main__":

@@ -10,26 +10,26 @@ export class FileUploadMonitor {
   private pasteHandler: ((event: ClipboardEvent) => Promise<void>) | null = null
 
   constructor() {
-    console.log('🔧 FileUploadMonitor constructor called')
+    console.log(' FileUploadMonitor constructor called')
   }
 
   initialize(): void {
-    console.log('🔧 FileUploadMonitor.initialize() called')
+    console.log(' FileUploadMonitor.initialize() called')
     this.monitorExistingInputs()
     this.monitorDragDrop()
     this.monitorPaste()
     this.setupDOMObserver()
     this.setupPeriodicCheck()
-    console.log('✅ FileUploadMonitor initialization complete')
+    console.log(' FileUploadMonitor initialization complete')
   }
 
   private monitorExistingInputs(): void {
-    console.log('🔍 REAL_FILE_MONITOR: Looking for existing file inputs...')
+    console.log(' REAL_FILE_MONITOR: Looking for existing file inputs...')
     const fileInputs = document.querySelectorAll('input[type="file"]')
-    console.log('🔍 REAL_FILE_MONITOR: Found file inputs:', fileInputs.length)
+    console.log(' REAL_FILE_MONITOR: Found file inputs:', fileInputs.length)
     
     for (const input of fileInputs) {
-      console.log('🔍 REAL_FILE_MONITOR: Attaching listener to input:', input)
+      console.log(' REAL_FILE_MONITOR: Attaching listener to input:', input)
       // attachListenerToInput is async but we don't need to await it here
       this.attachListenerToInput(input as HTMLInputElement).catch(err => {
         console.warn('Failed to attach listener to input:', err)
@@ -37,7 +37,7 @@ export class FileUploadMonitor {
     }
     
     if (fileInputs.length === 0) {
-      console.log('⚠️ REAL_FILE_MONITOR: No file inputs found on page')
+      console.log(' REAL_FILE_MONITOR: No file inputs found on page')
     }
   }
 
@@ -49,13 +49,13 @@ export class FileUploadMonitor {
     this.attachedInputs.add(input)
 
     input.addEventListener('change', async (event) => {
-      console.log('🔍 REAL_FILE_INPUT: File input change event detected!')
+      console.log(' REAL_FILE_INPUT: File input change event detected!')
       const inputElement = event.target as HTMLInputElement
       const files = inputElement.files
-      console.log('🔍 REAL_FILE_INPUT: Files selected:', files?.length || 0)
+      console.log(' REAL_FILE_INPUT: Files selected:', files?.length || 0)
       
       if (files?.length) {
-        console.log('🔍 REAL_FILE_INPUT: File details:', Array.from(files).map(f => ({
+        console.log(' REAL_FILE_INPUT: File details:', Array.from(files).map(f => ({
           name: f.name,
           size: f.size,
           type: f.type
@@ -63,26 +63,26 @@ export class FileUploadMonitor {
       }
 
       if (this.shouldSkipProcessing(inputElement)) {
-        console.log('⚠️ REAL_FILE_INPUT: Skipping processing due to scannerSkipNext flag')
+        console.log(' REAL_FILE_INPUT: Skipping processing due to scannerSkipNext flag')
         return
       }
       
       if (!files?.length) {
-        console.log('⚠️ REAL_FILE_INPUT: No files selected')
+        console.log(' REAL_FILE_INPUT: No files selected')
         return
       }
 
-      console.log('🔍 REAL_FILE_INPUT: Processing files with FileGuard...')
+      console.log(' REAL_FILE_INPUT: Processing files with FileGuard...')
       
       // Prevent default behavior initially to scan first
       event.stopImmediatePropagation()
       event.preventDefault()
 
       const shouldAllowUpload = await this.fileGuard.handleFileUpload(files, 'file input')
-      console.log('🔍 REAL_FILE_INPUT: FileGuard result:', shouldAllowUpload)
+      console.log(' REAL_FILE_INPUT: FileGuard result:', shouldAllowUpload)
 
       if (shouldAllowUpload) {
-        console.log('✅ REAL_FILE_INPUT: Upload allowed, file will remain visible')
+        console.log(' REAL_FILE_INPUT: Upload allowed, file will remain visible')
         // File scan successful - preserve file in input and allow upload to proceed
         // Files remain in input.files, so they'll stay visible in UI
         // Retrigger the change event to allow app to process the files
@@ -92,7 +92,7 @@ export class FileUploadMonitor {
         // Note: input.value cannot be set for file inputs, but input.files already contains the files
         // The app should see the files when we dispatch the change event
       } else {
-        console.log('❌ REAL_FILE_INPUT: Upload blocked, clearing input...')
+        console.log(' REAL_FILE_INPUT: Upload blocked, clearing input...')
         // Only clear input when blocked/failed
         input.value = ''
       }
@@ -183,7 +183,7 @@ export class FileUploadMonitor {
   }
 
   /**
-   * Add visual success indicator (✅ Safe/Allowed) to file display after successful scan
+   * Add visual success indicator ( Safe/Allowed) to file display after successful scan
    */
   private addSuccessIndicatorToFile(input: HTMLInputElement, files: FileList): void {
     try {
@@ -266,7 +266,7 @@ export class FileUploadMonitor {
               font-size: 11px;
               font-weight: 500;
             `
-            // indicator.textContent = '✅ Safe'
+            // indicator.textContent = ' Safe'
             indicator.title = `File scanned and allowed: ${fileName} (${fileSize} KB)`
             
             // Try to append to the file element or its parent
@@ -376,27 +376,27 @@ export class FileUploadMonitor {
   private setupDOMObserver(): void {
     const startObserver = () => {
       if (!document.body) {
-        console.log('🕇 FileUploadMonitor: document.body not ready, waiting...')
+        console.log(' FileUploadMonitor: document.body not ready, waiting...')
         setTimeout(startObserver, 100)
         return
       }
 
-      console.log('✅ FileUploadMonitor: Starting DOM observer')
+      console.log(' FileUploadMonitor: Starting DOM observer')
       this.domObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
           if (mutation.type === 'childList') {
-            console.log('🔍 REAL_FILE_MONITOR: DOM mutation detected, added nodes:', mutation.addedNodes.length)
+            console.log(' REAL_FILE_MONITOR: DOM mutation detected, added nodes:', mutation.addedNodes.length)
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === Node.ELEMENT_NODE) {
                 const element = node as Element
-                console.log('🔍 REAL_FILE_MONITOR: Checking element for file inputs:', element.tagName)
+                console.log(' REAL_FILE_MONITOR: Checking element for file inputs:', element.tagName)
                 
                 const fileInputs = element.querySelectorAll('input[type="file"]')
                 if (fileInputs.length > 0) {
-                  console.log('🔍 REAL_FILE_MONITOR: Found file inputs in new element:', fileInputs.length)
+                  console.log(' REAL_FILE_MONITOR: Found file inputs in new element:', fileInputs.length)
                 }
                 for (const input of fileInputs) {
-                  console.log('🔍 REAL_FILE_MONITOR: Attaching listener to new input:', input)
+                  console.log(' REAL_FILE_MONITOR: Attaching listener to new input:', input)
                   this.attachListenerToInput(input as HTMLInputElement)
                 }
 
@@ -426,7 +426,7 @@ export class FileUploadMonitor {
   }
   
   cleanup(): void {
-    console.log('🧹 FileUploadMonitor: Cleaning up...')
+    console.log(' FileUploadMonitor: Cleaning up...')
     
     // Disconnect MutationObserver
     if (this.domObserver) {
@@ -459,6 +459,6 @@ export class FileUploadMonitor {
     // Clear attached inputs
     this.attachedInputs.clear()
     
-    console.log('✅ FileUploadMonitor: Cleanup complete')
+    console.log(' FileUploadMonitor: Cleanup complete')
   }
 }

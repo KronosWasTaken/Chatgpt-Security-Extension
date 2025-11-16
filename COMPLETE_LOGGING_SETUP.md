@@ -3,15 +3,15 @@
 ## What Was Added
 
 ### 1. Visual Indicator on Page
-A green indicator appears in the top-right corner showing "🛡️ PromptGuard Active" when the content script loads.
+A green indicator appears in the top-right corner showing " PromptGuard Active" when the content script loads.
 
 ### 2. Enhanced Console Logging
 
 #### Content Script Loading
 ```
-╔════════════════════════════════════════════════════════════════════╗
-║  [PROMPT-GUARD] Content Script Starting...                         ║
-╚════════════════════════════════════════════════════════════════════╝
+
+  [PROMPT-GUARD] Content Script Starting...                         
+
    Page URL: http://localhost/test-page.html
    Document ready: complete
    Body exists: true
@@ -19,29 +19,29 @@ A green indicator appears in the top-right corner showing "🛡️ PromptGuard A
 
 #### PromptGuard Initialization
 ```
-╔════════════════════════════════════════════════════════════════════╗
-║  PromptGuard Constructor Called                                    ║
-╚════════════════════════════════════════════════════════════════════╝
+
+  PromptGuard Constructor Called                                    
+
    Initializing BackendApiService...
-   ✅ BackendApiService instance created
+    BackendApiService instance created
    Setting up event handlers...
-   ✅ Event handlers set up
+    Event handlers set up
    Initializing protection...
-   ✅ Protection initialized
-✅ PromptGuard: Fully initialized and ready to intercept prompts
+    Protection initialized
+ PromptGuard: Fully initialized and ready to intercept prompts
 ```
 
 #### Debug Logging for EVERY Click and Keyboard
 ```
-🔍 [DEBUG] Click detected on element: BUTTON button-submit
-🎯 [DEBUG] Send button detected: <button>
-🔍 [DEBUG] Keydown detected: Enter on TEXTAREA
-🎯 [DEBUG] Send shortcut detected: Enter
+ [DEBUG] Click detected on element: BUTTON button-submit
+ [DEBUG] Send button detected: <button>
+ [DEBUG] Keydown detected: Enter on TEXTAREA
+ [DEBUG] Send shortcut detected: Enter
 ```
 
 #### Text Extraction
 ```
-🔍 ElementSelector.getFirstTextWithContent: Starting text extraction
+ ElementSelector.getFirstTextWithContent: Starting text extraction
    Trying selectors: [...]
    Trying selector: textarea
    Found element: <textarea>
@@ -49,12 +49,12 @@ A green indicator appears in the top-right corner showing "🛡️ PromptGuard A
    Element value: "Your prompt text"
    Extracted text: "Your prompt text"
    Text length: 50
-✅ Found text: "Your prompt text" ...
+ Found text: "Your prompt text" ...
 ```
 
 #### Backend Analysis
 ```
-📡 STEP 1: Using BackendApiService to analyze prompt
+ STEP 1: Using BackendApiService to analyze prompt
    Prompt text: "Your prompt text"
    Initializing BackendApiService...
    BackendApiService initialized
@@ -89,32 +89,32 @@ Go to Console tab
 ### 4. Look for Initialization
 ```
 You should see:
-╔════════════════════════════════════════════════════════════════════╗
-║  [PROMPT-GUARD] Content Script Starting...                         ║
-╚════════════════════════════════════════════════════════════════════╝
 
-And a green "🛡️ PromptGuard Active" indicator on the page
+  [PROMPT-GUARD] Content Script Starting...                         
+
+
+And a green " PromptGuard Active" indicator on the page
 ```
 
 ### 5. Type and Send
 ```
 1. Type in the textarea: "This is my test prompt"
 2. Watch the console for:
-   🔍 [DEBUG] Keydown detected: Enter on TEXTAREA
-   🎯 [DEBUG] Send shortcut detected: Enter
+    [DEBUG] Keydown detected: Enter on TEXTAREA
+    [DEBUG] Send shortcut detected: Enter
    
 3. Click the Send button
 4. Watch for:
-   🔍 PromptGuard.handleClick: Event intercepted
-   🔍 ElementSelector.getFirstTextWithContent: Starting text extraction
-   ✅ Found text: "This is my test prompt"
-   📡 STEP 1: Using BackendApiService to analyze prompt
+    PromptGuard.handleClick: Event intercepted
+    ElementSelector.getFirstTextWithContent: Starting text extraction
+    Found text: "This is my test prompt"
+    STEP 1: Using BackendApiService to analyze prompt
 ```
 
 ### 6. Verify Backend Hit
 ```
 Look for:
-📡 STEP 1: Using BackendApiService to analyze prompt
+ STEP 1: Using BackendApiService to analyze prompt
    Backend enabled: true
    Backend config: {...}
    Calling analyzePromptInjection...
@@ -132,7 +132,7 @@ Request payload: {"text": "This is my test prompt", ...}
 1. Click extension icon
 2. Go to Logs tab
 3. You should see:
-   🛡️ PromptGuard content script active and monitoring prompts
+    PromptGuard content script active and monitoring prompts
    PROMPT CAPTURED (length=25):
    "This is my test prompt"
    CALLING BACKEND API: POST http://localhost:8000/api/v1/analyze/prompt
@@ -186,12 +186,12 @@ window.__promptGuardInstance.checkPromptSafety("This is a test prompt")
 
 ## Summary
 
-✅ Visual indicator shows when content script loads
-✅ EVERY click and keyboard event is logged
-✅ Text extraction is logged with full text
-✅ Backend API call is logged with full payload
-✅ Backend response is logged with full result
-✅ Extension storage logs show everything
+ Visual indicator shows when content script loads
+ EVERY click and keyboard event is logged
+ Text extraction is logged with full text
+ Backend API call is logged with full payload
+ Backend response is logged with full result
+ Extension storage logs show everything
 
 **Every single prompt is now completely traceable from start to finish!**
 

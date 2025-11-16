@@ -121,7 +121,7 @@ export class BackendApiService {
   
   async testConnection(): Promise<boolean> {
     try {
-      console.log('🔍 Testing backend connection...', { apiUrl: this.config.apiUrl })
+      console.log(' Testing backend connection...', { apiUrl: this.config.apiUrl })
       const headers = await this.getAuthHeaders()
       
       const url = `${this.config.apiUrl.replace(/\/$/, '')}/health`
@@ -129,19 +129,19 @@ export class BackendApiService {
         method: 'GET',
         headers
       })
-      console.log('🔍 Health check response:', response.status, response.statusText)
+      console.log(' Health check response:', response.status, response.statusText)
       
       if (response.ok) {
         const data = await response.json()
-        console.log('✅ Backend is reachable:', data)
+        console.log(' Backend is reachable:', data)
         return true
       } else {
         const text = await response.text().catch(() => '')
-        console.error('❌ Backend health check failed:', response.status, response.statusText, text)
+        console.error(' Backend health check failed:', response.status, response.statusText, text)
         return false
       }
     } catch (error) {
-      console.error('❌ Backend connection test failed:', error)
+      console.error(' Backend connection test failed:', error)
       return false
     }
   }
@@ -171,11 +171,11 @@ export class BackendApiService {
       }
       
       const analysisResult = await response.json()
-      console.log('✅ Backend analysis completed:', analysisResult)
+      console.log(' Backend analysis completed:', analysisResult)
       
       return analysisResult
     } catch (error) {
-      console.error('❌ Backend analysis failed:', error)
+      console.error(' Backend analysis failed:', error)
       return null
     }
   }
@@ -203,15 +203,15 @@ export class BackendApiService {
       const apiUrl = this.config.apiUrl.replace(/\/$/, '')
       const url = `${apiUrl}/api/v1/analyze/prompt`
       
-      console.log('🧩 Prompt analysis started', { correlationId, promptLength: text?.length })
-      console.log('🔍 Analyzing prompt with backend:', {
+      console.log(' Prompt analysis started', { correlationId, promptLength: text?.length })
+      console.log(' Analyzing prompt with backend:', {
         correlationId,
         promptLength: text.length,
         url,
         hasAuth: !!headers['Authorization']
       })
       
-      console.log('🚀 Sending prompt analysis request', { url, correlationId })
+      console.log(' Sending prompt analysis request', { url, correlationId })
       
       const requestStart = Date.now()
       const response = await fetch(url, {
@@ -222,7 +222,7 @@ export class BackendApiService {
       
       const durationMs = Date.now() - requestStart
       
-      console.log('📡 Backend response received:', {
+      console.log(' Backend response received:', {
         status: response.status,
         statusText: response.statusText,
         ok: response.ok
@@ -255,7 +255,7 @@ export class BackendApiService {
       
       const result: PromptAnalysisResponse & { logs?: Array<{ level: string; timestamp: string; message: string; context: string }> } = await response.json()
       
-      console.log('✅ Backend prompt analysis completed:', { result })
+      console.log(' Backend prompt analysis completed:', { result })
       
       await this.logApiSuccess('prompt_analysis', {
         riskLevel: result.riskLevel,
@@ -462,7 +462,7 @@ export class BackendApiService {
       // Save to AnalysisLogService (triggers real-time UI update)
       await appendAnalysisLog(entry)
       
-      console.log(`✅ Analysis result logged [${correlationId}]:`, {
+      console.log(` Analysis result logged [${correlationId}]:`, {
         type: params.type,
         status,
         summary: params.summary
@@ -704,7 +704,7 @@ export class BackendApiService {
         this.config.apiKey = result.authUser.token
       }
     } catch (error) {
-      console.error('🔐 BackendApiService: Failed to refresh auth token:', error)
+      console.error(' BackendApiService: Failed to refresh auth token:', error)
     }
   }
 
@@ -734,7 +734,7 @@ export class BackendApiService {
   cancelScan(correlationId: string): boolean {
     const controller = this.activeScans.get(correlationId)
     if (controller) {
-      console.log(`🛑 Canceling scan [${correlationId}]`)
+      console.log(` Canceling scan [${correlationId}]`)
       controller.abort()
       this.activeScans.delete(correlationId)
       return true
@@ -753,19 +753,19 @@ export class BackendApiService {
     // Generate correlationId internally
     const correlationId = globalThis.crypto?.randomUUID?.() || crypto.randomUUID?.() || Math.random().toString(36).substring(2, 12)
     
-    console.log('🔍 BackendApiService.scanFile called', { correlationId })
-    console.log('🔍 Config:', this.config)
+    console.log(' BackendApiService.scanFile called', { correlationId })
+    console.log(' Config:', this.config)
     
     // Guard: Only one active scan per correlationId
     if (this.activeScans.has(correlationId)) {
-      console.warn(`⚠️ Scan already in progress for [${correlationId}], skipping duplicate request`)
+      console.warn(` Scan already in progress for [${correlationId}], skipping duplicate request`)
       throw new Error(`Scan already in progress for correlationId: ${correlationId}`)
     }
     
     try {
       // If extension is inactive, bypass scanning and log locally
       if (!this.config.enabled) {
-        console.log('⏭️ Extension inactive — allowing upload without scanning')
+        console.log('⏭ Extension inactive — allowing upload without scanning')
         await this.appendResponseLogs([
           {
             level: 'info',
@@ -804,7 +804,7 @@ export class BackendApiService {
         headers['X-Correlation-Id'] = correlationId
       }
 
-      console.log('🧩 File analysis started', { correlationId, fileName: file?.name, fileSize: file?.size })
+      console.log(' File analysis started', { correlationId, fileName: file?.name, fileSize: file?.size })
       
       // Emit "started" log before calling backend
       await this.logAnalysisResult({
@@ -845,8 +845,8 @@ export class BackendApiService {
         formData.append('correlationId', correlationId)
       }
       
-      console.log('🚀 Making request to:', `${this.config.apiUrl}/api/v1/scan/file`)
-      console.log('🚀 FormData contents:', {
+      console.log(' Making request to:', `${this.config.apiUrl}/api/v1/scan/file`)
+      console.log(' FormData contents:', {
         correlationId,
         fileName: file.name,
         fileSize: file.size,
@@ -856,8 +856,8 @@ export class BackendApiService {
         mspId: this.config.mspId
       })
 
-      console.log('🚀 Request headers (axios):', headers)
-      console.log('🚀 About to make axios request...')
+      console.log(' Request headers (axios):', headers)
+      console.log(' About to make axios request...')
 
       // Create AbortController for this scan
       const abortController = new AbortController()
@@ -880,7 +880,7 @@ export class BackendApiService {
         // Remove from active scans on success
         this.activeScans.delete(correlationId)
 
-        console.log('✅ Backend file scan completed (axios):', axiosResponse.data)
+        console.log(' Backend file scan completed (axios):', axiosResponse.data)
         
         // Parse response - FileScanResponse format (from /api/v1/scan/file)
         const responseData = axiosResponse.data
@@ -976,7 +976,7 @@ export class BackendApiService {
         
         // Check if this was a cancellation
         if (axiosError.name === 'CanceledError' || axiosError.name === 'AbortError' || axiosError.code === 'ERR_CANCELED' || (abortController && abortController.signal.aborted)) {
-          console.log(`🛑 Scan canceled by user [${correlationId}]`)
+          console.log(` Scan canceled by user [${correlationId}]`)
           
           // Emit canceled log entry
           await this.logAnalysisResult({
@@ -1033,13 +1033,13 @@ export class BackendApiService {
           } : {})
         }
         
-        console.error('❌ Error type:', typeof axiosError)
-        console.error('❌ Error message:', errorMessage)
-        console.error('❌ Error stack:', (axiosError as any)?.stack)
+        console.error(' Error type:', typeof axiosError)
+        console.error(' Error message:', errorMessage)
+        console.error(' Error stack:', (axiosError as any)?.stack)
         
         // Check if it's an axios error
         if (axios.isAxiosError && axios.isAxiosError(axiosError)) {
-          console.error('❌ Axios error details:', {
+          console.error(' Axios error details:', {
             message: axiosError.message,
             status: axiosError.response?.status,
             statusText: axiosError.response?.statusText,
@@ -1049,7 +1049,7 @@ export class BackendApiService {
         
         // Check if it's a network error
         if ((axiosError as any)?.name === 'TypeError' && (axiosError as any)?.message?.includes('fetch')) {
-          console.error('❌ Network error detected - check if backend is running')
+          console.error(' Network error detected - check if backend is running')
         }
 
         // Log file analysis failure as FAILED_ANALYSIS with status="failed"
@@ -1193,9 +1193,9 @@ export class BackendApiService {
         throw new Error(`Audit logging failed: ${response.status} ${response.statusText}`)
       }
       
-      console.log('✅ Audit event logged successfully')
+      console.log(' Audit event logged successfully')
     } catch (error) {
-      console.error('❌ Failed to log audit event:', error)
+      console.error(' Failed to log audit event:', error)
     }
   }
 }

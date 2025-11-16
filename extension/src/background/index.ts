@@ -11,7 +11,7 @@ chrome.runtime.onInstalled.addListener(async () => {
   
   // Clear any existing auth state on fresh install
   await chrome.storage.sync.remove(['authUser']);
-  console.log('🔐 BACKGROUND: Cleared any existing auth state');
+  console.log(' BACKGROUND: Cleared any existing auth state');
   
   chrome.storage.sync.set({
     config: {
@@ -36,7 +36,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     ]
   });
   
-  console.log('🚀 Extension ready with Gemini 2.0 Flash for prompt injection detection!')
+  console.log(' Extension ready with Gemini 2.0 Flash for prompt injection detection!')
   
   chrome.tabs.create({
     url: chrome.runtime.getURL('tabs/options.html')
@@ -206,20 +206,20 @@ async function scanFileWithVirusTotal(fileData: ArrayBuffer, fileName: string, a
   scanId?: string
 }> {
   try {
-    console.log('🛡️ VirusTotal: Starting file scan...', {
+    console.log(' VirusTotal: Starting file scan...', {
       fileName,
       fileSize: fileData.byteLength,
       apiKeyLength: apiKey.length
     })
     
     const fileHash = await calculateFileHash(fileData)
-    console.log(`🛡️ VirusTotal: Calculated file hash: ${fileHash}`)
+    console.log(` VirusTotal: Calculated file hash: ${fileHash}`)
 
-    console.log('🛡️ VirusTotal: Checking for existing report...')
+    console.log(' VirusTotal: Checking for existing report...')
     const existingReport = await getFileReport(fileHash, apiKey)
     
     if (existingReport && existingReport.last_analysis_stats) {
-      console.log('🛡️ VirusTotal: Found existing report:', existingReport.last_analysis_stats)
+      console.log(' VirusTotal: Found existing report:', existingReport.last_analysis_stats)
       const stats = existingReport.last_analysis_stats
       const detectionCount = (stats.malicious || 0) + (stats.suspicious || 0)
       const totalEngines = Object.values(stats).reduce((sum: number, count: unknown) => sum + (Number(count) || 0), 0) as number
@@ -232,22 +232,22 @@ async function scanFileWithVirusTotal(fileData: ArrayBuffer, fileName: string, a
         scanId: fileHash
       }
       
-      console.log('🛡️ VirusTotal: Existing report result:', result)
+      console.log(' VirusTotal: Existing report result:', result)
       return result
     }
     
-    console.log('🛡️ VirusTotal: No existing report found, uploading file for analysis...')
+    console.log(' VirusTotal: No existing report found, uploading file for analysis...')
     
     const analysisId = await uploadFileToVirusTotal(fileData, fileName, apiKey)
     
     if (!analysisId) {
-      console.error('❌ VirusTotal: Failed to upload file to VirusTotal')
+      console.error(' VirusTotal: Failed to upload file to VirusTotal')
       throw new Error('Failed to upload file to VirusTotal')
     }
     
-    console.log(`🛡️ VirusTotal: File uploaded, analysis ID: ${analysisId}`)
+    console.log(` VirusTotal: File uploaded, analysis ID: ${analysisId}`)
     
-    console.log('🛡️ VirusTotal: Getting analysis result...')
+    console.log(' VirusTotal: Getting analysis result...')
     const analysisResult = await getFileAnalysis(analysisId, apiKey)
     
     if (analysisResult.stats) {
@@ -263,16 +263,16 @@ async function scanFileWithVirusTotal(fileData: ArrayBuffer, fileName: string, a
         scanId: analysisId
       }
       
-      console.log('🛡️ VirusTotal: Analysis result:', result)
+      console.log(' VirusTotal: Analysis result:', result)
       return result
     }
     
-    console.error('❌ VirusTotal: Invalid analysis result format:', analysisResult)
+    console.error(' VirusTotal: Invalid analysis result format:', analysisResult)
     throw new Error('Invalid analysis result format')
     
   } catch (error) {
-    console.error('❌ VirusTotal: Scan error:', error)
-    console.error('❌ VirusTotal: Error details:', {
+    console.error(' VirusTotal: Scan error:', error)
+    console.error(' VirusTotal: Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       name: error instanceof Error ? error.name : undefined
@@ -313,7 +313,7 @@ async function broadcastStatusChange(isEnabled: boolean) {
 
 async function broadcastAuthStatusChange(isAuthenticated: boolean) {
   try {
-    console.log('🔐 BACKGROUND: Broadcasting auth status change:', isAuthenticated)
+    console.log(' BACKGROUND: Broadcasting auth status change:', isAuthenticated)
     const tabs = await chrome.tabs.query({
       url: ['https://chatgpt.com/*', 'https://chat.openai.com/*', 'http://127.0.0.1:*/*', 'http://localhost:*/*']
     });
@@ -558,7 +558,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const isAuthenticated = result.authUser && result.authUser.token
       
       if (!isAuthenticated) {
-        console.log('🔐 BACKGROUND: Authentication required for', request.type)
+        console.log(' BACKGROUND: Authentication required for', request.type)
         sendResponse({ 
           success: false, 
           error: 'Authentication required. Please log in to use this feature.',
@@ -616,9 +616,9 @@ async function handleNonAuthenticatedRequest(request: any, sender: any, sendResp
       break
       
     case 'SAVE_CONFIG':
-      console.log('🔄 Background: SAVE_CONFIG received with isEnabled:', request.config.isEnabled)
+      console.log(' Background: SAVE_CONFIG received with isEnabled:', request.config.isEnabled)
       chrome.storage.sync.set({ config: request.config }, async () => {
-        console.log('🔄 Background: Config saved, broadcasting status change')
+        console.log(' Background: Config saved, broadcasting status change')
         await broadcastStatusChange(request.config.isEnabled);
         
         // Auto-enable/disable backend integration based on extension status
@@ -630,7 +630,7 @@ async function handleNonAuthenticatedRequest(request: any, sender: any, sendResp
           }
         };
         
-        console.log('🔄 Background: Updated config with backend enabled:', updatedConfig.backendConfig.enabled)
+        console.log(' Background: Updated config with backend enabled:', updatedConfig.backendConfig.enabled)
         
         // Save the updated config with backend status
         chrome.storage.sync.set({ config: updatedConfig });
@@ -666,7 +666,7 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           }
           
           const canceled = backendApi.cancelScan(correlationId)
-          console.log(`🛑 CANCEL_SCAN: Cancel request for [${correlationId}]:`, canceled ? 'success' : 'not found')
+          console.log(` CANCEL_SCAN: Cancel request for [${correlationId}]:`, canceled ? 'success' : 'not found')
           
           sendResponse({ success: canceled, canceled })
         } catch (error) {
@@ -682,8 +682,8 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
         const correlationId = request.correlationId || (globalThis.crypto?.randomUUID?.() || crypto.randomUUID?.() || Math.random().toString(36).substring(2, 12))
         
         try {
-          console.log('🔍 SCAN_FILE: Starting file scan process...', { correlationId })
-          console.log('🔍 SCAN_FILE: Request details:', {
+          console.log(' SCAN_FILE: Starting file scan process...', { correlationId })
+          console.log(' SCAN_FILE: Request details:', {
             fileName: request.fileName,
             fileSize: request.fileData ? (Array.isArray(request.fileData) ? request.fileData.length : request.fileData.byteLength) : 'unknown',
             fileDataType: Array.isArray(request.fileData) ? 'array' : typeof request.fileData,
@@ -691,14 +691,14 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           })
           
           const { config } = await chrome.storage.sync.get(['config'])
-          console.log('🔍 SCAN_FILE: Config loaded:', {
+          console.log(' SCAN_FILE: Config loaded:', {
             isEnabled: config?.isEnabled,
             backendEnabled: config?.backendConfig?.enabled,
             backendUrl: config?.backendConfig?.apiUrl
           })
           
           if (!config || !config.isEnabled) {
-            console.log('⏸️ SCAN_FILE: Scanner is disabled, skipping scan')
+            console.log('⏸ SCAN_FILE: Scanner is disabled, skipping scan')
             sendResponse({ 
               success: false, 
               error: 'Scanner is disabled',
@@ -710,7 +710,7 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           }
 
           if (!config.backendConfig?.enabled) {
-            console.log('⏸️ SCAN_FILE: Backend is disabled, skipping scan')
+            console.log('⏸ SCAN_FILE: Backend is disabled, skipping scan')
             sendResponse({ 
               success: false, 
               error: 'Backend scanning is disabled',
@@ -724,16 +724,16 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           let fileData: ArrayBuffer
           if (Array.isArray(request.fileData)) {
             fileData = new Uint8Array(request.fileData).buffer
-            console.log('🔍 SCAN_FILE: Converted array to ArrayBuffer, size:', fileData.byteLength)
+            console.log(' SCAN_FILE: Converted array to ArrayBuffer, size:', fileData.byteLength)
           } else if (request.fileData instanceof ArrayBuffer) {
             fileData = request.fileData
-            console.log('🔍 SCAN_FILE: Using ArrayBuffer directly, size:', fileData.byteLength)
+            console.log(' SCAN_FILE: Using ArrayBuffer directly, size:', fileData.byteLength)
           } else {
-            console.error('❌ SCAN_FILE: Invalid file data format:', typeof request.fileData)
+            console.error(' SCAN_FILE: Invalid file data format:', typeof request.fileData)
             throw new Error('Invalid file data format')
           }
           
-          console.log('🔍 SCAN_FILE: Sending file to backend for scanning...')
+          console.log(' SCAN_FILE: Sending file to backend for scanning...')
           
           // Use BackendApiService to scan file (handles FormData, logging, and all file processing)
           // Use static import instead of dynamic import to avoid Worker/importScripts issues
@@ -749,7 +749,7 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
             lastModified: Date.now()
           })
           
-          console.log('🔍 SCAN_FILE: Reconstructed file:', {
+          console.log(' SCAN_FILE: Reconstructed file:', {
             name: reconstructedFile.name,
             size: reconstructedFile.size,
             type: reconstructedFile.type
@@ -762,7 +762,7 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
             throw new Error('Backend API returned null result')
           }
           
-          console.log('✅ SCAN_FILE: Backend scan completed:', scanResult)
+          console.log(' SCAN_FILE: Backend scan completed:', scanResult)
           
           sendResponse({
             ...scanResult,
@@ -802,9 +802,9 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
         const correlationId = request.correlationId || (globalThis.crypto?.randomUUID?.() || crypto.randomUUID?.() || Math.random().toString(36).substring(2, 12))
         
         console.log('='.repeat(80))
-        console.log('🚨 TEST_PROMPT_INJECTION REQUEST RECEIVED')
+        console.log(' TEST_PROMPT_INJECTION REQUEST RECEIVED')
         console.log('='.repeat(80))
-        console.log('🧩 Prompt analysis started', { correlationId })
+        console.log(' Prompt analysis started', { correlationId })
         
         try {
           const { prompt } = request
@@ -814,7 +814,7 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           const preview100 = safePrompt ? `${safePrompt.substring(0, 100)}${safePrompt.length > 100 ? '...' : ''}` : 'N/A'
           const previewSent = truncate(safePrompt, 500)
 
-          console.log('📥 REQUEST DETAILS:')
+          console.log(' REQUEST DETAILS:')
           console.log('   Prompt received:', !!safePrompt)
           console.log('   Prompt type:', typeof prompt)
           console.log('   Prompt length:', safePrompt.length, 'characters')
@@ -822,13 +822,13 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           console.log('   Prompt preview (500 chars):', safePrompt.substring(0, 500))
           console.log('   FULL PROMPT:', safePrompt)
           console.log('   Full prompt length:', safePrompt.length)
-          console.log('\n🔍 VERIFICATION:')
+          console.log('\n VERIFICATION:')
           console.log('   Prompt is string:', typeof safePrompt === 'string')
           console.log('   Prompt has content:', safePrompt.length > 0)
           console.log('   Will be sent to backend:', true)
           
           if (!safePrompt) {
-            console.error('❌ Invalid prompt:', { prompt, type: typeof prompt })
+            console.error(' Invalid prompt:', { prompt, type: typeof prompt })
             sendResponse({
               success: false,
               error: 'Invalid prompt provided',
@@ -840,22 +840,22 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           }
 
           // Step 1: Log captured prompt content
-          console.log('\n📝 STEP 1: Logging prompt to extension storage')
+          console.log('\n STEP 1: Logging prompt to extension storage')
           console.log('   Prompt to log:', safePrompt.substring(0, 200))
           
           await chrome.runtime.sendMessage({
             type: 'ADD_LOG',
-            message: `📝 PROMPT CAPTURED (length=${safePrompt.length}):\n"${previewSent}"\n\nFULL PROMPT:\n${safePrompt}`,
+            message: ` PROMPT CAPTURED (length=${safePrompt.length}):\n"${previewSent}"\n\nFULL PROMPT:\n${safePrompt}`,
             logType: 'info',
             category: 'prompt_injection'
           })
           
-          console.log('✅ Prompt logged to extension storage')
+          console.log(' Prompt logged to extension storage')
 
           // Load config/auth
-          console.log('\n📝 STEP 2: Loading config and authentication')
+          console.log('\n STEP 2: Loading config and authentication')
           const storage = await chrome.storage.sync.get(['config', 'authUser'])
-          console.log('📦 Storage contents loaded:')
+          console.log(' Storage contents loaded:')
           console.log('   - Has config:', !!storage.config)
           console.log('   - Has backend config:', !!storage.config?.backendConfig)
           console.log('   - Backend enabled:', storage.config?.backendConfig?.enabled)
@@ -869,16 +869,16 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           const headers: Record<string, string> = { 'Content-Type': 'application/json' }
           if (hasAuth) headers['Authorization'] = `Bearer ${storage.authUser.token}`
           
-          console.log('\n📝 STEP 3: Config prepared')
+          console.log('\n STEP 3: Config prepared')
           console.log('   - Target API URL:', apiUrl)
           console.log('   - Has authentication:', hasAuth)
           console.log('   - Headers:', Object.keys(headers).join(', '))
 
           // Step 4: Announce API call intent with payload preview
-          console.log('\n📝 STEP 4: Preparing API call payload')
+          console.log('\n STEP 4: Preparing API call payload')
           const payload = { text: safePrompt, clientId: storage?.config?.backendConfig?.clientId, mspId: storage?.config?.backendConfig?.mspId, correlationId }
           
-          console.log('📋 Payload details:')
+          console.log(' Payload details:')
           console.log('   - Text length:', safePrompt.length)
           console.log('   - Text (first 100 chars):', safePrompt.substring(0, 100))
           console.log('   - Client ID:', payload.clientId)
@@ -889,7 +889,7 @@ async function handleAuthenticatedRequest(request: any, sender: any, sendRespons
           // Log FULL prompt to extension storage
           await chrome.runtime.sendMessage({
             type: 'ADD_LOG',
-            message: `➡️ CALLING BACKEND API: POST ${apiUrl}/api/v1/analyze/prompt
+            message: ` CALLING BACKEND API: POST ${apiUrl}/api/v1/analyze/prompt
 Headers: Content-Type: application/json, Authorization: ${hasAuth ? 'Bearer TOKEN_PRESENT' : 'absent'}
 Payload size: ${JSON.stringify(payload).length} bytes
 Full prompt being sent:
@@ -901,7 +901,7 @@ MSP ID: ${payload.mspId}`,
           })
 
           // Step 5: Perform API call
-          console.log('\n📝 STEP 5: Sending request to backend API')
+          console.log('\n STEP 5: Sending request to backend API')
           console.log(`   Method: POST`)
           console.log(`   URL: ${apiUrl}/api/v1/analyze/prompt`)
           console.log(`   Payload size: ${JSON.stringify(payload).length} bytes`)
@@ -912,14 +912,14 @@ MSP ID: ${payload.mspId}`,
           const requestStartTime = Date.now()
           
           try {
-          console.log('\n📡 SENDING FETCH REQUEST TO BACKEND...')
+          console.log('\n SENDING FETCH REQUEST TO BACKEND...')
           console.log('   Target:', `${apiUrl}/api/v1/analyze/prompt`)
           console.log('   Full URL:', `${apiUrl}/api/v1/analyze/prompt`)
           console.log('   Request method: POST')
           console.log('   Request headers:', JSON.stringify(headers, null, 2))
-          console.log('\n📋 PAYLOAD BEING SENT TO BACKEND:')
+          console.log('\n PAYLOAD BEING SENT TO BACKEND:')
           console.log(JSON.stringify(payload, null, 2))
-          console.log('\n🔍 PAYLOAD VERIFICATION:')
+          console.log('\n PAYLOAD VERIFICATION:')
           console.log('   Prompt text in payload:', payload.text)
           console.log('   Prompt length in payload:', payload.text.length)
           console.log('   Full prompt being sent to backend:', safePrompt)
@@ -935,7 +935,7 @@ MSP ID: ${payload.mspId}`,
             statusText = resp.statusText
             rawText = await resp.text()
             
-            console.log(`\n✅ BACKEND RESPONSE RECEIVED in ${requestDuration}ms`)
+            console.log(`\n BACKEND RESPONSE RECEIVED in ${requestDuration}ms`)
             console.log(`   Status: ${status} ${statusText}`)
             console.log(`   Response headers:`, Object.fromEntries(resp.headers.entries()))
             console.log(`   Response length: ${rawText.length} characters`)
@@ -943,13 +943,13 @@ MSP ID: ${payload.mspId}`,
             console.log(`   Full response:`, rawText)
             
             // Log the response to extension storage
-            console.log('\n📝 LOGGING BACKEND RESPONSE TO EXTENSION:')
+            console.log('\n LOGGING BACKEND RESPONSE TO EXTENSION:')
             console.log('   Response will be stored in extension logs')
             
             // Log to extension storage
             await chrome.runtime.sendMessage({
               type: 'ADD_LOG',
-              message: `⬅️ BACKEND RESPONSE RECEIVED (${requestDuration}ms):
+              message: ` BACKEND RESPONSE RECEIVED (${requestDuration}ms):
 Status: ${status} ${statusText}
 Response length: ${rawText.length} chars
 Response: ${rawText.substring(0, 1000)}${rawText.length > 1000 ? '...' : ''}`,
@@ -958,14 +958,14 @@ Response: ${rawText.substring(0, 1000)}${rawText.length > 1000 ? '...' : ''}`,
             })
           } catch (e) {
             const requestDuration = Date.now() - requestStartTime
-            console.error(`\n❌ BACKEND REQUEST FAILED after ${requestDuration}ms [${correlationId}]:`)
+            console.error(`\n BACKEND REQUEST FAILED after ${requestDuration}ms [${correlationId}]:`)
             console.error('   Error:', e)
             console.error('   Error type:', e instanceof Error ? e.name : typeof e)
             console.error('   Error message:', e instanceof Error ? e.message : String(e))
             console.error('   Stack:', e instanceof Error ? e.stack : 'no stack')
             await chrome.runtime.sendMessage({
               type: 'ADD_LOG',
-              message: `❌ API ERROR [${correlationId}]: network failure ${e instanceof Error ? e.message : String(e)}`,
+              message: ` API ERROR [${correlationId}]: network failure ${e instanceof Error ? e.message : String(e)}`,
               logType: 'error',
               category: 'prompt_injection'
             })
@@ -983,15 +983,15 @@ Response: ${rawText.substring(0, 1000)}${rawText.length > 1000 ? '...' : ''}`,
           }
 
           // Step 6: Check for HTTP errors - backend dependency
-          console.log('\n📝 STEP 6: Validating HTTP response')
+          console.log('\n STEP 6: Validating HTTP response')
           if (status < 200 || status >= 300) {
-            console.error('❌ HTTP ERROR: Status code', status, statusText)
+            console.error(' HTTP ERROR: Status code', status, statusText)
             console.error('   This means the backend API call FAILED')
             console.error('   Response text:', rawText)
             
             await chrome.runtime.sendMessage({
               type: 'ADD_LOG',
-              message: `❌ HTTP ERROR - BACKEND FAILED: ${status} ${statusText}
+              message: ` HTTP ERROR - BACKEND FAILED: ${status} ${statusText}
 Response: ${rawText.substring(0, 500)}
 PROMPT WILL BE BLOCKED DUE TO BACKEND FAILURE`,
               logType: 'error',
@@ -1009,27 +1009,27 @@ PROMPT WILL BE BLOCKED DUE TO BACKEND FAILURE`,
             return
           }
           
-          console.log('✅ HTTP response OK:', status, statusText)
+          console.log(' HTTP response OK:', status, statusText)
 
           // Step 7: Parse JSON safely
-          console.log('\n📝 STEP 7: Parsing JSON response')
+          console.log('\n STEP 7: Parsing JSON response')
           let result: any = null
           try {
             result = rawText ? JSON.parse(rawText) : null
-            console.log('✅ JSON parsed successfully')
+            console.log(' JSON parsed successfully')
             console.log('   Result keys:', Object.keys(result))
             console.log('   isThreats:', result?.isThreats)
             console.log('   riskLevel:', result?.riskLevel)
             console.log('   shouldBlock:', result?.shouldBlock)
             console.log('   Full result:', JSON.stringify(result, null, 2))
           } catch (e) {
-            console.error('❌ JSON PARSE FAILED:')
+            console.error(' JSON PARSE FAILED:')
             console.error('   Error:', e)
             console.error('   Raw text:', rawText.substring(0, 500))
             
             await chrome.runtime.sendMessage({
               type: 'ADD_LOG',
-              message: `❌ RESPONSE PARSE ERROR: ${e instanceof Error ? e.message : String(e)}
+              message: ` RESPONSE PARSE ERROR: ${e instanceof Error ? e.message : String(e)}
 Raw response: ${rawText.substring(0, 500)}
 PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
               logType: 'error',
@@ -1038,9 +1038,9 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           }
 
           // If no result, return error (backend dependency)
-          console.log('\n📝 STEP 8: Validating parsed result')
+          console.log('\n STEP 8: Validating parsed result')
           if (!result) {
-            console.error('❌ No result from backend - BLOCKING prompt')
+            console.error(' No result from backend - BLOCKING prompt')
             console.error('   This means the backend API call did not return valid data')
             console.error('   Prompt will be BLOCKED for security')
             
@@ -1055,10 +1055,10 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
             return
           }
           
-          console.log('✅ Result validated successfully')
+          console.log(' Result validated successfully')
 
           // Final: return backend result through
-          console.log('\n📝 STEP 9: Returning result to content script')
+          console.log('\n STEP 9: Returning result to content script')
           console.log('   isThreats:', result.isThreats)
           console.log('   shouldBlock:', result.shouldBlock)
           console.log('   riskLevel:', result.riskLevel)
@@ -1078,7 +1078,7 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           if (result.isThreats) {
             chrome.runtime.sendMessage({
               type: 'ADD_LOG',
-              message: `🚨 INJECTION DETECTED (${analysisMethod}): ${result.riskLevel.toUpperCase()} risk - ${result.summary}`,
+              message: ` INJECTION DETECTED (${analysisMethod}): ${result.riskLevel.toUpperCase()} risk - ${result.summary}`,
               logType: 'error',
               category: 'prompt_injection'
             })
@@ -1086,7 +1086,7 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
             for (const threat of result.threats) {
               chrome.runtime.sendMessage({
                 type: 'ADD_LOG',
-                message: `⚠️ THREAT TYPE: ${threat}`,
+                message: ` THREAT TYPE: ${threat}`,
                 logType: 'warning',
                 category: 'prompt_injection'
               })
@@ -1094,14 +1094,14 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
             
             chrome.runtime.sendMessage({
               type: 'ADD_LOG',
-              message: `🚫 BLOCKED: "${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}"`,
+              message: ` BLOCKED: "${prompt.substring(0, 200)}${prompt.length > 200 ? '...' : ''}"`,
               logType: 'error',
               category: 'prompt_injection'
             })
           } else {
             chrome.runtime.sendMessage({
               type: 'ADD_LOG',
-              message: `✅ SAFE PROMPT (${analysisMethod}): ${result.summary}`,
+              message: ` SAFE PROMPT (${analysisMethod}): ${result.summary}`,
               logType: 'success',
               category: 'normal_prompt'
             })
@@ -1122,7 +1122,7 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           })
           
         } catch (error) {
-          console.error(`❌ Error testing prompt injection [${correlationId}]:`, error)
+          console.error(` Error testing prompt injection [${correlationId}]:`, error)
           sendResponse({
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -1153,9 +1153,9 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
         });
         
         // Send to backend if enabled
-        console.log('🔄 ADD_LOG: Checking backend config:', result.config?.backendConfig)
-        console.log('🔄 ADD_LOG: Backend enabled?', result.config?.backendConfig?.enabled)
-        console.log('🔄 ADD_LOG: Extension enabled?', result.config?.isEnabled)
+        console.log(' ADD_LOG: Checking backend config:', result.config?.backendConfig)
+        console.log(' ADD_LOG: Backend enabled?', result.config?.backendConfig?.enabled)
+        console.log(' ADD_LOG: Extension enabled?', result.config?.isEnabled)
         
         if (result.config?.backendConfig?.enabled) {
           // Hourly throttle by category+message (use chrome.storage.local in service worker)
@@ -1168,7 +1168,7 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           } catch (_) {}
           const oneHourMs = 3600000
           if (lastSent && nowTs - lastSent < oneHourMs) {
-            console.log('⏸️ ADD_LOG: Skipping backend audit due to hourly throttle:', throttleKey)
+            console.log('⏸ ADD_LOG: Skipping backend audit due to hourly throttle:', throttleKey)
             return
           }
           try {
@@ -1196,12 +1196,12 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           
           if (authResult.authUser && authResult.authUser.token) {
             authHeaders['Authorization'] = `Bearer ${authResult.authUser.token}`
-            console.log('🔐 ADD_LOG: Using auth token for audit logging')
+            console.log(' ADD_LOG: Using auth token for audit logging')
           } else {
-            console.log('❌ ADD_LOG: No auth token found, audit logging will fail authentication')
+            console.log(' ADD_LOG: No auth token found, audit logging will fail authentication')
           }
 
-          console.log('🚀 Sending log to backend:', {
+          console.log(' Sending log to backend:', {
             url: `${result.config.backendConfig.apiUrl}/api/v1/audit/events`,
             payload: payload,
             headers: authHeaders
@@ -1213,26 +1213,26 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
             body: JSON.stringify(payload)
           })
           .then(response => {
-            console.log('📡 Backend response status:', response.status);
-            console.log('📡 Backend response headers:', Object.fromEntries(response.headers.entries()));
+            console.log(' Backend response status:', response.status);
+            console.log(' Backend response headers:', Object.fromEntries(response.headers.entries()));
             if (!response.ok) {
               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             return response.json();
           })
           .then(data => {
-            console.log('✅ Backend log successful:', data);
+            console.log(' Backend log successful:', data);
           })
           .catch(error => {
-            console.error('❌ Failed to send log to backend:', error);
-            console.error('❌ Error details:', {
+            console.error(' Failed to send log to backend:', error);
+            console.error(' Error details:', {
               message: error.message,
               stack: error.stack,
               name: error.name
             });
           });
         } else {
-          console.log('⏸️ Backend logging skipped - backend not enabled');
+          console.log('⏸ Backend logging skipped - backend not enabled');
         }
       });
       break;
@@ -1240,8 +1240,8 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
     case 'INCREMENT_INTERACTION':
       (async () => {
         try {
-          console.log('📊 INCREMENT_INTERACTION: Processing interaction increment...')
-          console.log('📊 INCREMENT_INTERACTION: Request details:', {
+          console.log(' INCREMENT_INTERACTION: Processing interaction increment...')
+          console.log(' INCREMENT_INTERACTION: Request details:', {
             clientId: request.clientId,
             applicationId: request.applicationId,
             interactionType: request.interactionType,
@@ -1249,13 +1249,13 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           })
           
           const { config } = await chrome.storage.sync.get(['config'])
-          console.log('📊 INCREMENT_INTERACTION: Config loaded:', {
+          console.log(' INCREMENT_INTERACTION: Config loaded:', {
             backendEnabled: config?.backendConfig?.enabled,
             backendUrl: config?.backendConfig?.apiUrl
           })
           
           if (!config?.backendConfig?.enabled) {
-            console.log('⏸️ INCREMENT_INTERACTION: Backend is disabled, skipping increment')
+            console.log('⏸ INCREMENT_INTERACTION: Backend is disabled, skipping increment')
             sendResponse({ 
               success: false, 
               error: 'Backend integration is disabled'
@@ -1271,9 +1271,9 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           const authResult = await chrome.storage.sync.get(['authUser'])
           if (authResult.authUser && authResult.authUser.token) {
             headers['Authorization'] = `Bearer ${authResult.authUser.token}`
-            console.log('🔐 INCREMENT_INTERACTION: Using auth token for request')
+            console.log(' INCREMENT_INTERACTION: Using auth token for request')
           } else {
-            console.log('❌ INCREMENT_INTERACTION: No auth token found')
+            console.log(' INCREMENT_INTERACTION: No auth token found')
             sendResponse({ 
               success: false, 
               error: 'Authentication required'
@@ -1288,7 +1288,7 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
             metadata: request.metadata || {}
           }
           
-          console.log('🚀 INCREMENT_INTERACTION: Sending to backend:', {
+          console.log(' INCREMENT_INTERACTION: Sending to backend:', {
             url: `${config.backendConfig.apiUrl}/api/v1/clients/${request.clientId}/interactions/increment`,
             payload: payload,
             headers: headers
@@ -1300,16 +1300,16 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
             body: JSON.stringify(payload)
           })
           
-          console.log('📡 INCREMENT_INTERACTION: Backend response status:', response.status)
+          console.log(' INCREMENT_INTERACTION: Backend response status:', response.status)
           
           if (!response.ok) {
             const errorText = await response.text()
-            console.error('❌ INCREMENT_INTERACTION: Backend request failed:', response.status, errorText)
+            console.error(' INCREMENT_INTERACTION: Backend request failed:', response.status, errorText)
             throw new Error(`Backend request failed: ${response.status} ${response.statusText}`)
           }
           
           const result = await response.json()
-          console.log('✅ INCREMENT_INTERACTION: Backend response:', result)
+          console.log(' INCREMENT_INTERACTION: Backend response:', result)
           
           sendResponse({
             success: true,
@@ -1317,7 +1317,7 @@ PROMPT WILL BE BLOCKED DUE TO PARSE FAILURE`,
           })
           
         } catch (error) {
-          console.error('❌ INCREMENT_INTERACTION: Error during increment:', error)
+          console.error(' INCREMENT_INTERACTION: Error during increment:', error)
           sendResponse({ 
             success: false, 
             error: error instanceof Error ? error.message : 'Unknown error'

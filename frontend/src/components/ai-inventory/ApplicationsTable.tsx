@@ -234,7 +234,7 @@ export function ApplicationsTable({ applications, onItemClick, activeFilter }: A
       {filteredApplications.length === 0 && (
         <div className="text-center py-12">
           <div className="text-subtext">
-            🎉 No applications found matching your criteria
+             No applications found matching your criteria
           </div>
         </div>
       )}

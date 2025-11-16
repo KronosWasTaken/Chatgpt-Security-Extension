@@ -24,11 +24,11 @@ class MetricsUpdater:
                     await self._update_client_metrics(session, calculator, str(client.id))
                 
                 await session.commit()
-                print(f"✅ Updated metrics for {len(clients)} clients")
+                print(f" Updated metrics for {len(clients)} clients")
                 
             except Exception as e:
                 await session.rollback()
-                print(f"❌ Error updating metrics: {e}")
+                print(f" Error updating metrics: {e}")
                 raise
             finally:
                 await session.close()
@@ -68,7 +68,7 @@ class MetricsUpdater:
                 session.add(new_metrics)
             
         except Exception as e:
-            print(f"❌ Error updating metrics for client {client_id}: {e}")
+            print(f" Error updating metrics for client {client_id}: {e}")
             raise
 
 # Background task function

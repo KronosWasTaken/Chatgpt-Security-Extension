@@ -13,14 +13,14 @@ export default function StatusToggle({ isEnabled, onToggle }: StatusToggleProps)
           <h3 className="text-lg font-semibold text-white mb-2">Extension Status</h3>
           <p className="text-sm text-slate-400">
             {isEnabled 
-              ? "🟢 Security scanning is active and protecting your uploads" 
-              : "🔴 Scanner inactive — all uploads and prompts are allowed without scanning"
+              ? " Security scanning is active and protecting your uploads" 
+              : " Scanner inactive — all uploads and prompts are allowed without scanning"
             }
           </p>
         </div>
         <button
           onClick={() => {
-            console.log('🔄 StatusToggle clicked! Current:', isEnabled, 'New:', !isEnabled)
+            console.log(' StatusToggle clicked! Current:', isEnabled, 'New:', !isEnabled)
             onToggle(!isEnabled)
           }}
           className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors ${

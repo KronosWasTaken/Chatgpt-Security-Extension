@@ -384,7 +384,7 @@ async def get_audit_logs(
         }
         
     except Exception as e:
-        print(f"❌ Failed to retrieve audit logs: {e}")
+        print(f" Failed to retrieve audit logs: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Failed to retrieve audit logs: {str(e)}"
@@ -477,7 +477,7 @@ async def export_audit_logs(
             }
         
     except Exception as e:
-        print(f"❌ Failed to export audit logs: {e}")
+        print(f" Failed to export audit logs: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Failed to export audit logs: {str(e)}"

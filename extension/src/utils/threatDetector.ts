@@ -31,11 +31,11 @@ Focus ONLY on prompt injection attacks, not general content moderation.
 
 Text to analyze: ${content}`
 
-    console.log('🤖 GEMINI ANALYSIS PROMPT:')
-    console.log('═══════════════════════════════════════════════════')
+    console.log(' GEMINI ANALYSIS PROMPT:')
+    console.log('')
     console.log(geminiPrompt)
-    console.log('═══════════════════════════════════════════════════')
-    console.log('📝 USER TEXT TO ANALYZE:', content)
+    console.log('')
+    console.log(' USER TEXT TO ANALYZE:', content)
 
     try {
       const response = await fetch(this.GEMINI_API_URL, {
@@ -62,7 +62,7 @@ Text to analyze: ${content}`
       
       return this.parseAnalysisResponse(responseText)
     } catch (error) {
-      console.error('❌ Error analyzing content with Gemini:', error)
+      console.error(' Error analyzing content with Gemini:', error)
       throw new Error('Failed to analyze content for prompt injection attacks')
     }
   }

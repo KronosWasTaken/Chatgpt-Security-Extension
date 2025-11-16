@@ -150,11 +150,11 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
   const getStatusIcon = () => {
     switch (connectionStatus) {
       case 'connected':
-        return '✅'
+        return ''
       case 'disconnected':
-        return '❌'
+        return ''
       default:
-        return '❓'
+        return ''
     }
   }
 
@@ -175,7 +175,7 @@ export const BackendConfigPanel: React.FC<BackendConfigProps> = ({ onConfigChang
         <h3 className="text-lg font-semibold text-white">Backend Integration</h3>
         <div className="flex items-center space-x-2">
           <span className={`text-sm font-medium ${isExtensionEnabled ? 'text-green-400' : 'text-red-400'}`}>
-            {isExtensionEnabled ? '🟢 Active' : '🔴 Inactive'}
+            {isExtensionEnabled ? ' Active' : ' Inactive'}
           </span>
           <span className="text-xs text-slate-400">
             (Follows Extension Status)

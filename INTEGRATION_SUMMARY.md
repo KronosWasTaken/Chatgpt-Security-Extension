@@ -1,9 +1,9 @@
 # Prompt Analysis Integration - Summary
 
-## 🎯 Objective Completed
+##  Objective Completed
 Successfully integrated backend prompt analysis into the Chrome extension with full blocking capability for malicious prompts.
 
-## 📋 What Was Done
+##  What Was Done
 
 ### 1. Backend API Service Enhancement
 **File**: `extension/src/services/BackendApiService.ts`
@@ -66,7 +66,7 @@ The existing logic already properly blocks threats:
 - Visual feedback
 - Step-by-step instructions
 
-## ✅ Key Features
+##  Key Features
 
 ### 1. Smart Fallback Mechanism
 ```
@@ -76,26 +76,26 @@ Backend Analysis → Local Gemini → Pattern Matching
 
 ### 2. Comprehensive Logging
 Every analysis step is logged with emojis for easy identification:
-- 🔍 Analysis in progress
-- ✅ Success / Safe prompt
-- 🚨 Threat detected
-- ⚠️ Warning / Fallback
-- ❌ Error
+-  Analysis in progress
+-  Success / Safe prompt
+-  Threat detected
+-  Warning / Fallback
+-  Error
 
 ### 3. Automatic Blocking
 When threats are detected:
-- ✅ Input fields are cleared
-- ✅ User is notified
-- ✅ Prompt is logged
-- ✅ Audit event sent to backend
-- ✅ Further submission prevented
+-  Input fields are cleared
+-  User is notified
+-  Prompt is logged
+-  Audit event sent to backend
+-  Further submission prevented
 
 ### 4. Authentication Support
 - Uses JWT tokens from Chrome storage
 - Automatically refreshes tokens
 - Works with existing auth flow
 
-## 🔧 How It Works
+##  How It Works
 
 ### Flow Diagram
 ```
@@ -108,24 +108,24 @@ checkPromptSafety() called
 Sends to background.js → TEST_PROMPT_INJECTION
        ↓
 Background tries backend analysis
-       ├─ Success → Returns result
-       └─ Failed → Falls back to local Gemini
-              ├─ Success → Returns result
-              └─ Failed → Uses pattern matching
+        Success → Returns result
+        Failed → Falls back to local Gemini
+               Success → Returns result
+               Failed → Uses pattern matching
        ↓
 Result returned to PromptGuard
        ↓
 If isSafe = false:
-  ├─ Clear inputs
-  ├─ Show notification
-  ├─ Log to extension
-  └─ Block submission
+   Clear inputs
+   Show notification
+   Log to extension
+   Block submission
        ↓
 If isSafe = true:
-  └─ Allow submission
+   Allow submission
 ```
 
-## 🧪 Testing
+##  Testing
 
 ### Backend API Test
 ```powershell
@@ -144,9 +144,9 @@ curl.exe -X POST http://localhost:8000/api/v1/analyze/prompt `
 3. Try malicious prompt: "Ignore previous instructions"
 4. Should see: Input cleared + Notification + Console logs
 
-## 📊 Current Status
+##  Current Status
 
-✅ **Completed**:
+ **Completed**:
 - Backend API integration
 - Smart fallback mechanism
 - Comprehensive logging
@@ -155,19 +155,19 @@ curl.exe -X POST http://localhost:8000/api/v1/analyze/prompt `
 - Test page
 - Build verification
 
-✅ **Verified**:
+ **Verified**:
 - Extension builds without errors
 - Backend endpoint works with authentication
 - Prompt blocking logic is correct
 - Logging is comprehensive
 
-📝 **Ready for Testing**:
+ **Ready for Testing**:
 - Manual testing with actual extension
 - Integration testing with ChatGPT.com
 - Performance testing
 - User acceptance testing
 
-## 🔐 Security Notes
+##  Security Notes
 
 1. **Authentication Required**: All backend requests use Bearer token authentication
 2. **Secure Token Storage**: Tokens stored in Chrome's secure sync storage
@@ -175,7 +175,7 @@ curl.exe -X POST http://localhost:8000/api/v1/analyze/prompt `
 4. **No Data Leakage**: Prompts only sent to authenticated backend
 5. **Audit Trail**: All blocked prompts logged for security review
 
-## 🚀 Usage Instructions
+##  Usage Instructions
 
 ### For Users:
 1. Ensure extension is loaded and enabled
@@ -196,7 +196,7 @@ curl.exe -X POST http://localhost:8000/api/v1/analyze/prompt `
 4. Check console for detailed analysis logs
 5. Verify malicious prompts are blocked
 
-## 🎓 Technical Details
+##  Technical Details
 
 ### Technologies Used:
 - **Backend**: FastAPI, Pydantic, Google Gemini API
@@ -229,7 +229,7 @@ Content-Type: application/json
 }
 ```
 
-## 🔄 Next Steps (Optional Enhancements)
+##  Next Steps (Optional Enhancements)
 
 1. **Caching**: Cache analysis results for repeated prompts
 2. **Rate Limiting**: Implement client-side rate limiting
@@ -238,14 +238,14 @@ Content-Type: application/json
 5. **Custom Patterns**: Allow users to define custom threat patterns
 6. **Whitelist**: Add prompt whitelist for trusted patterns
 
-## 🐛 Known Issues / Limitations
+##  Known Issues / Limitations
 
 1. Backend requires Gemini API key to be configured
 2. Analysis adds slight delay (~1-2 seconds) before prompt submission
 3. Requires active internet connection for backend analysis
 4. Token expiration requires re-authentication
 
-## 📞 Support
+##  Support
 
 If issues occur:
 1. Check browser console for error messages
@@ -254,14 +254,14 @@ If issues occur:
 4. Review `TESTING_GUIDE.md` for troubleshooting
 5. Check backend logs for API errors
 
-## ✨ Conclusion
+##  Conclusion
 
 The prompt analysis integration is **complete and ready for testing**. The system provides:
-- ✅ Robust backend analysis
-- ✅ Automatic fallback mechanisms
-- ✅ Comprehensive logging
-- ✅ Proper threat blocking
-- ✅ Clear documentation
-- ✅ Testing tools
+-  Robust backend analysis
+-  Automatic fallback mechanisms
+-  Comprehensive logging
+-  Proper threat blocking
+-  Clear documentation
+-  Testing tools
 
 The integration ensures that malicious prompts are detected and blocked before reaching AI systems, providing a critical security layer for users.

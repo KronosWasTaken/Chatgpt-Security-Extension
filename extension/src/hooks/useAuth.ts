@@ -10,28 +10,28 @@ export const useAuth = () => {
   useEffect(() => {
     const loadAuthState = async () => {
       try {
-        console.log('🔐 AUTH: Loading auth state from storage...')
+        console.log(' AUTH: Loading auth state from storage...')
         const result = await chrome.storage.sync.get(['authUser'])
-        console.log('🔐 AUTH: Storage result:', result)
+        console.log(' AUTH: Storage result:', result)
         
         if (result.authUser && result.authUser.token) {
-          console.log('🔐 AUTH: Found auth user:', result.authUser.email)
+          console.log(' AUTH: Found auth user:', result.authUser.email)
           
           // Verify token with backend
           const isValid = await verifyTokenWithBackend(result.authUser.token)
           if (!isValid) {
-            console.log('🔐 AUTH: Token invalid, clearing auth state')
+            console.log(' AUTH: Token invalid, clearing auth state')
             await chrome.storage.sync.remove(['authUser'])
             setUser(null)
           } else {
             setUser(result.authUser)
           }
         } else {
-          console.log('🔐 AUTH: No valid auth user found')
+          console.log(' AUTH: No valid auth user found')
           setUser(null)
         }
       } catch (error) {
-        console.error('🔐 AUTH: Failed to load auth state:', error)
+        console.error(' AUTH: Failed to load auth state:', error)
         setUser(null)
       } finally {
         setLoading(false)
@@ -41,13 +41,13 @@ export const useAuth = () => {
     loadAuthState()
 
     const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
-      console.log('🔐 AUTH: Storage changed:', changes)
+      console.log(' AUTH: Storage changed:', changes)
       if (changes.authUser) {
         if (changes.authUser.newValue && changes.authUser.newValue.token) {
-          console.log('🔐 AUTH: Auth user updated:', changes.authUser.newValue.email)
+          console.log(' AUTH: Auth user updated:', changes.authUser.newValue.email)
           setUser(changes.authUser.newValue)
         } else {
-          console.log('🔐 AUTH: Auth user removed')
+          console.log(' AUTH: Auth user removed')
           setUser(null)
         }
       }
@@ -64,7 +64,7 @@ export const useAuth = () => {
     try {
       const config = backendApi.getConfig()
       if (!config.enabled || !config.apiUrl) {
-        console.log('🔐 AUTH: Backend not configured, authentication required')
+        console.log(' AUTH: Backend not configured, authentication required')
         return false
       }
 
@@ -77,21 +77,21 @@ export const useAuth = () => {
       })
 
       if (response.ok) {
-        console.log('🔐 AUTH: Token verified with backend')
+        console.log(' AUTH: Token verified with backend')
         return true
       } else {
-        console.log('🔐 AUTH: Token verification failed:', response.status)
+        console.log(' AUTH: Token verification failed:', response.status)
         return false
       }
     } catch (error) {
-      console.error('🔐 AUTH: Token verification error:', error)
+      console.error(' AUTH: Token verification error:', error)
       return false
     }
   }
 
   const login = async (credentials: LoginCredentials): Promise<{ success: boolean; message: string }> => {
     try {
-      console.log('🔐 AUTH: Login attempt with:', credentials.email)
+      console.log(' AUTH: Login attempt with:', credentials.email)
       
       const config = backendApi.getConfig()
       
@@ -104,7 +104,7 @@ export const useAuth = () => {
       }
 
       try {
-        console.log('🔐 AUTH: Attempting backend authentication...')
+        console.log(' AUTH: Attempting backend authentication...')
         const response = await fetch(`${config.apiUrl}/api/v1/auth/login`, {
           method: 'POST',
           headers: {
@@ -118,7 +118,7 @@ export const useAuth = () => {
 
         if (response.ok) {
           const data = await response.json()
-          console.log('🔐 AUTH: Backend login successful:', data)
+          console.log(' AUTH: Backend login successful:', data)
           
           const authUser: AuthUser = {
             email: data.user_info.email,
@@ -128,7 +128,7 @@ export const useAuth = () => {
           }
 
           await chrome.storage.sync.set({ authUser })
-          console.log('🔐 AUTH: Token saved to Chrome storage:', {
+          console.log(' AUTH: Token saved to Chrome storage:', {
             email: authUser.email,
             tokenLength: authUser.token.length,
             tokenPreview: authUser.token.substring(0, 20) + '...',
@@ -148,13 +148,13 @@ export const useAuth = () => {
             type: 'AUTH_STATUS_CHANGED',
             isAuthenticated: true
           }).catch(error => {
-            console.log('🔐 AUTH: Could not broadcast auth status:', error)
+            console.log(' AUTH: Could not broadcast auth status:', error)
           })
           
           return { success: true, message: 'Login successful!' }
         } else {
           const errorData = await response.json().catch(() => ({}))
-          console.log('🔐 AUTH: Backend login failed:', response.status, errorData)
+          console.log(' AUTH: Backend login failed:', response.status, errorData)
           
           return { 
             success: false, 
@@ -162,7 +162,7 @@ export const useAuth = () => {
           }
         }
       } catch (error) {
-        console.error('🔐 AUTH: Backend login error:', error)
+        console.error(' AUTH: Backend login error:', error)
         
         return { 
           success: false, 
@@ -170,44 +170,44 @@ export const useAuth = () => {
         }
       }
     } catch (error) {
-      console.error('🔐 AUTH: Login error:', error)
+      console.error(' AUTH: Login error:', error)
       return { success: false, message: 'Login failed. Please try again.' }
     }
   }
 
   const logout = async () => {
     try {
-      console.log('🔐 AUTH: Logging out user')
+      console.log(' AUTH: Logging out user')
       await chrome.storage.sync.remove(['authUser'])
       setUser(null)
-      console.log('🔐 AUTH: User logged out successfully')
+      console.log(' AUTH: User logged out successfully')
       
       // Broadcast authentication status change to content scripts
       chrome.runtime.sendMessage({
         type: 'AUTH_STATUS_CHANGED',
         isAuthenticated: false
       }).catch(error => {
-        console.log('🔐 AUTH: Could not broadcast auth status:', error)
+        console.log(' AUTH: Could not broadcast auth status:', error)
       })
     } catch (error) {
-      console.error('🔐 AUTH: Logout error:', error)
+      console.error(' AUTH: Logout error:', error)
     }
   }
 
   const isAuthenticated = () => {
     const authenticated = user !== null && user.token !== undefined
-    console.log('🔐 AUTH: isAuthenticated check:', { user: user?.email, hasToken: !!user?.token, authenticated })
+    console.log(' AUTH: isAuthenticated check:', { user: user?.email, hasToken: !!user?.token, authenticated })
     return authenticated
   }
 
   const clearAuth = async () => {
     try {
-      console.log('🔐 AUTH: Manually clearing auth state')
+      console.log(' AUTH: Manually clearing auth state')
       await chrome.storage.sync.remove(['authUser'])
       setUser(null)
-      console.log('🔐 AUTH: Auth state cleared')
+      console.log(' AUTH: Auth state cleared')
     } catch (error) {
-      console.error('🔐 AUTH: Clear auth error:', error)
+      console.error(' AUTH: Clear auth error:', error)
     }
   }
 

@@ -87,7 +87,7 @@ export class ElementSelector {
   }
 
   static getFirstTextWithContent(): { element: HTMLElement; text: string } | null {
-    console.log('\n🔍 ElementSelector.getFirstTextWithContent: Starting text extraction')
+    console.log('\n ElementSelector.getFirstTextWithContent: Starting text extraction')
     console.log('   Trying selectors:', this.SELECTORS.TEXT_INPUT)
     
     for (const selector of this.SELECTORS.TEXT_INPUT) {
@@ -104,7 +104,7 @@ export class ElementSelector {
           console.log('   Text length:', text.length)
           
           if (text.length > 0) {
-            console.log('✅ Found text:', text.substring(0, 100), '...')
+            console.log(' Found text:', text.substring(0, 100), '...')
             return { element, text }
           }
         }
@@ -114,7 +114,7 @@ export class ElementSelector {
       }
     }
     
-    console.log('❌ No text found in any selectors')
+    console.log(' No text found in any selectors')
     console.log('   Trying fallback: querySelectorAll for textarea')
     
     // Fallback: try all textareas
@@ -127,12 +127,12 @@ export class ElementSelector {
       console.log(`   Textarea ${i}:`, text.substring(0, 50))
       
       if (text.length > 0) {
-        console.log('✅ Found text in fallback textarea:', text.substring(0, 50))
+        console.log(' Found text in fallback textarea:', text.substring(0, 50))
         return { element: textarea, text }
       }
     }
     
-    console.log('❌ No text found anywhere')
+    console.log(' No text found anywhere')
     return null
   }
 

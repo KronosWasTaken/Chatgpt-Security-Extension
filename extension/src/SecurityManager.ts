@@ -11,21 +11,21 @@ export class SecurityManager {
 
   constructor() {
     try {
-      console.log('🔍 SecurityManager: Creating components...')
+      console.log(' SecurityManager: Creating components...')
       this.notificationManager = new NotificationManager()
       this.promptGuard = new PromptGuard()
       this.fileUploadMonitor = new FileUploadMonitor()
       
       this.setupGlobalNotifications()
-      console.log('✅ SecurityManager: Components created successfully')
+      console.log(' SecurityManager: Components created successfully')
     } catch (error) {
-      console.error('🚨 SecurityManager constructor failed:', error)
+      console.error(' SecurityManager constructor failed:', error)
       throw error
     }
   }
 
   setEnabled(enabled: boolean): void {
-    console.log(`🔄 SecurityManager: Setting enabled to ${enabled}`)
+    console.log(` SecurityManager: Setting enabled to ${enabled}`)
     this.isEnabled = enabled
     
     // Enable/disable all security components
@@ -34,12 +34,12 @@ export class SecurityManager {
     
     if (enabled) {
       this.notificationManager.show(
-        '🛡️ Security scanner activated - uploads are being monitored',
+        ' Security scanner activated - uploads are being monitored',
         'success'
       )
     } else {
       this.notificationManager.show(
-        '⚪ Security scanner deactivated - uploads are not monitored',
+        ' Security scanner deactivated - uploads are not monitored',
         'info'
       )
     }
@@ -47,31 +47,31 @@ export class SecurityManager {
 
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.log('⚠️ SecurityManager already initialized, skipping...')
+      console.log(' SecurityManager already initialized, skipping...')
       return
     }
 
     try {
-      console.log('🔄 SecurityManager: Starting initialization...')
+      console.log(' SecurityManager: Starting initialization...')
       
       await this.checkExtensionStatus()
-      console.log('✅ Extension status checked')
+      console.log(' Extension status checked')
       
       this.setupFileUploadMonitoring()
-      console.log('✅ File upload monitoring setup')
+      console.log(' File upload monitoring setup')
       
       this.setupPromptProtection()
-      console.log('✅ Prompt protection setup')
+      console.log(' Prompt protection setup')
       
       await this.logInitialization()
-      console.log('✅ Initialization logged')
+      console.log(' Initialization logged')
       
       this.isInitialized = true
-      console.log('✅ SecurityManager: Initialization complete!')
+      console.log(' SecurityManager: Initialization complete!')
     } catch (error) {
-      console.error('🚨 SecurityManager initialization failed:', error)
+      console.error(' SecurityManager initialization failed:', error)
       this.notificationManager.show(
-        '❌ Security system initialization failed',
+        ' Security system initialization failed',
         'error'
       )
       throw error
@@ -88,7 +88,7 @@ export class SecurityManager {
       
       if (!isEnabled) {
         this.notificationManager.show(
-          '⚪ Security scanner disabled - uploads allowed',
+          ' Security scanner disabled - uploads allowed',
           'info'
         )
       }
@@ -133,12 +133,12 @@ export class SecurityManager {
         return
       }
       
-      console.log(`🖼️ IMAGE_INTERACTION: Detected ${imageFiles.length} image file(s) from ${source}`)
+      console.log(` IMAGE_INTERACTION: Detected ${imageFiles.length} image file(s) from ${source}`)
       
       // Get configuration
       const config = await this.getConfig()
       if (!config?.clientId || !config?.applicationId) {
-        console.log('🖼️ IMAGE_INTERACTION: No client/application context available')
+        console.log(' IMAGE_INTERACTION: No client/application context available')
         return
       }
       
@@ -162,16 +162,16 @@ export class SecurityManager {
         }
       })
       
-      console.log('🖼️ IMAGE_INTERACTION: Interaction tracked successfully')
+      console.log(' IMAGE_INTERACTION: Interaction tracked successfully')
       
       // Show notification
       this.notificationManager.show(
-        `📸 Tracked ${imageFiles.length} image upload(s) - interaction count updated`,
+        ` Tracked ${imageFiles.length} image upload(s) - interaction count updated`,
         'info'
       )
       
     } catch (error) {
-      console.error('🖼️ IMAGE_INTERACTION: Failed to track image interactions:', error)
+      console.error(' IMAGE_INTERACTION: Failed to track image interactions:', error)
     }
   }
 
@@ -188,7 +188,7 @@ export class SecurityManager {
   private setupPromptProtection(): void {
     if (this.isChatGPTDomain() || this.isTestPage()) {
       this.notificationManager.show(
-        '🛡️AI site detected - activating prompt injection and PII protection',
+        'AI site detected - activating prompt injection and PII protection',
         'info'
       )
     }
@@ -246,11 +246,11 @@ export class SecurityManager {
   }
 
   cleanup(): void {
-    console.log('🧹 SecurityManager: Cleaning up...')
+    console.log(' SecurityManager: Cleaning up...')
     this.promptGuard.cleanup()
     this.fileUploadMonitor.cleanup()
     this.notificationManager.clear()
     this.isInitialized = false
-    console.log('✅ SecurityManager: Cleanup complete')
+    console.log(' SecurityManager: Cleanup complete')
   }
 }

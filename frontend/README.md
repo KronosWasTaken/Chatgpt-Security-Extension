@@ -1,6 +1,6 @@
 # Cybercept MSP Security Platform
 
-## 🚀 Deploy to Vercel
+##  Deploy to Vercel
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/cybercept-msp-dashboard)
 
@@ -8,7 +8,7 @@
 
 Cybercept is a professional MSP (Managed Service Provider) security dashboard that provides comprehensive monitoring and compliance management for AI applications across client portfolios.
 
-### ✨ Features
+###  Features
 
 - **MSP Portfolio Dashboard** - Real-time overview of all managed clients
 - **Single Client View** - Detailed security metrics for individual clients  
@@ -17,7 +17,7 @@ Cybercept is a professional MSP (Managed Service Provider) security dashboard th
 - **Risk Assessment** - Automated risk scoring and status badges
 - **Inventory Management** - Complete catalog of permitted and unsanctioned AI tools
 
-### 🎨 Design System
+###  Design System
 
 **Brand Colors:**
 - Primary Blue: `#1F7AE0` 
@@ -28,7 +28,7 @@ Cybercept is a professional MSP (Managed Service Provider) security dashboard th
 **Typography:** Inter font family
 **Components:** Built with shadcn/ui and Tailwind CSS
 
-## 🏗️ Tech Stack
+##  Tech Stack
 
 - **Frontend:** React 18 + TypeScript + Vite
 - **Styling:** Tailwind CSS + shadcn/ui components
@@ -37,30 +37,30 @@ Cybercept is a professional MSP (Managed Service Provider) security dashboard th
 - **Routing:** React Router v6
 - **Data:** Local TypeScript files (no backend required)
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 src/
-├── components/
-│   ├── ui/              # shadcn/ui components
-│   ├── AppLayout.tsx    # Main layout wrapper
-│   ├── AppSidebar.tsx   # Navigation sidebar
-│   └── Combobox.tsx     # Custom dropdown component
-├── data/
-│   ├── clients.ts       # Client portfolio data
-│   ├── frameworks.ts    # Compliance frameworks
-│   ├── inventory.ts     # AI applications/agents
-│   ├── engagement.ts    # Usage analytics
-│   └── utils.ts         # Helper functions
-├── pages/
-│   ├── Login.tsx        # MSP sign-in page
-│   ├── Dashboard.tsx    # Portfolio overview
-│   ├── Client.tsx       # Single client view
-│   └── NotFound.tsx     # 404 page
-└── hooks/               # React hooks
+ components/
+    ui/              # shadcn/ui components
+    AppLayout.tsx    # Main layout wrapper
+    AppSidebar.tsx   # Navigation sidebar
+    Combobox.tsx     # Custom dropdown component
+ data/
+    clients.ts       # Client portfolio data
+    frameworks.ts    # Compliance frameworks
+    inventory.ts     # AI applications/agents
+    engagement.ts    # Usage analytics
+    utils.ts         # Helper functions
+ pages/
+    Login.tsx        # MSP sign-in page
+    Dashboard.tsx    # Portfolio overview
+    Client.tsx       # Single client view
+    NotFound.tsx     # 404 page
+ hooks/               # React hooks
 ```
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 
@@ -94,14 +94,14 @@ src/
 npm run build
 ```
 
-## 🔐 Authentication Flow
+##  Authentication Flow
 
 1. Visit `/login` 
 2. Click "MSP Sign In" button
 3. Redirected to `/dashboard` (MSP Portfolio)
 4. Navigate to `/client` for detailed client views
 
-## 📊 Data Structure
+##  Data Structure
 
 The application uses local TypeScript data files to simulate a live backend:
 
@@ -110,7 +110,7 @@ The application uses local TypeScript data files to simulate a live backend:
 - **Inventory:** Mix of permitted/unsanctioned AI applications and agents
 - **Engagement:** Top applications, agents, and users with trend analytics
 
-## 🎯 Key Features
+##  Key Features
 
 ### MSP Dashboard (`/dashboard`)
 - Portfolio-wide KPI tiles with sparkline trends
@@ -131,7 +131,7 @@ The application uses local TypeScript data files to simulate a live backend:
 - Loading states and hover effects
 - Risk badges and status indicators
 
-## 🔮 Future Enhancements (TODO)
+##  Future Enhancements (TODO)
 
 - [ ] **Policy Center** - AI governance and policy management
 - [ ] **Reports** - Compliance reports and security analytics  
@@ -140,7 +140,7 @@ The application uses local TypeScript data files to simulate a live backend:
 - [ ] **Alerting System** - Risk threshold notifications
 - [ ] **Advanced Charts** - Detailed trend analysis and forecasting
 
-## 🚀 Deployment
+##  Deployment
 
 ### Vercel (Recommended)
 1. Connect your GitHub repository to Vercel
@@ -152,11 +152,11 @@ The application uses local TypeScript data files to simulate a live backend:
 - **AWS S3 + CloudFront:** Static site hosting
 - **Firebase Hosting:** `firebase deploy`
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License.
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -166,6 +166,6 @@ This project is licensed under the MIT License.
 
 ---
 
-**Built with ❤️ for MSP Security Management**
+**Built with  for MSP Security Management**
 
 *Cybercept - Innovate Securely*

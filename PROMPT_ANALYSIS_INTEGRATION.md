@@ -113,7 +113,7 @@ The response now includes:
 cd extension
 npm run build
 ```
-✅ Build completed successfully without errors
+ Build completed successfully without errors
 
 ### Manual Testing Steps
 1. Enable backend in extension settings
@@ -132,11 +132,11 @@ All prompt analyses are logged with:
 - Detailed error information for debugging
 
 Example log entries:
-- `🏛️ Attempting backend prompt analysis...`
-- `✅ Backend prompt analysis successful`
-- `⚠️ Backend analysis failed or returned null, falling back to local Gemini`
-- `🚨 INJECTION DETECTED (backend): HIGH risk - ...`
-- `✅ SAFE PROMPT (local-gemini): No threats detected`
+- ` Attempting backend prompt analysis...`
+- ` Backend prompt analysis successful`
+- ` Backend analysis failed or returned null, falling back to local Gemini`
+- ` INJECTION DETECTED (backend): HIGH risk - ...`
+- ` SAFE PROMPT (local-gemini): No threats detected`
 
 ## Error Scenarios
 

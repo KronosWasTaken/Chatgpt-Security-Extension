@@ -15,15 +15,15 @@ export default function OptionsPage() {
   const { user, loading: authLoading, login, logout, isAuthenticated } = useAuth()
   const [config, updateConfig, configLoading] = useConfig()
   
-  console.log('🔐 OPTIONS: Loading states:', { authLoading, configLoading })
-  console.log('🔐 OPTIONS: Auth user:', user)
-  console.log('🔐 OPTIONS: Is authenticated:', isAuthenticated())
-  console.log('🔐 OPTIONS: Config:', config)
+  console.log(' OPTIONS: Loading states:', { authLoading, configLoading })
+  console.log(' OPTIONS: Auth user:', user)
+  console.log(' OPTIONS: Is authenticated:', isAuthenticated())
+  console.log(' OPTIONS: Config:', config)
 
 
   // Show loading state while checking authentication
   if (authLoading) {
-    console.log('🔐 OPTIONS: Showing auth loading state...')
+    console.log(' OPTIONS: Showing auth loading state...')
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900">
         <div className="flex items-center text-xl text-white">
@@ -39,16 +39,16 @@ export default function OptionsPage() {
 
   // Show login page if not authenticated
   const authenticated = isAuthenticated()
-  console.log('🔐 OPTIONS: Authentication check result:', authenticated)
+  console.log(' OPTIONS: Authentication check result:', authenticated)
   
   if (!authenticated) {
-    console.log('🔐 OPTIONS: User not authenticated, showing login page')
+    console.log(' OPTIONS: User not authenticated, showing login page')
     return <LoginPage onLogin={login} loading={authLoading} />
   }
 
   // Show loading state for config if authenticated
   if (configLoading) {
-    console.log('🔐 OPTIONS: Showing loading state...')
+    console.log(' OPTIONS: Showing loading state...')
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-purple-900">
         <div className="flex items-center text-xl text-white">
@@ -65,16 +65,16 @@ export default function OptionsPage() {
   console.log('Rendering main UI...')
 
   const handleToggle = (enabled: boolean) => {
-    console.log('🔄 OptionsPage: handleToggle called with enabled:', enabled)
+    console.log(' OptionsPage: handleToggle called with enabled:', enabled)
     const newConfig = { ...config, isEnabled: enabled }
-    console.log('🔄 OptionsPage: Updating config to:', newConfig)
+    console.log(' OptionsPage: Updating config to:', newConfig)
     updateConfig(newConfig)
     
     chrome.runtime.sendMessage({
       type: 'SAVE_CONFIG',
       config: newConfig
     }, (response) => {
-      console.log('🔄 SAVE_CONFIG response:', response)
+      console.log(' SAVE_CONFIG response:', response)
     })
   }
 
@@ -94,19 +94,19 @@ export default function OptionsPage() {
   }
 
   const handleTestLog = async () => {
-    console.log('🧪 Testing manual log entry...')
+    console.log(' Testing manual log entry...')
     chrome.runtime.sendMessage({
       type: 'ADD_LOG',
-      message: '🧪 TEST LOG - Manual test from options page',
+      message: ' TEST LOG - Manual test from options page',
       logType: 'info',
       category: 'test'
     }, (response) => {
-      console.log('🧪 Test log response:', response)
+      console.log(' Test log response:', response)
     })
   }
 
   const handleTestFileScan = async () => {
-    console.log('🧪 Testing file scan...')
+    console.log(' Testing file scan...')
     
     // Create a simple test file
     const testContent = 'This is a test file for scanning'
@@ -121,7 +121,7 @@ export default function OptionsPage() {
       fileName: testFile.name,
       fileData: fileData
     }, (response) => {
-      console.log('🧪 File scan response:', response)
+      console.log(' File scan response:', response)
     })
   }
 
@@ -145,13 +145,13 @@ export default function OptionsPage() {
                      onClick={handleTestLog}
                      className="px-4 py-2 font-medium text-black transition-colors bg-yellow-500 rounded-lg hover:bg-yellow-400"
                    >
-                     🧪 Test API Call
+                      Test API Call
                    </button>
                    <button
                      onClick={handleTestFileScan}
                      className="px-4 py-2 font-medium text-white transition-colors bg-blue-500 rounded-lg hover:bg-blue-400"
                    >
-                     🔍 Test File Scan
+                      Test File Scan
                    </button>
                  </div>
                  <p className="mt-2 text-xs text-yellow-300">

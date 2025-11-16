@@ -33,42 +33,42 @@ Decision: Block or Allow
 
 ### 3. Blocking Conditions
 
-#### ❌ BACKEND TIMEOUT (> 30 seconds)
+####  BACKEND TIMEOUT (> 30 seconds)
 ```
 Reason: "Backend analysis timeout - no response after 30 seconds"
 Action: BLOCK prompt
 Notification: "Backend timeout. Prompt blocked for security."
 ```
 
-#### ❌ NETWORK ERROR
+####  NETWORK ERROR
 ```
 Reason: Network failure, backend unreachable
 Action: BLOCK prompt
 Notification: "Unable to reach backend. Prompt blocked for security."
 ```
 
-#### ❌ AUTHENTICATION REQUIRED
+####  AUTHENTICATION REQUIRED
 ```
 Reason: No auth token or invalid token
 Action: BLOCK prompt
 Notification: "Authentication required. Please log in."
 ```
 
-#### ❌ BACKEND HTTP ERROR
+####  BACKEND HTTP ERROR
 ```
 Reason: Backend returns 4xx or 5xx error
 Action: BLOCK prompt
 Notification: "Backend error. Prompt blocked for security."
 ```
 
-#### ❌ INVALID RESPONSE
+####  INVALID RESPONSE
 ```
 Reason: Backend returns empty or invalid JSON
 Action: BLOCK prompt
 Notification: "Backend returned invalid data. Prompt blocked."
 ```
 
-#### ❌ THREAT DETECTED
+####  THREAT DETECTED
 ```
 Reason: Backend detects prompt injection/threats
 Action: BLOCK prompt
@@ -77,7 +77,7 @@ Notification: "Security threat detected. Prompt blocked."
 
 ### 4. Allowing Conditions
 
-#### ✅ VALID SAFE RESPONSE ONLY
+####  VALID SAFE RESPONSE ONLY
 ```
 Condition 1: Backend responds with 200 OK
 Condition 2: Valid JSON response
@@ -208,41 +208,41 @@ sendResponse({ success: true, ...result })
 Every attempt shows:
 ```
 ================================================================================
-🔍 PromptGuard.checkPromptSafety: ENTRY
+ PromptGuard.checkPromptSafety: ENTRY
 ================================================================================
    Full text: "Your complete prompt..."
 
-📡 STEP 1: Sending prompt to backend for analysis
+ STEP 1: Sending prompt to backend for analysis
    Will wait for backend response...
    
 [30 SECOND TIMEOUT RUNNING...]
 
-📥 STEP 2: Received response from backend
+ STEP 2: Received response from backend
    Response success: true
    
-📝 STEP 3: Processing backend analysis result
+ STEP 3: Processing backend analysis result
    Threat detected: false
    Should block: false
    
-✅ DECISION: Prompt is SAFE - ALLOWING submission
+ DECISION: Prompt is SAFE - ALLOWING submission
 ```
 
 OR if backend fails:
 ```
-❌ CRITICAL ERROR: Backend analysis failed
+ CRITICAL ERROR: Backend analysis failed
    Error: Network error: Failed to fetch
-🚫 BLOCKING PROMPT - No backend response received
+ BLOCKING PROMPT - No backend response received
    Reason: Backend is required for all prompts
 ```
 
 ## Summary
 
 **No prompt can pass without:**
-1. ✅ Backend API call made
-2. ✅ Backend responds successfully
-3. ✅ Valid JSON returned
-4. ✅ shouldBlock: false
-5. ✅ isThreats: false
+1.  Backend API call made
+2.  Backend responds successfully
+3.  Valid JSON returned
+4.  shouldBlock: false
+5.  isThreats: false
 
 **Any failure at any step = BLOCKED**
 

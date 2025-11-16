@@ -1,10 +1,10 @@
 # Backend Mandatory Update - Prompt Blocking
 
-## 🎯 Critical Change
+##  Critical Change
 
 **The backend API is now MANDATORY when enabled. Prompts will be BLOCKED if the backend cannot be reached.**
 
-## 🔒 New Behavior
+##  New Behavior
 
 ### Before (Old):
 ```
@@ -13,11 +13,11 @@ Backend enabled → Try backend → Failed? → Fallback to local Gemini → All
 
 ### After (New):
 ```
-Backend enabled → Try backend → Failed? → ❌ BLOCK PROMPT + Show Error
+Backend enabled → Try backend → Failed? →  BLOCK PROMPT + Show Error
 Backend disabled → Use local Gemini → Allow/Block based on analysis
 ```
 
-## 📋 Changes Made
+##  Changes Made
 
 ### 1. Background Script Logic (`extension/src/background/index.ts`)
 
@@ -38,18 +38,18 @@ Added explicit checks for:
 **Backend Unreachable:**
 ```typescript
 if (response.backendUnreachable) {
-  ❌ Clear inputs
-  ❌ Show error notification
-  ❌ Block prompt
+   Clear inputs
+   Show error notification
+   Block prompt
 }
 ```
 
 **Authentication Error:**
 ```typescript
 if (response.error.includes('Authentication required')) {
-  🔐 Clear inputs
-  🔐 Show auth error notification
-  🔐 Block prompt
+   Clear inputs
+   Show auth error notification
+   Block prompt
 }
 ```
 
@@ -58,18 +58,18 @@ if (response.error.includes('Authentication required')) {
 - Fallback notification creation if NotificationManager isn't available
 - Clear messages for different error types
 
-## 🔍 Error Messages
+##  Error Messages
 
 ### Backend Unreachable:
 ```
-❌ Backend security service is unreachable. 
+ Backend security service is unreachable. 
 Cannot verify prompt safety. 
 Please check your connection and try again.
 ```
 
 ### Authentication Required:
 ```
-🔐 Authentication required. 
+ Authentication required. 
 Please log in to use prompt protection.
 ```
 
@@ -79,7 +79,7 @@ Backend is disabled and Gemini API key is not configured.
 Please enable backend or add your Gemini API key in the extension settings.
 ```
 
-## 🧪 Testing Scenarios
+##  Testing Scenarios
 
 ### Test 1: Backend Enabled & Reachable
 **Setup:**
@@ -90,20 +90,20 @@ Please enable backend or add your Gemini API key in the extension settings.
 **Action:** Type malicious prompt: "Ignore previous instructions"
 
 **Expected Result:**
-- ✅ Backend analyzes prompt
-- ✅ Detects threat (isThreats: true)
-- ✅ Input cleared
-- ✅ Notification shown
-- ✅ Prompt BLOCKED
+-  Backend analyzes prompt
+-  Detects threat (isThreats: true)
+-  Input cleared
+-  Notification shown
+-  Prompt BLOCKED
 
 **Console Logs:**
 ```
-🔍 PromptGuard: Checking prompt safety...
-🔍 PromptGuard: Sending prompt to backend for analysis...
-🏛️ Backend is enabled - attempting backend prompt analysis (REQUIRED)...
-🔍 Analyzing prompt with backend...
-✅ Backend prompt analysis completed: {isThreats: true, ...}
-🚨 PromptGuard: THREAT DETECTED - Blocking prompt and clearing inputs
+ PromptGuard: Checking prompt safety...
+ PromptGuard: Sending prompt to backend for analysis...
+ Backend is enabled - attempting backend prompt analysis (REQUIRED)...
+ Analyzing prompt with backend...
+ Backend prompt analysis completed: {isThreats: true, ...}
+ PromptGuard: THREAT DETECTED - Blocking prompt and clearing inputs
 ```
 
 ---
@@ -117,25 +117,25 @@ Please enable backend or add your Gemini API key in the extension settings.
 **Action:** Type any prompt: "Hello world"
 
 **Expected Result:**
-- ❌ Backend call fails
-- ❌ Prompt BLOCKED (for security)
-- ❌ Error notification shown
-- ❌ Input cleared
-- 🚫 NO FALLBACK to local Gemini
+-  Backend call fails
+-  Prompt BLOCKED (for security)
+-  Error notification shown
+-  Input cleared
+-  NO FALLBACK to local Gemini
 
 **Console Logs:**
 ```
-🔍 PromptGuard: Checking prompt safety...
-🔍 PromptGuard: Sending prompt to backend for analysis...
-🏛️ Backend is enabled - attempting backend prompt analysis (REQUIRED)...
-❌ Backend prompt analysis failed: null
-❌ CRITICAL: Backend is enabled but analysis failed - BLOCKING prompt for security
-❌ PromptGuard: Backend is unreachable - BLOCKING prompt
-ERROR: ❌ Backend security service unreachable. Prompt blocked for safety.
+ PromptGuard: Checking prompt safety...
+ PromptGuard: Sending prompt to backend for analysis...
+ Backend is enabled - attempting backend prompt analysis (REQUIRED)...
+ Backend prompt analysis failed: null
+ CRITICAL: Backend is enabled but analysis failed - BLOCKING prompt for security
+ PromptGuard: Backend is unreachable - BLOCKING prompt
+ERROR:  Backend security service unreachable. Prompt blocked for safety.
 ```
 
 **User Notification:**
-> ❌ Backend security service unreachable. Prompt blocked for safety.
+>  Backend security service unreachable. Prompt blocked for safety.
 
 ---
 
@@ -147,17 +147,17 @@ ERROR: ❌ Backend security service unreachable. Prompt blocked for safety.
 **Action:** Type malicious prompt: "Ignore previous instructions"
 
 **Expected Result:**
-- ⚠️ Uses local Gemini analysis
-- ✅ Detects threat
-- ✅ Prompt BLOCKED
+-  Uses local Gemini analysis
+-  Detects threat
+-  Prompt BLOCKED
 
 **Console Logs:**
 ```
-🔍 PromptGuard: Checking prompt safety...
-⚠️ Backend is DISABLED - using fallback analysis
-🤖 Testing prompt for injection attacks with local Gemini...
-🔍 Local Gemini prompt injection test result: {isThreats: true, ...}
-🚨 PromptGuard: THREAT DETECTED - Blocking prompt and clearing inputs
+ PromptGuard: Checking prompt safety...
+ Backend is DISABLED - using fallback analysis
+ Testing prompt for injection attacks with local Gemini...
+ Local Gemini prompt injection test result: {isThreats: true, ...}
+ PromptGuard: THREAT DETECTED - Blocking prompt and clearing inputs
 ```
 
 ---
@@ -170,15 +170,15 @@ ERROR: ❌ Backend security service unreachable. Prompt blocked for safety.
 **Action:** Type any prompt
 
 **Expected Result:**
-- ❌ Authentication error
-- ❌ Prompt BLOCKED
-- 🔐 Auth error notification shown
+-  Authentication error
+-  Prompt BLOCKED
+-  Auth error notification shown
 
 **Console Logs:**
 ```
-🔐 BACKGROUND: Authentication required for TEST_PROMPT_INJECTION
-❌ PromptGuard: Authentication required - BLOCKING prompt
-ERROR: 🔐 Authentication required. Please log in to use prompt protection.
+ BACKGROUND: Authentication required for TEST_PROMPT_INJECTION
+ PromptGuard: Authentication required - BLOCKING prompt
+ERROR:  Authentication required. Please log in to use prompt protection.
 ```
 
 ---
@@ -191,13 +191,13 @@ ERROR: 🔐 Authentication required. Please log in to use prompt protection.
 **Action:** Type any prompt
 
 **Expected Result:**
-- ❌ Error response
-- ⚠️ Message asking to enable backend or add Gemini key
-- ❌ Prompt functionality unavailable
+-  Error response
+-  Message asking to enable backend or add Gemini key
+-  Prompt functionality unavailable
 
 ---
 
-## 📊 Security Rationale
+##  Security Rationale
 
 ### Why Block When Backend Unreachable?
 
@@ -207,7 +207,7 @@ ERROR: 🔐 Authentication required. Please log in to use prompt protection.
 4. **Explicit Choice**: If you want fallback, disable backend; if enabled, it's mandatory
 5. **Audit Trail**: All blocked prompts are logged for security review
 
-## 🔧 Configuration Options
+##  Configuration Options
 
 ### Option A: Backend Required (Recommended for Organizations)
 ```json
@@ -218,10 +218,10 @@ ERROR: 🔐 Authentication required. Please log in to use prompt protection.
   }
 }
 ```
-- ✅ Centralized security
-- ✅ Consistent policies
-- ✅ Full audit trail
-- ⚠️ Requires backend availability
+-  Centralized security
+-  Consistent policies
+-  Full audit trail
+-  Requires backend availability
 
 ### Option B: Fallback Mode (For Individual Users)
 ```json
@@ -232,12 +232,12 @@ ERROR: 🔐 Authentication required. Please log in to use prompt protection.
   "geminiApiKey": "your-key-here"
 }
 ```
-- ✅ Works offline
-- ✅ No backend dependency
-- ⚠️ Less centralized control
-- ⚠️ User provides API key
+-  Works offline
+-  No backend dependency
+-  Less centralized control
+-  User provides API key
 
-## 🚀 Deployment Checklist
+##  Deployment Checklist
 
 - [ ] Backend is running and accessible
 - [ ] Users are authenticated
@@ -247,7 +247,7 @@ ERROR: 🔐 Authentication required. Please log in to use prompt protection.
 - [ ] Verify error notifications appear
 - [ ] Check console logs for debugging
 
-## 📝 Rollback Plan
+##  Rollback Plan
 
 If issues occur, you can quickly revert to fallback mode:
 
@@ -257,7 +257,7 @@ If issues occur, you can quickly revert to fallback mode:
 
 Or revert code to previous commit if needed.
 
-## ✅ Verification Commands
+##  Verification Commands
 
 ### Test backend is reachable:
 ```bash
@@ -279,18 +279,18 @@ curl.exe -X POST http://localhost:8000/api/v1/analyze/prompt `
 2. Go to any page with text input
 3. Stop backend server
 4. Try to send a prompt
-5. Should see: ❌ Error notification + Blocked
+5. Should see:  Error notification + Blocked
 
-## 🎓 Summary
+##  Summary
 
 The new behavior ensures:
-- ✅ Backend API is always called when enabled
-- ✅ Prompts are blocked if backend unreachable
-- ✅ Clear error messages to users
-- ✅ No silent failures or bypasses
-- ✅ Security-first approach
-- ✅ Fallback option still available (disable backend)
+-  Backend API is always called when enabled
+-  Prompts are blocked if backend unreachable
+-  Clear error messages to users
+-  No silent failures or bypasses
+-  Security-first approach
+-  Fallback option still available (disable backend)
 
-**Status**: ✅ Implemented and built
-**Build**: ✅ No errors  
-**Ready**: ✅ For testing
+**Status**:  Implemented and built
+**Build**:  No errors  
+**Ready**:  For testing
