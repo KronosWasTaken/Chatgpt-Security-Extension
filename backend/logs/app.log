@@ -14138,3 +14138,2224 @@ WHERE extension_logs.id = %(pk_1)s
 2025-11-03T23:15:21+0545 INFO watchfiles.main - 1 change detected
 2025-11-03T23:15:22+0545 INFO watchfiles.main - 1 change detected
 2025-11-03T23:15:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:03:55+0545 INFO uvicorn.error - Will watch for changes in these directories: ['C:\\Users\\snoorabbits\\OneDrive\\Videos\\tryapi\\Chatgpt-Security-Extension\\backend']
+2025-11-16T20:03:55+0545 INFO uvicorn.error - Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2025-11-16T20:03:55+0545 INFO uvicorn.error - Started reloader process [30192] using WatchFiles
+2025-11-16T20:03:58+0545 INFO uvicorn.error - Started server process [30704]
+2025-11-16T20:03:58+0545 INFO uvicorn.error - Waiting for application startup.
+2025-11-16T20:03:58+0545 INFO app.main - Starting AI Compliance Platform Backend...
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - SELECT 1
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00032s] ()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:03:58+0545 INFO app.core.database - Database connection established
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00037s] {'table_name': 'extension_logs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-11-16T20:03:58+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:03:58+0545 INFO app.core.database - Extension logs table initialized
+2025-11-16T20:03:58+0545 INFO app.main - Database initialized
+2025-11-16T20:03:58+0545 INFO app.core.monitoring - Setting up monitoring and metrics collection
+2025-11-16T20:03:58+0545 INFO app.core.monitoring - Monitoring setup complete
+2025-11-16T20:03:58+0545 INFO app.main - Monitoring setup complete
+2025-11-16T20:03:59+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.0-flash
+2025-11-16T20:03:59+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:04:01+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:04:01+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:04:01+0545 INFO app.services.gemini_client - Gemini self-test success: ok
+2025-11-16T20:04:01+0545 INFO uvicorn.error - Application startup complete.
+2025-11-16T20:04:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:02+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:04:02+0545 INFO sqlalchemy.engine.Engine - SELECT users.name, users.email, users.hashed_password, users.department, users.user_type, users.is_active, users.last_login, users.msp_id, users.client_id, users.role, users.permissions, users.id, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR AND users.is_active = true
+2025-11-16T20:04:02+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00047s] ('bob@techcorp.com',)
+2025-11-16T20:04:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:02+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:04:02+0545 INFO structured - [ACCESS] method=POST path=/api/v1/auth/login status=200 durationMs=306 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=unknown
+2025-11-16T20:04:02+0545 INFO structured - [ACCESS] method=GET path=/health status=200 durationMs=0 corrId=unknown requestId=unknown userId=none origin=none type=unknown
+2025-11-16T20:04:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:05+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:19:05.043Z
+2025-11-16T20:04:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:05+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:19:05.629Z
+2025-11-16T20:04:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:06+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:19:06.420Z
+2025-11-16T20:04:06+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:19:06.593Z
+2025-11-16T20:04:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:09+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:04:09+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:04:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:11+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:04:11+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:04:11+0545 INFO structured - [2025-11-16 20:04:11] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:19:05.043Z"
+Summary: The text is a standard healthcheck string with a URL and timestamp. It contains no identifiable prompt injection patterns or attempts to manipulate AI instructions or behavior.
+2025-11-16T20:04:11+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:04:11+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:04:11+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:04:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:12+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:04:12+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:04:12+0545 INFO structured - [2025-11-16 20:04:12] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:19:05.629Z"
+Summary: No prompt injection patterns were detected. The text appears to be a standard healthcheck string with no manipulative commands or attempts to change AI behavior.
+2025-11-16T20:04:12+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:04:12+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:04:12+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:04:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:13+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:04:13+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:04:13+0545 INFO structured - [2025-11-16 20:04:13] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:19:06.420Z"
+Summary: No prompt injection patterns or manipulative commands were detected in the provided text. It appears to be a standard log or system health check entry.
+2025-11-16T20:04:13+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:04:13+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:04:13+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:04:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:04:13+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:04:13+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:04:13+0545 INFO structured - [2025-11-16 20:04:13] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:19:06.593Z"
+Summary: No prompt injection patterns detected. The text appears to be a standard system healthcheck message or log entry, containing no elements attempting to manipulate AI instructions, roles, or safety measures.
+2025-11-16T20:04:13+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:04:13+0545 INFO uvicorn.error - Shutting down
+2025-11-16T20:04:13+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=8934 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:04:13+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=8341 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:04:13+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=7269 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:04:13+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=7062 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:04:14+0545 INFO uvicorn.error - Waiting for application shutdown.
+2025-11-16T20:04:14+0545 INFO app.main - Shutting down AI Compliance Platform Backend...
+2025-11-16T20:04:14+0545 INFO uvicorn.error - Application shutdown complete.
+2025-11-16T20:04:14+0545 INFO uvicorn.error - Finished server process [30704]
+2025-11-16T20:04:16+0545 INFO uvicorn.error - Stopping reloader process [30192]
+2025-11-16T20:04:23+0545 INFO uvicorn.error - Will watch for changes in these directories: ['C:\\Users\\snoorabbits\\OneDrive\\Videos\\tryapi\\Chatgpt-Security-Extension\\backend']
+2025-11-16T20:04:23+0545 INFO uvicorn.error - Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2025-11-16T20:04:23+0545 INFO uvicorn.error - Started reloader process [22168] using WatchFiles
+2025-11-16T20:04:25+0545 INFO uvicorn.error - Started server process [20936]
+2025-11-16T20:04:25+0545 INFO uvicorn.error - Waiting for application startup.
+2025-11-16T20:04:25+0545 INFO app.main - Starting AI Compliance Platform Backend...
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - SELECT 1
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00022s] ()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:04:25+0545 INFO app.core.database - Database connection established
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00036s] {'table_name': 'extension_logs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-11-16T20:04:25+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:04:25+0545 INFO app.core.database - Extension logs table initialized
+2025-11-16T20:04:25+0545 INFO app.main - Database initialized
+2025-11-16T20:04:25+0545 INFO app.core.monitoring - Setting up monitoring and metrics collection
+2025-11-16T20:04:25+0545 INFO app.core.monitoring - Monitoring setup complete
+2025-11-16T20:04:25+0545 INFO app.main - Monitoring setup complete
+2025-11-16T20:04:26+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.0-flash
+2025-11-16T20:04:26+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:04:28+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:04:28+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:04:28+0545 INFO app.services.gemini_client - Gemini self-test success: ok
+2025-11-16T20:04:28+0545 INFO uvicorn.error - Application startup complete.
+2025-11-16T20:04:34+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:04:34+0545 INFO sqlalchemy.engine.Engine - SELECT users.name, users.email, users.hashed_password, users.department, users.user_type, users.is_active, users.last_login, users.msp_id, users.client_id, users.role, users.permissions, users.id, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID AND users.client_id = $2::UUID
+2025-11-16T20:04:34+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00054s] ('429be3ee-4272-4385-bbd5-240f32e2c1bc', 'b3de2004-de20-482c-b500-b6833fec8493')
+2025-11-16T20:04:34+0545 INFO sqlalchemy.engine.Engine - ROLLBACK
+2025-11-16T20:04:34+0545 INFO structured - [ACCESS] method=GET path=/api/v1/auth/me status=200 durationMs=66 corrId=unknown requestId=unknown userId=none origin=none type=unknown
+2025-11-16T20:04:47+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:04:47+0545 INFO sqlalchemy.engine.Engine - SELECT users.name, users.email, users.hashed_password, users.department, users.user_type, users.is_active, users.last_login, users.msp_id, users.client_id, users.role, users.permissions, users.id, users.created_at, users.updated_at 
+FROM users 
+WHERE users.id = $1::UUID AND users.client_id = $2::UUID
+2025-11-16T20:04:47+0545 INFO sqlalchemy.engine.Engine - [cached since 13.05s ago] ('429be3ee-4272-4385-bbd5-240f32e2c1bc', 'b3de2004-de20-482c-b500-b6833fec8493')
+2025-11-16T20:04:47+0545 INFO sqlalchemy.engine.Engine - ROLLBACK
+2025-11-16T20:04:47+0545 INFO structured - [ACCESS] method=GET path=/api/v1/auth/me status=200 durationMs=6 corrId=unknown requestId=unknown userId=none origin=none type=unknown
+2025-11-16T20:05:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:46+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:05:46+0545 INFO sqlalchemy.engine.Engine - SELECT users.name, users.email, users.hashed_password, users.department, users.user_type, users.is_active, users.last_login, users.msp_id, users.client_id, users.role, users.permissions, users.id, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR AND users.is_active = true
+2025-11-16T20:05:46+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00032s] ('bob@techcorp.com',)
+2025-11-16T20:05:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:47+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:05:47+0545 INFO structured - [ACCESS] method=POST path=/api/v1/auth/login status=200 durationMs=213 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=unknown
+2025-11-16T20:05:47+0545 INFO structured - [ACCESS] method=GET path=/health status=200 durationMs=0 corrId=unknown requestId=unknown userId=none origin=none type=unknown
+2025-11-16T20:05:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:51+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:20:51.201Z
+2025-11-16T20:05:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:52+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:20:52.327Z
+2025-11-16T20:05:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:56+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:05:56+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:05:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:58+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:05:58+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:05:58+0545 INFO structured - [2025-11-16 20:05:58] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:20:51.201Z"
+Summary: The text appears to be a log entry or status message and contains no identifiable prompt injection patterns such as instruction overrides, role manipulation, or attempts to reveal system prompts.
+2025-11-16T20:05:58+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:05:58+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:05:58+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:05:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:59+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:05:59+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:05:59+0545 INFO structured - [2025-11-16 20:05:59] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:20:52.327Z"
+Summary: The text appears to be a standard healthcheck string with a URL and timestamp, containing no detectable prompt injection patterns or attempts to manipulate AI behavior.
+2025-11-16T20:05:59+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:05:59+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=8231 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:05:59+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=6780 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:05:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:05:59+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:20:56.432Z
+2025-11-16T20:05:59+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:20:56.146Z
+2025-11-16T20:05:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:05+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:06:05+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:06:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:07+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:06:07+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:06:07+0545 INFO structured - [2025-11-16 20:06:07] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:20:56.432Z"
+Summary: The text is a simple log entry or status message and does not contain any detected prompt injection patterns or attempts to manipulate AI behavior.
+2025-11-16T20:06:07+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:06:07+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:06:07+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:06:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:07+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:06:07+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:06:07+0545 INFO structured - [2025-11-16 20:06:07] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:20:56.146Z"
+Summary: The text appears to be a benign healthcheck string for a service, containing a URL and timestamp. No prompt injection patterns, role manipulation attempts, instruction overrides, or hidden commands were detected.
+2025-11-16T20:06:07+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:06:07+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=8378 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:06:07+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=8379 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:06:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:06:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:07:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:08:36+0545 INFO uvicorn.error - Shutting down
+2025-11-16T20:08:36+0545 INFO uvicorn.error - Waiting for application shutdown.
+2025-11-16T20:08:36+0545 INFO app.main - Shutting down AI Compliance Platform Backend...
+2025-11-16T20:08:36+0545 INFO uvicorn.error - Application shutdown complete.
+2025-11-16T20:08:36+0545 INFO uvicorn.error - Finished server process [20936]
+2025-11-16T20:08:38+0545 INFO uvicorn.error - Stopping reloader process [22168]
+2025-11-16T20:08:44+0545 INFO uvicorn.error - Will watch for changes in these directories: ['C:\\Users\\snoorabbits\\OneDrive\\Videos\\tryapi\\Chatgpt-Security-Extension\\backend']
+2025-11-16T20:08:44+0545 INFO uvicorn.error - Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2025-11-16T20:08:44+0545 INFO uvicorn.error - Started reloader process [29880] using WatchFiles
+2025-11-16T20:08:47+0545 INFO uvicorn.error - Started server process [21864]
+2025-11-16T20:08:47+0545 INFO uvicorn.error - Waiting for application startup.
+2025-11-16T20:08:47+0545 INFO app.main - Starting AI Compliance Platform Backend...
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - SELECT 1
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00025s] ()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:08:47+0545 INFO app.core.database - Database connection established
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00046s] {'table_name': 'extension_logs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-11-16T20:08:47+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:08:47+0545 INFO app.core.database - Extension logs table initialized
+2025-11-16T20:08:47+0545 INFO app.main - Database initialized
+2025-11-16T20:08:47+0545 INFO app.core.monitoring - Setting up monitoring and metrics collection
+2025-11-16T20:08:47+0545 INFO app.core.monitoring - Monitoring setup complete
+2025-11-16T20:08:47+0545 INFO app.main - Monitoring setup complete
+2025-11-16T20:08:47+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.0-flash
+2025-11-16T20:08:47+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:08:49+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:08:49+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:08:49+0545 INFO app.services.gemini_client - Gemini self-test success: ok
+2025-11-16T20:08:49+0545 INFO uvicorn.error - Application startup complete.
+2025-11-16T20:08:51+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:23:50.885Z
+2025-11-16T20:08:51+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:23:51.731Z
+2025-11-16T20:08:55+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:08:55+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:08:57+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:08:57+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:08:57+0545 INFO structured - [2025-11-16 20:08:57] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:23:50.885Z"
+Summary: The text appears to be a benign log or status message containing a domain and timestamp. It does not exhibit any patterns commonly associated with prompt injection attacks, such as instruction overrides, role manipulation, or attempts to reveal system prompts.
+2025-11-16T20:08:57+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:08:57+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=6402 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:08:57+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:23:57.232Z
+2025-11-16T20:08:57+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:23:57.544Z
+2025-11-16T20:08:58+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:08:58+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:08:59+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:08:59+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:08:59+0545 INFO structured - [2025-11-16 20:08:59] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:23:51.731Z"
+Summary: The text appears to be a standard system health check or log entry and does not contain any detected prompt injection patterns or attempts to manipulate AI behavior.
+2025-11-16T20:08:59+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:08:59+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=7690 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:09:02+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:09:02+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:09:03+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:09:03+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:09:03+0545 INFO structured - [2025-11-16 20:09:03] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:23:57.232Z"
+Summary: The provided text appears to be a standard system health check or log entry, containing a service name, domain, and timestamp. It does not contain any of the specified prompt injection patterns or attempts to manipulate AI instructions or behavior.
+2025-11-16T20:09:03+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:09:03+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:09:03+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:09:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:04+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:09:04+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:09:04+0545 INFO structured - [2025-11-16 20:09:04] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:23:57.544Z"
+Summary: The text is a standard system health check message and does not contain any patterns indicative of prompt injection attacks.
+2025-11-16T20:09:04+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:09:04+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=6588 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:09:04+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=6584 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:09:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:20+0545 INFO watchfiles.main - 2 changes detected
+2025-11-16T20:09:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:09:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:10:26+0545 INFO uvicorn.error - Shutting down
+2025-11-16T20:10:26+0545 INFO uvicorn.error - Waiting for application shutdown.
+2025-11-16T20:10:26+0545 INFO app.main - Shutting down AI Compliance Platform Backend...
+2025-11-16T20:10:26+0545 INFO uvicorn.error - Application shutdown complete.
+2025-11-16T20:10:26+0545 INFO uvicorn.error - Finished server process [21864]
+2025-11-16T20:10:28+0545 INFO uvicorn.error - Stopping reloader process [29880]
+2025-11-16T20:12:57+0545 INFO uvicorn.error - Will watch for changes in these directories: ['C:\\Users\\snoorabbits\\OneDrive\\Videos\\tryapi\\Chatgpt-Security-Extension\\backend']
+2025-11-16T20:12:57+0545 INFO uvicorn.error - Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2025-11-16T20:12:57+0545 INFO uvicorn.error - Started reloader process [12448] using WatchFiles
+2025-11-16T20:12:59+0545 INFO uvicorn.error - Started server process [28292]
+2025-11-16T20:12:59+0545 INFO uvicorn.error - Waiting for application startup.
+2025-11-16T20:12:59+0545 INFO app.main - Starting AI Compliance Platform Backend...
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - SELECT 1
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00025s] ()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:13:00+0545 INFO app.core.database - Database connection established
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00044s] {'table_name': 'extension_logs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-11-16T20:13:00+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:13:00+0545 INFO app.core.database - Extension logs table initialized
+2025-11-16T20:13:00+0545 INFO app.main - Database initialized
+2025-11-16T20:13:00+0545 INFO app.core.monitoring - Setting up monitoring and metrics collection
+2025-11-16T20:13:00+0545 INFO app.core.monitoring - Monitoring setup complete
+2025-11-16T20:13:00+0545 INFO app.main - Monitoring setup complete
+2025-11-16T20:13:00+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.0-flash
+2025-11-16T20:13:00+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:13:03+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:13:03+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:13:03+0545 INFO app.services.gemini_client - Gemini self-test success: ok
+2025-11-16T20:13:03+0545 INFO uvicorn.error - Application startup complete.
+2025-11-16T20:13:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:13:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:01+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:14:01+0545 INFO sqlalchemy.engine.Engine - SELECT users.name, users.email, users.hashed_password, users.department, users.user_type, users.is_active, users.last_login, users.msp_id, users.client_id, users.role, users.permissions, users.id, users.created_at, users.updated_at 
+FROM users 
+WHERE users.email = $1::VARCHAR AND users.is_active = true
+2025-11-16T20:14:01+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00067s] ('bob@techcorp.com',)
+2025-11-16T20:14:01+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:14:01+0545 INFO structured - [ACCESS] method=POST path=/api/v1/auth/login status=200 durationMs=289 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=unknown
+2025-11-16T20:14:01+0545 INFO structured - [ACCESS] method=GET path=/health status=200 durationMs=0 corrId=unknown requestId=unknown userId=none origin=none type=unknown
+2025-11-16T20:14:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:13+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:29:13.517Z
+2025-11-16T20:14:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:14+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:29:14.400Z
+2025-11-16T20:14:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:17+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:14:17+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:14:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:19+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:14:19+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:14:19+0545 INFO structured - [2025-11-16 20:14:19] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:29:13.517Z"
+Summary: No prompt injection patterns or attempts to manipulate AI behavior were detected. The text appears to be a benign system health check or log entry.
+2025-11-16T20:14:19+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:14:19+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=5485 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:14:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:19+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:29:17.676Z
+2025-11-16T20:14:19+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:29:17.826Z
+2025-11-16T20:14:19+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:14:19+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:14:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:20+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:14:20+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:14:20+0545 INFO structured - [2025-11-16 20:14:20] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:29:14.400Z"
+Summary: The provided text appears to be a standard health check string with a timestamp and does not contain any patterns indicative of prompt injection attacks.
+2025-11-16T20:14:20+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:14:20+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=5356 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:14:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:23+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:14:23+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:14:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:24+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:14:24+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:14:24+0545 INFO structured - [2025-11-16 20:14:24] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:29:17.826Z"
+Summary: The provided text appears to be a system healthcheck message or log entry. It contains no discernible patterns or attempts at prompt injection.
+2025-11-16T20:14:24+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:14:24+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:14:24+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:14:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:24+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:14:24+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:14:24+0545 INFO structured - [2025-11-16 20:14:24] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:29:17.676Z"
+Summary: The text appears to be a standard system health check message or identifier and contains no recognizable prompt injection patterns, role manipulation attempts, instruction overrides, or hidden commands.
+2025-11-16T20:14:24+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:14:24+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=5967 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:14:24+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=5968 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:14:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:49+0545 ERROR uvicorn.error - Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\_utils.py", line 79, in collapse_excgroups
+  |     yield
+  |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\anyio\_backends\_asyncio.py", line 781, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         self.scope, self.receive, self.send
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     )
+    |     ^
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    |     return await self.app(scope, receive, send)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1082, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    |     raise exc
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Python313\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\app\main.py", line 166, in dispatch
+    |     return await call_next(request)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "C:\Python313\Lib\contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    |     raise exc
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\app\core\middleware.py", line 35, in dispatch
+    |     raise HTTPException(
+    |     ...<2 lines>...
+    |     )
+    | fastapi.exceptions.HTTPException: 401: {'error': 'Missing authorization header', 'detail': 'Authorization header is required'}
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\uvicorn\protocols\http\httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\uvicorn\middleware\proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\fastapi\applications.py", line 1082, in __call__
+    await super().__call__(scope, receive, send)
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 186, in __call__
+    raise exc
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\app\main.py", line 166, in dispatch
+    return await call_next(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 159, in call_next
+    raise app_exc
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Python313\Lib\contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\_utils.py", line 85, in collapse_excgroups
+    raise exc
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\.venv\Lib\site-packages\starlette\middleware\base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\snoorabbits\OneDrive\Videos\tryapi\Chatgpt-Security-Extension\backend\app\core\middleware.py", line 35, in dispatch
+    raise HTTPException(
+    ...<2 lines>...
+    )
+fastapi.exceptions.HTTPException: 401: {'error': 'Missing authorization header', 'detail': 'Authorization header is required'}
+2025-11-16T20:14:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:54+0545 INFO structured - [ACCESS] method=GET path=/docs status=200 durationMs=0 corrId=unknown requestId=unknown userId=none origin=none type=unknown
+2025-11-16T20:14:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:55+0545 INFO structured - [ACCESS] method=GET path=/openapi.json status=200 durationMs=49 corrId=unknown requestId=unknown userId=none origin=none type=unknown
+2025-11-16T20:14:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:14:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:13+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:30:13.291Z
+2025-11-16T20:15:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:14+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:30:14.356Z
+2025-11-16T20:15:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:16+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:30:16.095Z
+2025-11-16T20:15:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:17+0545 INFO app.api.analyze - Prompt received: healthcheck gemini.google.com 2025-11-16T14:30:16.721Z
+2025-11-16T20:15:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:17+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:15:17+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:15:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:19+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:15:19+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:15:19+0545 INFO structured - [2025-11-16 20:15:19] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:30:13.291Z"
+Summary: The text provided is a standard health check string with a URL and timestamp. It does not contain any patterns associated with prompt injection attacks, role manipulation, instruction overrides, or attempts to bypass safety measures.
+2025-11-16T20:15:19+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:15:19+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:15:19+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:15:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:20+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:15:20+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:15:20+0545 INFO structured - [2025-11-16 20:15:20] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:30:14.356Z"
+Summary: The provided text is a standard log or health check message containing a service name, URL, and timestamp. It does not contain any patterns or structures associated with prompt injection attacks.
+2025-11-16T20:15:20+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:15:20+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=7199 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:15:20+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=6417 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:15:20+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:15:20+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:15:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:21+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:15:21+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:15:21+0545 INFO structured - [2025-11-16 20:15:21] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:30:16.095Z"
+Summary: The text 'healthcheck gemini.google.com 2025-11-16T14:30:16.095Z' does not contain any patterns indicative of prompt injection attempts. It appears to be a benign system status or log message.
+2025-11-16T20:15:21+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:15:21+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=5416 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:15:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:24+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.5-flash-lite
+2025-11-16T20:15:24+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:15:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:24+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:15:24+0545 INFO app.services.gemini_client - Gemini generate_text success len=14
+2025-11-16T20:15:24+0545 INFO structured - [2025-11-16 20:15:24] [SUCCESS] Prompt analyzed successfully.
+Prompt: "healthcheck gemini.google.com 2025-11-16T14:30:16.721Z"
+Summary: The text consists of a health check message, a URL, and a timestamp. It contains no discernible patterns indicative of prompt injection attacks, role manipulation, instruction overrides, or attempts to bypass safety measures.
+2025-11-16T20:15:24+0545 INFO app.api.analyze - Prompt analysis result: allowed (risk=low)
+2025-11-16T20:15:24+0545 INFO structured - [ACCESS] method=POST path=/api/v1/analyze/prompt status=200 durationMs=7912 corrId=unknown requestId=unknown userId=none origin=chrome-extension://nipfdihhjjedhpdhbeaodpbfldngnfkb type=text
+2025-11-16T20:15:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:15:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:56+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:57+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:58+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:16:59+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:00+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:01+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:02+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:03+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:04+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:05+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:22+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:23+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:24+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:25+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:26+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:27+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:28+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:29+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:30+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:31+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:32+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:33+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:34+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:35+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:36+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:37+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:38+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:39+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:40+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:41+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:42+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:43+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:44+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:45+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:46+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:47+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:48+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:49+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:50+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:51+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:52+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:53+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:54+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:55+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:17:56+0545 INFO uvicorn.error - Shutting down
+2025-11-16T20:17:56+0545 INFO uvicorn.error - Waiting for application shutdown.
+2025-11-16T20:17:56+0545 INFO app.main - Shutting down AI Compliance Platform Backend...
+2025-11-16T20:17:56+0545 INFO uvicorn.error - Application shutdown complete.
+2025-11-16T20:17:56+0545 INFO uvicorn.error - Finished server process [28292]
+2025-11-16T20:17:58+0545 INFO uvicorn.error - Stopping reloader process [12448]
+2025-11-16T20:18:03+0545 INFO uvicorn.error - Will watch for changes in these directories: ['C:\\Users\\snoorabbits\\OneDrive\\Videos\\tryapi\\Chatgpt-Security-Extension\\backend']
+2025-11-16T20:18:03+0545 INFO uvicorn.error - Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2025-11-16T20:18:03+0545 INFO uvicorn.error - Started reloader process [5572] using WatchFiles
+2025-11-16T20:18:05+0545 INFO uvicorn.error - Started server process [3124]
+2025-11-16T20:18:05+0545 INFO uvicorn.error - Waiting for application startup.
+2025-11-16T20:18:05+0545 INFO app.main - Starting AI Compliance Platform Backend...
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [raw sql] ()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - SELECT 1
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00035s] ()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:18:05+0545 INFO app.core.database - Database connection established
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - select pg_catalog.version()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - select current_schema()
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - show standard_conforming_strings
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [raw sql] {}
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - BEGIN (implicit)
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = %(table_name)s AND pg_catalog.pg_class.relkind = ANY (ARRAY[%(param_1)s, %(param_2)s, %(param_3)s, %(param_4)s, %(param_5)s]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != %(nspname_1)s
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - [generated in 0.00042s] {'table_name': 'extension_logs', 'param_1': 'r', 'param_2': 'p', 'param_3': 'f', 'param_4': 'v', 'param_5': 'm', 'nspname_1': 'pg_catalog'}
+2025-11-16T20:18:05+0545 INFO sqlalchemy.engine.Engine - COMMIT
+2025-11-16T20:18:05+0545 INFO app.core.database - Extension logs table initialized
+2025-11-16T20:18:05+0545 INFO app.main - Database initialized
+2025-11-16T20:18:05+0545 INFO app.core.monitoring - Setting up monitoring and metrics collection
+2025-11-16T20:18:05+0545 INFO app.core.monitoring - Monitoring setup complete
+2025-11-16T20:18:05+0545 INFO app.main - Monitoring setup complete
+2025-11-16T20:18:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:06+0545 INFO app.services.gemini_client - Gemini generate_text start model=gemini-2.0-flash
+2025-11-16T20:18:06+0545 INFO google_genai.models - AFC is enabled with max remote calls: 10.
+2025-11-16T20:18:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:06+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:07+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:08+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:09+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:10+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:11+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:11+0545 INFO httpx - HTTP Request: POST https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent "HTTP/1.1 200 OK"
+2025-11-16T20:18:11+0545 INFO app.services.gemini_client - Gemini generate_text success len=2
+2025-11-16T20:18:11+0545 INFO app.services.gemini_client - Gemini self-test success: ok
+2025-11-16T20:18:11+0545 INFO uvicorn.error - Application startup complete.
+2025-11-16T20:18:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:12+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:13+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:14+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:15+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:16+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:17+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:18+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:19+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:20+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:21+0545 INFO watchfiles.main - 1 change detected
+2025-11-16T20:18:21+0545 INFO watchfiles.main - 1 change detected
